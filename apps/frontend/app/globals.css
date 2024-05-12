@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+	color: #fffef4;
+	background-color: #181515;
+}
+
+@layer utilities {
+	.flex-center {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.skip-ink-none {
+		text-decoration-skip-ink: none;
+	}
+}
+
+@layer components {
+	.foreground {
+		@apply bg-[#E8CABD] bg-opacity-[0.08] backdrop-blur-[44.4px];
+	}
+
+	.text-stroke {
+		text-shadow:
+			1px 1px 0 #000,
+			-1px -1px 0 #000,
+			1px -1px 0 #000,
+			-1px 1px 0 #000,
+			1px 1px 0 #000;
+	}
+}

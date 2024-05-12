@@ -1,0 +1,35 @@
+{
+	"name": "@workify/database",
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist/**"
+	],
+	"scripts": {
+		"build": "tsup",
+		"db:migrate:deploy": "dotenv -e ../../.env prisma migrate deploy",
+		"db:migrate:dev": "dotenv -e ../../.env prisma migrate dev",
+		"db:generate": "prisma generate",
+		"db:push": "dotenv -e ../../.env prisma db push --skip-generate",
+		"db:seed": "tsx src/seed.ts",
+		"dev": "tsup --watch",
+		"format": "prisma format",
+		"lint": "eslint . --max-warnings 0",
+		"prebuild": "pnpm run db:generate",
+		"predev": "pnpm run db:generate",
+		"studio": "prisma studio"
+	},
+	"dependencies": {
+		"@prisma/client": "^5.12.1"
+	},
+	"devDependencies": {
+		"@types/node": "^20.3.1",
+		"@workify/eslint-config": "workspace:*",
+		"@workify/typescript-config": "workspace:*",
+		"prisma": "^5.12.1",
+		"tsup": "^8.0.2",
+		"tsx": "^4.7.2",
+		"typescript": "^5.4.5"
+	}
+}

@@ -1,0 +1,1 @@
+type CreateEditVacancyType = 'create' | 'edit'

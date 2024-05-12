@@ -1,0 +1,4 @@
+{
+	"extends": "@workify/typescript-config/base.json",
+	"exclude": ["dist", "node_modules"]
+}

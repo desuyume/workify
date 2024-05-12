@@ -1,0 +1,30 @@
+{
+	"name": "workify",
+	"private": true,
+	"prisma": {
+		"schema": "packages/database/prisma/schema.prisma",
+		"seed": "tsx packages/database/src/seed.ts"
+	},
+	"scripts": {
+		"start": "dotenv -- turbo run start",
+		"build": "dotenv -- turbo run build",
+		"dev": "dotenv -- turbo run dev",
+		"predev": "pnpm --filter=database run db:migrate:deploy",
+		"db:seed": "turbo run db:seed",
+		"format": "prettier --write \"**/*.{ts,tsx,md}\"",
+		"lint": "turbo run lint",
+		"clean": "turbo run clean"
+	},
+	"author": "desuyume <https://t.me/desuyume>",
+	"devDependencies": {
+		"@workify/eslint-config": "workspace:*",
+		"prettier": "^3.0.0",
+		"prettier-plugin-tailwindcss": "^0.5.14",
+		"tsx": "^4.7.2",
+		"turbo": "^1.13.2"
+	},
+	"packageManager": "pnpm@9.1.0",
+	"dependencies": {
+		"dotenv-cli": "^7.4.1"
+	}
+}
