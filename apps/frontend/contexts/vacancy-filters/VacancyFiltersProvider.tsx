@@ -14,6 +14,7 @@ export const VacancyFiltersProvider: React.FC<VacancyFiltersProviderProps> = ({
 		categories: [],
 		cost: {},
 		worksAmount: null,
+		city: null,
 	})
 
 	const value = useMemo(
