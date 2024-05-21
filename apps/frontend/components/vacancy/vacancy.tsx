@@ -13,7 +13,7 @@ interface VacancyProps {
 export const vacancyMockInfo: IVacancy = {
 	id: 1,
 	title: 'Тату-мастер',
-	category: 'Татуировки',
+	category: { id: 1, title: 'Татуировки' },
 	description: `Привет! Я тату-мастер с опытом работы в индустрии татуировок более 3  лет. Моя страсть к искусству и творчеству позволяет мне создавать уникальные и индивидуальные дизайны, которые выражают личность и жизненные ценности каждого клиента. Моя цель - не просто нанести татуировку, а создать произведение искусства, которое будет радовать вас на протяжении многих лет. <br/><br/>
 
 Мой стиль татуирования разнообразен. Я специализируюсь на черно-белых работах, геометрических дизайнах. Каждая работа для меня - это уникальный проект, который я разрабатываю в тесном взаимодействии с клиентом, учитывая его пожелания и предпочтения. <br/><br/>
@@ -23,7 +23,11 @@ export const vacancyMockInfo: IVacancy = {
 Если вы ищете татуировщика, который сможет воплотить ваши идеи в жизнь с мастерством и тщательностью, обращайтесь ко мне. Я всегда готов воплотить ваши тату-идеи в реальность и создать для вас неповторимое произведение искусства.`,
 	rating: 4,
 	price: 10000,
-	location: 'г. Калининград, Московский пр-кт, 21',
+	city: {
+		name: 'Калининград',
+		subject: 'Калининградская область',
+		population: 30000,
+	},
 	isLocationHidden: false,
 	isVacancyHidden: false,
 	cover: 'gfdgdfg',
@@ -62,7 +66,7 @@ export default function Vacancy({ inProfile = false }: VacancyProps) {
 					<Stars rating={3} />
 					<hr className='flex-1 border-t border-t-white rounded-full mx-[0.625rem] mt-[0.125rem]' />
 					<p className='text-xl font-light text-right'>
-						{vacancyMockInfo.category.toLowerCase()}
+						{vacancyMockInfo.category?.title.toLowerCase()}
 					</p>
 				</div>
 

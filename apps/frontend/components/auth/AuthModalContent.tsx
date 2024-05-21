@@ -1,3 +1,5 @@
+'use client'
+
 import { useState } from 'react'
 import { IntroduceSection } from './IntroduceSection'
 import { LoginSection } from './LoginSection'

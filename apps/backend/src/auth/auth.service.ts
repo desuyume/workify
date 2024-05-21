@@ -17,10 +17,9 @@ export class AuthService {
   async login(dto: LoginDto) {
     const user = await this.validateUser(dto);
     const payload: IUserPayload = {
-      username: user.email,
-      sub: {
-        name: user.name,
-      },
+      id: user.id,
+      login: user.login,
+      email: user.email,
     };
 
     return {
@@ -56,13 +55,14 @@ export class AuthService {
 
   async refreshToken(user: IUserPayload) {
     const payload: IUserPayload = {
-      username: user.username,
-      sub: user.sub,
+      id: user.id,
+      login: user.login,
+      email: user.email,
     };
 
     return {
       accessToken: await this.jwtService.signAsync(payload, {
-        expiresIn: '20s',
+        expiresIn: '5h',
         secret: process.env.ACCESS_TOKEN_SECRET,
       }),
       refreshToken: await this.jwtService.signAsync(payload, {

@@ -12,8 +12,65 @@ generator client {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
-  name     String?
-  email    String  @unique
-  password String
+  id             Int       @id @default(autoincrement())
+  login          String    @unique
+  email          String    @unique
+  name           String?
+  birthday       DateTime?
+  phone          String?
+  description    String?
+  avatar         String?
+  specialisation String?
+  password       String
+  Vacancy        Vacancy[]
+
+  @@map("users")
+}
+
+model City {
+  name       String    @unique
+  subject    String
+  population Int       @default(0)
+  Vacancy    Vacancy[]
+}
+
+model Profile {
+  id Int @id @default(autoincrement())
+}
+
+model Vacancy {
+  id                Int              @id @default(autoincrement())
+  title             String
+  category          VacancyCategory? @relation(fields: [vacancyCategoryId], references: [id])
+  cover             String?
+  photos            VacancyPhoto[]
+  rating            Float            @default(0)
+  description       String?          @db.VarChar(1500)
+  price             Float?
+  city              City?            @relation(fields: [cityName], references: [name])
+  isLocationHidden  Boolean          @default(false)
+  isVacancyHidden   Boolean          @default(false)
+  user              User             @relation(fields: [userId], references: [id])
+  vacancyCategoryId Int?
+  userId            Int
+  cityName          String?
+
+  @@map("vacancies")
+}
+
+model VacancyCategory {
+  id      Int       @id @default(autoincrement())
+  title   String    @unique
+  Vacancy Vacancy[]
+
+  @@map("vacancy_categories")
+}
+
+model VacancyPhoto {
+  id        Int      @id @default(autoincrement())
+  url       String
+  Vacancy   Vacancy? @relation(fields: [vacancyId], references: [id])
+  vacancyId Int?
+
+  @@map("vacancy_photos")
 }

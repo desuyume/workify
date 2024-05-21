@@ -1,6 +1,4 @@
-import {
-	VacancyFiltersProvider,
-} from '@/contexts/vacancy-filters'
+import { VacancyFiltersProvider } from '@/contexts/vacancy-filters'
 import Categories from './filters/categories'
 import Cost from './filters/cost'
 import WorkAmount from './filters/work-amount'

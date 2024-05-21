@@ -2,9 +2,9 @@ import { SettingInput, SettingTextarea } from '@/app/ui/setting-input'
 import AvatarSetting from '@/components/settings/avatar-setting'
 import SettingsNav from '@/components/settings/settings-nav'
 
-export default function Page() {
+export default async function Page() {
 	return (
-		<div className='w-[94%] h-[76.6875rem] foreground flex flex-col items-center rounded-[0.625rem]'>
+		<div className='w-full h-[76.6875rem] foreground flex flex-col items-center rounded-[0.625rem]'>
 			<SettingsNav activeSection='profile' className='mb-[3.125rem]' />
 
 			<AvatarSetting className='mb-[2.6875rem]' />
@@ -12,37 +12,37 @@ export default function Page() {
 			<div className='w-[56.75rem] h-[40.3125rem] bg-primary-dark rounded-[0.625rem] pt-10 px-[3.875rem]'>
 				<div className='w-full flex justify-between mb-[3.4375rem]'>
 					<SettingInput
-						id='login'
-						name='login'
-						value='Даниил Соколов'
+						id='name'
+						name='name'
 						label='Имя/Логин'
 						inputWidth='28.3125rem'
+						settingType='name'
 					/>
 					<SettingInput
 						id='birthday'
 						name='birthday'
-						value='2002-08-17'
 						label='Дата Рождения'
 						inputWidth='10.625rem'
 						type='date'
+						settingType='birthday'
 					/>
 				</div>
 
 				<div className='w-full flex justify-between mb-[3.4375rem]'>
 					<SettingInput
-						id='speciality'
-						name='speciality'
-						value='Тату-мастер'
+						id='specialisation'
+						name='specialisation'
 						label='Специализация'
 						inputWidth='28.3125rem'
+						settingType='specialisation'
 					/>
 					<SettingInput
 						id='phone'
 						name='phone'
-						value='+7 906 267 91 99'
 						label='Телефон'
 						inputWidth='10.625rem'
 						type='tel'
+						settingType='phone'
 					/>
 				</div>
 

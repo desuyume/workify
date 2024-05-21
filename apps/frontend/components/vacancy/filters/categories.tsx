@@ -1,18 +1,36 @@
+import { getAllVacancyCategories } from '@/lib/api'
 import CategoryItem from './category-item'
+import MoreCategoryButton from './more-category-button'
 
-export default function Categories() {
+export default async function Categories() {
+	const categories = await getAllVacancyCategories({ params: {} })
+
 	return (
 		<div className='w-full h-[7.125rem]'>
 			<p className='text-[0.9375rem] leading-[1.125rem] mb-2.5'>Категории</p>
 			<div className='w-full flex flex-wrap gap-x-[8px] gap-y-[5px]'>
-				<CategoryItem id={1} title='пупупупупуп' />
-				<CategoryItem id={2} title='пупу' />
-				<CategoryItem id={3} title='пупупу' />
-				<CategoryItem id={4} title='пупупупупуп' />
-				<CategoryItem id={5} title='пупупупупупу' />
-				<button className='text-[0.9375rem] leading-[1.125rem] font-medium underline skip-ink-none ml-2.5 self-end'>
-					Еще
-				</button>
+				<CategoryItem
+					id={categories.data[3].id}
+					title={categories.data[3].title}
+				/>
+				<CategoryItem
+					id={categories.data[0].id}
+					title={categories.data[0].title}
+				/>
+				<CategoryItem
+					id={categories.data[4].id}
+					title={categories.data[4].title}
+				/>
+				<CategoryItem
+					id={categories.data[11].id}
+					title={categories.data[11].title}
+				/>
+				<CategoryItem
+					id={categories.data[6].id}
+					title={categories.data[6].title}
+				/>
+
+				<MoreCategoryButton categories={categories.data} />
 			</div>
 		</div>
 	)

@@ -5,6 +5,7 @@ import '@workify/ui/styles.css'
 
 import Providers from './providers'
 import { Toaster } from 'sonner'
+import { Suspense } from 'react'
 
 export const metadata: Metadata = {
 	title: 'Workify',
@@ -22,8 +23,9 @@ export default function RootLayout({
 				className={`${montserrat.variable} ${santello.variable} font-montserrat`}
 			>
 				<Providers>
-					{children}
+					<Suspense>{children}</Suspense>
 					<Toaster position='top-center' />
+					<div id='modal-root' />
 				</Providers>
 			</body>
 		</html>

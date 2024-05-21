@@ -2,19 +2,20 @@ import { cn } from '@workify/shared'
 
 interface ChangeIconProps {
 	isColored?: boolean
-	withInputFile?: boolean
+	onClick?: () => void
 	className?: string
 }
 
 export default function ChangeIcon({
 	isColored = false,
-	withInputFile = false,
+	onClick,
 	className,
 }: ChangeIconProps) {
 	return (
-		<div
+		<button
+			onClick={onClick}
 			className={cn(
-				'size-[3.4375rem] rounded-full border border-primary-light flex justify-center items-center cursor-pointer transition-colors relative',
+				'size-[3.4375rem] rounded-full border border-primary-light flex justify-center items-center cursor-pointer transition-all relative',
 				className,
 				{
 					'bg-[#302A2A] bg-opacity-70 hover:bg-opacity-90': !isColored,
@@ -42,15 +43,6 @@ export default function ChangeIcon({
 					strokeLinejoin='round'
 				/>
 			</svg>
-
-			{withInputFile && (
-				<input
-					accept='image/*'
-					type='file'
-					title=''
-					className='outline-none absolute inset-0 opacity-0 w-full h-full cursor-pointer'
-				/>
-			)}
-		</div>
+		</button>
 	)
 }

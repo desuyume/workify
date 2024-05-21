@@ -1,7 +1,21 @@
-export default function Loading() {
+import { cn } from '@workify/shared'
+
+interface LoadingProps {
+	className?: string
+}
+
+export default function Loading({ className }: LoadingProps) {
 	return (
-		<div className='w-screen h-screen bg-primary-dark flex justify-center items-center'>
-			<p className='text-primary-light text-4xl underline skip-ink-none'>Workify</p>
+		<div
+			id='loading'
+			className={cn(
+				'w-screen h-screen flex flex-col justify-center items-center',
+				className
+			)}
+		>
+			<p className='text-primary-light text-4xl underline skip-ink-none animate-pulse'>
+				Workify
+			</p>
 		</div>
 	)
 }

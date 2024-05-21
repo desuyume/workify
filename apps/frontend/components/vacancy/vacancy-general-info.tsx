@@ -1,12 +1,12 @@
 import Stars from '@/app/ui/stars'
-import { VacancyRating } from '@workify/shared'
+import { IVacancyCategory, VacancyRating } from '@workify/shared'
 import parse from 'html-react-parser'
 
 interface VacancyGeneralInfoProps {
 	title: string
 	rating: VacancyRating
 	description: string
-	category: string
+	category: IVacancyCategory | null
 }
 
 export default function VacancyGeneralInfo({
@@ -19,8 +19,8 @@ export default function VacancyGeneralInfo({
 		<div className='w-[60.9375rem] h-[27.375rem] p-5 bg-primary-dark rounded-[0.625rem] flex flex-col mb-8'>
 			<div className='w-full h-10 flex justify-between mb-[1.875rem]'>
 				<div className='flex'>
-					<div className='w-[10.9375rem] h-full foreground rounded-[0.3125rem] flex justify-center items-center mr-[5.9375rem]'>
-						<p className='font-santello text-xl text-primary-light text-center px-2'>
+					<div className='h-full foreground rounded-[0.3125rem] flex justify-center items-center mr-[5.9375rem]'>
+						<p className='font-santello text-xl text-primary-light text-center px-4'>
 							{title}
 						</p>
 					</div>
@@ -29,9 +29,9 @@ export default function VacancyGeneralInfo({
 					</div>
 				</div>
 
-				<div className='w-[10.9375rem] h-full foreground rounded-[0.3125rem] flex justify-center items-center self-end'>
-					<p className='font-montserrat font-light text-xl text-primary-light'>
-						{category.toLowerCase()}
+				<div className='h-full foreground rounded-[0.3125rem] flex justify-center items-center self-end'>
+					<p className='font-montserrat font-light text-xl text-primary-light px-4'>
+						{category?.title.toLowerCase()}
 					</p>
 				</div>
 			</div>

@@ -1,20 +1,22 @@
 import { cn } from '@workify/shared'
 
-interface EyeIconProps {
-	className?: string
-	onClick?: () => void
+interface EyeIconProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 	isActive?: boolean
 	theme?: 'light' | 'dark'
 }
 
 export function EyeIcon({
-	className,
-	onClick,
 	isActive = false,
 	theme = 'light',
+	...props
 }: EyeIconProps) {
 	return (
-		<button type='button' onClick={onClick} className={className}>
+		<button
+			{...props}
+			type='button'
+			onClick={props.onClick}
+			className={props.className}
+		>
 			<svg
 				width='15'
 				height='9'
@@ -31,7 +33,12 @@ export function EyeIcon({
 						'fill-black': isActive && theme === 'dark',
 					})}
 				/>
-				<circle cx='7.5' cy='4.5' r='2.5' fill={theme === 'light' ? 'white' : 'black'} />
+				<circle
+					cx='7.5'
+					cy='4.5'
+					r='2.5'
+					fill={theme === 'light' ? 'white' : 'black'}
+				/>
 			</svg>
 		</button>
 	)

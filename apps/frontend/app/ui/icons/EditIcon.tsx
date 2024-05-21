@@ -2,12 +2,28 @@ import { cn } from '@workify/shared'
 
 interface EditIconProps {
 	className?: string
+	onClick?: () => void
+	isDisabled?: boolean
 }
 
-export default function EditIcon({ className }: EditIconProps) {
+export default function EditIcon({
+	className,
+	onClick,
+	isDisabled,
+}: EditIconProps) {
 	return (
 		<button
-			className={cn('hover:[&_path]:first-of-type:fill-[#FEFDF3]', className)}
+			disabled={isDisabled}
+			onClick={onClick}
+			className={cn(
+				'transition-opacity',
+				{
+					'hover:[&_path]:first-of-type:fill-[#FEFDF3] opacity-100':
+						!isDisabled,
+					'opacity-70': isDisabled,
+				},
+				className
+			)}
 		>
 			<svg
 				width='24'

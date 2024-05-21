@@ -3,16 +3,19 @@ import { cn } from '@workify/shared'
 interface GarbageIconProps {
 	isColored?: boolean
 	className?: string
+	onClick?: () => void
 }
 
 export default function GarbageIcon({
 	isColored = false,
 	className,
+	onClick,
 }: GarbageIconProps) {
 	return (
-		<div
+		<button
+			onClick={onClick}
 			className={cn(
-				'size-[3.4375rem] rounded-full border border-primary-light flex justify-center items-center pl-1 cursor-pointer transition-colors',
+				'size-[3.4375rem] rounded-full border border-primary-light flex justify-center items-center pl-1 cursor-pointer transition-all relative',
 				className,
 				{
 					'bg-[#302A2A] bg-opacity-70 hover:bg-opacity-90': !isColored,
@@ -42,6 +45,6 @@ export default function GarbageIcon({
 					strokeLinecap='round'
 				/>
 			</svg>
-		</div>
+		</button>
 	)
 }

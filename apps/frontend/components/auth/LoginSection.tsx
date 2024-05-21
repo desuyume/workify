@@ -23,7 +23,7 @@ export function LoginSection({ setActiveSection }: LoginSectionProps) {
 
 		if (data?.ok) {
 			toast.success('Вход выполнен')
-			router.push('/')
+			router.push('/vacancy')
 		} else {
 			if (data?.error === 'CredentialsSignin') {
 				toast.error('Неверная почта или пароль')

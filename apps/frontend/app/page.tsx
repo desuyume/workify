@@ -1,46 +1,12 @@
-'use client'
-
 import Image from 'next/image'
 import Link from 'next/link'
-import { Button, Glow, AuthModal } from '@workify/ui'
-import { useEffect, useState } from 'react'
+import { Button, Glow } from '@workify/ui'
 import gridImg from '@/public/images/mainGrid.png'
-import { AuthModalContent } from '../components/auth/AuthModalContent'
 import Statistic from './ui/statistic'
-import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
-import Loading from './ui/loading'
+import LoginRegButton from './ui/login-reg-button'
 
 export default function Home() {
-	const [isAuthModalVisible, setIsAuthModalVisible] = useState<boolean>(false)
-	const { data: session, status } = useSession()
-	const router = useRouter()
-
-	const handleClickCreateVacancy = () => {
-		if (session && session.user) {
-			router.push('/vacancy')
-		} else {
-			setIsAuthModalVisible(true)
-		}
-	}
-
-	const handleFindPerformer = () => {
-		if (session && session.user) {
-			router.push('/vacancy')
-		} else {
-			setIsAuthModalVisible(true)
-		}
-	}
-
-	useEffect(() => {
-		if (session && session.user) {
-			router.push('/vacancy')
-		}
-	}, [session])
-
-	return status === 'loading' || status === 'authenticated' ? (
-		<Loading />
-	) : (
+	return (
 		<>
 			<header className='w-full h-[7.1875rem] px-[10.125rem] flex justify-between items-center'>
 				<Link
@@ -49,18 +15,8 @@ export default function Home() {
 				>
 					Workify
 				</Link>
-				<button
-					onClick={() => setIsAuthModalVisible(true)}
-					className='text-2xl text-primary-light underline skip-ink-none hover:uppercase hover:no-underline pl-[4.28125rem]'
-				>
-					Вход / Регистрация
-				</button>
-				<Link
-					href='/faq'
-					className='w-[17rem] text-2xl text-primary-light underline skip-ink-none hover:uppercase hover:no-underline hover:w-[20.4375rem] hover:-ml-[3.4375rem]'
-				>
-					Задаваемые вопросы
-				</Link>
+
+				<LoginRegButton />
 			</header>
 
 			<main className='w-full min-h-[calc(100vh-7.1875rem)] px-[10.125rem] relative'>
@@ -96,15 +52,16 @@ export default function Home() {
 				</div>
 				<div className='w-[31.35vw] aspect-[602/258] bg-primary-dark flex flex-col flex-center rounded-[2.9375rem] absolute top-[29%] right-[11.7%]'>
 					<div className='w-full h-[28%] flex justify-between items-center pl-[5.5%] mb-[1.375rem]'>
-						<Button
-							title='создать анкету'
-							variant='light'
-							onClick={handleClickCreateVacancy}
-							width='78%'
-							height='100%'
-							fontSize='1.2vw'
-							className='peer'
-						/>
+						<Link className='w-[78%] h-full' href='/vacancy/create'>
+							<Button
+								title='создать анкету'
+								variant='light'
+								width='100%'
+								height='100%'
+								fontSize='1.2vw'
+								className='peer'
+							/>
+						</Link>
 
 						<div className='flex-1 flex justify-center peer-hover:[&_svg]:fill-primary-light peer-hover:[&_path]:stroke-primary-dark'>
 							<svg
@@ -135,15 +92,16 @@ export default function Home() {
 						</div>
 					</div>
 					<div className='w-full h-[28%] flex justify-between items-center pl-[5.5%]'>
-						<Button
-							title='найти исполнителя'
-							variant='dark'
-							onClick={handleFindPerformer}
-							width='78%'
-							height='100%'
-							fontSize='1.2vw'
-							className='peer'
-						/>
+						<Link className='w-[78%] h-full' href='/vacancy'>
+							<Button
+								title='найти исполнителя'
+								variant='dark'
+								width='100%'
+								height='100%'
+								fontSize='1.2vw'
+								className='peer'
+							/>
+						</Link>
 
 						<div className='ml-1 flex-1 flex justify-center peer-hover:[&_path]:fill-primary-light peer-hover:[&_circle]:first-of-type:fill-primary-light peer-hover:[&_circle]:last-of-type:stroke-primary-dark'>
 							<svg
@@ -180,14 +138,6 @@ export default function Home() {
 					style={{ width: 'auto', height: '100%' }}
 					priority
 					className='min-h-full absolute top-0 right-0 -z-10'
-				/>
-
-				<AuthModal
-					isVisible={isAuthModalVisible}
-					onClose={() => setIsAuthModalVisible(false)}
-					children={
-						<AuthModalContent onClose={() => setIsAuthModalVisible(false)} />
-					}
 				/>
 
 				<Glow className='absolute top-[20%] -left-[467px] -z-10' />

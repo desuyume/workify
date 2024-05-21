@@ -3,11 +3,16 @@ import HomeIcon from './icons/HomeIcon'
 import Link from 'next/link'
 import ProfileIcon from './icons/ProfileIcon'
 import SettingsIcon from './icons/SettingsIcon'
+import SignInOutButton from './sign-in-out-button'
 
 export default function Sidebar() {
 	return (
-		<nav className='pt-[9.75rem] min-h-screen flex flex-col items-center mr-[4.9375rem]'>
-			<ul className='w-[2.9375rem] h-[12.0625rem] border border-white rounded-[1.4375rem] flex flex-col justify-evenly items-center mb-[1.8125rem]'>
+		<nav className='pt-[9.75rem] min-h-screen fixed left-[5.9375rem] flex flex-col items-center mr-[4.9375rem]'>
+			<ul
+				className={
+					'w-[2.9375rem] h-[14.75rem] border border-white rounded-[1.4375rem] flex flex-col justify-evenly items-center mb-[1.8125rem]'
+				}
+			>
 				<Circle />
 				<li>
 					<Link href='/vacancy'>
@@ -24,6 +29,10 @@ export default function Sidebar() {
 						<SettingsIcon />
 					</Link>
 				</li>
+				<li className='pl-0.5'>
+					<SignInOutButton />
+				</li>
+
 				<Circle />
 			</ul>
 			<hr className='w-[1px] flex-1 border-l border-white' />

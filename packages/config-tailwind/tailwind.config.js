@@ -9,6 +9,7 @@ const sharedConfig = {
 			colors: {
 				'primary-dark': '#181515',
 				'primary-light': '#FFFEF4',
+				'primary-green': '#A5C585',
 			},
 			screens: {
 				mobile: '320px',

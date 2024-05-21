@@ -1,32 +1,32 @@
-export default function SortButton() {
+import { SortBy, cn } from '@workify/shared'
+
+interface SortButtonProps {
+	title: string
+	sortBy: SortBy
+	onClick: (sortOption: SortBy) => void
+	className?: string
+	isActive?: boolean
+}
+
+export default function SortButton({
+	title,
+	sortBy,
+	onClick,
+	className,
+	isActive,
+}: SortButtonProps) {
 	return (
-		<button className='w-[2.25rem] aspect-square bg-white rounded-[1.125rem] flex flex-col justify-center items-center'>
-			<svg
-				width='15'
-				height='5'
-				viewBox='0 0 15 5'
-				fill='none'
-				xmlns='http://www.w3.org/2000/svg'
-			>
-				<path d='M1 2.5H10' stroke='black' strokeLinecap='round' />
-				<circle cx='12.5' cy='2.5' r='2' stroke='black' />
-			</svg>
-			<svg
-				width='15'
-				height='5'
-				viewBox='0 0 15 5'
-				fill='none'
-				xmlns='http://www.w3.org/2000/svg'
-			>
-				<path d='M14 2.5H5' stroke='black' strokeLinecap='round' />
-				<circle
-					cx='2.5'
-					cy='2.5'
-					r='2'
-					transform='matrix(-1 0 0 1 5 0)'
-					stroke='black'
-				/>
-			</svg>
+		<button
+			onClick={() => onClick(sortBy)}
+			className={cn(
+				'w-full border-b border-primary-dark text-primary-dark hover:bg-primary-green transition-colors',
+				className,
+				{
+					'bg-primary-green border-primary-green': isActive,
+				}
+			)}
+		>
+			{title}
 		</button>
 	)
 }

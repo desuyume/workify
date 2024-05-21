@@ -1,4 +1,5 @@
 import { AuthProvider } from '@/contexts/auth'
+import { ProfileProvider } from '@/contexts/profile'
 import { QueryProvider } from '@/contexts/query'
 
 export interface ProvidersProps {
@@ -8,7 +9,9 @@ export interface ProvidersProps {
 export default function Providers({ children }: ProvidersProps) {
 	return (
 		<AuthProvider>
-			<QueryProvider>{children}</QueryProvider>
+			<QueryProvider>
+				<ProfileProvider>{children}</ProfileProvider>
+			</QueryProvider>
 		</AuthProvider>
 	)
 }

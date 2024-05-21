@@ -2,7 +2,7 @@ import { cn } from '@workify/shared'
 
 interface ProfileInfoProps {
 	title: string
-	value?: string
+	value: string | null
 	className?: string
 }
 

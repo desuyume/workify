@@ -47,6 +47,7 @@ export function AuthFormPasswordInput({ ...props }: AuthFormInputProps) {
 				className='absolute right-4'
 				isActive={isShowPassword}
 				theme='dark'
+				tabIndex={-1}
 			/>
 		</div>
 	)

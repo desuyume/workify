@@ -16,6 +16,12 @@ module.exports = {
 			boxShadow: {
 				toggleSwitch: '0 0 7px 0 rgba(254, 253, 243, 0.22)',
 			},
+			backgroundImage: {
+				'layout-lines': "url('/images/layout-bg-lines.svg')",
+			},
+			backgroundSize: {
+				'layout-lines': '100% auto',
+			},
 		},
 	},
 	plugins: [

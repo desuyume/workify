@@ -1,20 +1,23 @@
+import { ICity } from './city'
+import { IUser } from './user'
+
 export interface IVacancy {
 	id: number
 	title: string
 	description: string
 	rating: VacancyRating
-	category: string
+	category: IVacancyCategory | null
 	price: number
-	cover: string | null
+	cover: string | File | null
 	photos: IVacancyPhoto[]
-	location: string | null
+	city: ICity | null
 	isLocationHidden: boolean
 	isVacancyHidden: boolean
 }
 
 export interface IVacancyPhoto {
 	id: number
-	url: string
+	url: string | File
 }
 
 export enum VacancyRating {
@@ -24,4 +27,26 @@ export enum VacancyRating {
 	'three' = 3,
 	'four' = 4,
 	'five' = 5,
+}
+
+export type SortBy = 'rating' | 'cost' | 'reviews'
+
+export interface IVacancyQuery {
+	page?: string
+	search?: string
+	sortBy?: SortBy
+	category?: string
+	cost_from?: string
+	cost_to?: string
+	works_amount?: string
+	city?: string
+}
+
+export interface IVacancyCategory {
+	id: number
+	title: string
+}
+
+export interface IFetchedVacancy extends IVacancy {
+	user: IUser
 }

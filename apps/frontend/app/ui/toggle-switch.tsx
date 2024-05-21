@@ -1,9 +1,10 @@
 'use client'
 
 import { cn } from '@workify/shared'
-import { useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 
-interface ToggleSwitchProps {
+interface ToggleSwitchProps
+	extends React.InputHTMLAttributes<HTMLInputElement> {
 	id?: string
 	isChecked?: boolean
 }
@@ -11,8 +12,20 @@ interface ToggleSwitchProps {
 export default function ToggleSwitch({
 	id = 'check',
 	isChecked = false,
+	...props
 }: ToggleSwitchProps) {
 	const [checked, setChecked] = useState(isChecked)
+
+	const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
+		if (props.onChange) {
+			props.onChange(e)
+		}
+		setChecked(!checked)
+	}
+
+	useEffect(() => {
+		setChecked(isChecked)
+	}, [isChecked])
 
 	return (
 		<label
@@ -26,7 +39,8 @@ export default function ToggleSwitch({
 			)}
 		>
 			<input
-				onChange={() => setChecked(!checked)}
+				{...props}
+				onChange={handleOnChange}
 				checked={checked}
 				type='checkbox'
 				id={id}

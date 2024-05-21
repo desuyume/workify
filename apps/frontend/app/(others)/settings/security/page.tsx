@@ -5,7 +5,7 @@ import SettingsNav from '@/components/settings/settings-nav'
 
 export default function Page() {
 	return (
-		<div className='w-[94%] h-[30.9375rem] foreground flex flex-col items-center rounded-[0.625rem]'>
+		<div className='w-full h-[30.9375rem] foreground flex flex-col items-center rounded-[0.625rem]'>
 			<SettingsNav activeSection='security' className='mb-[3.4375rem]' />
 
 			<div className='w-[56.75rem] h-[16.0625rem] bg-primary-dark rounded-[0.625rem] pt-10 px-[5.4375rem] flex justify-between items-start'>
@@ -24,6 +24,8 @@ export default function Page() {
 					label='Пароль'
 					inputWidth='11.9375rem'
 					type='password'
+					settingType='password'
+					value=''
 				/>
 			</div>
 		</div>

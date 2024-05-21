@@ -4,6 +4,7 @@ const nextConfig = {
 	transpilePackages: ['@workify/ui'],
 	env: {
 		API_URL: process.env.API_URL,
+		SERVER_URL: process.env.SERVER_URL,
 		NEXTAUTH_URL: process.env.NEXTAUTH_URL,
 		NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
 	},
@@ -15,6 +16,16 @@ const nextConfig = {
 				permanent: true,
 			},
 		]
+	},
+	images: {
+		remotePatterns: [
+			{
+				protocol: 'http',
+				hostname: 'localhost',
+				port: '8000',
+				pathname: '/**',
+			},
+		],
 	},
 }
 

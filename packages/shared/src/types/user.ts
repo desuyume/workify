@@ -1,12 +1,17 @@
 export interface IUserPayload {
-	username: string
-	sub: {
-		name: string
-	}
+	id: number
+	login: string
+	email: string
 }
 
 export interface IUser {
 	id: number
-	name: string
+	login: string
 	email: string
+	name: string | null
+	avatar: string | null
+	birthday: string | null
+	description: string | null
+	phone: string | null
+	specialisation: string | null
 }

@@ -1,7 +1,7 @@
 import { cn } from '@workify/shared'
 import ToggleSwitch from './toggle-switch'
 
-interface SettingSwitchProps {
+interface SettingSwitchProps extends React.InputHTMLAttributes<HTMLInputElement> {
 	title: string
 	width?: string
 	switchId: string
@@ -15,6 +15,7 @@ export default function SettingSwitch({
 	switchId,
 	isChecked = false,
 	className,
+	...props
 }: SettingSwitchProps) {
 	return (
 		<div
@@ -25,7 +26,7 @@ export default function SettingSwitch({
 			)}
 		>
 			<p className='font-light text-lg text-primary-light'>{title}</p>
-			<ToggleSwitch id={switchId} isChecked={isChecked} />
+			<ToggleSwitch id={switchId} isChecked={isChecked} {...props} />
 		</div>
 	)
 }

@@ -1,76 +1,76 @@
-import { authOptions } from '@/app/api/auth/[...nextauth]/options'
-import { getUsersId } from '@/lib/api'
-import { getServerSession } from 'next-auth'
+'use client'
+
 import Image from 'next/image'
-import Link from 'next/link'
-import profileImg from '@/public/images/profile-img.png'
 import ProfileInfo from '@/components/profile/profile-info'
-import { Button, NavButton } from '@workify/ui'
+import { Button } from '@workify/ui'
 import VacancyFeedback from '@/components/profile/vacancy-feedback'
+import htmlParse from 'html-react-parser'
+import defaultProfilePic from '@/public/images/default-profile-pic.webp'
+import { useProfile } from '@/contexts/profile'
+import { useSession } from 'next-auth/react'
+import Loading from '@/app/ui/loading'
+import Unauthorized from '@/app/ui/unauthorized'
 
-export default async function Page() {
-	// const session = await getServerSession(authOptions)
+export default function Page() {
+	const session = useSession()
+	const { profile } = useProfile()
 
-	// if (!session?.user.id)
-	// 	return (
-	// 		<div className='flex-1 h-screen flex justify-center items-center'>
-	// 			<Link
-	// 				href='/'
-	// 				className='bg-primary-light px-10 py-4 text-primary-dark font-semibold rounded-[1.5rem]'
-	// 			>
-	// 				Войти
-	// 			</Link>
-	// 		</div>
-	// 	)
+	if (session.status === 'loading') {
+		return <Loading className='w-full h-full' />
+	}
 
-	// const profile = await getUsersId({
-	// 	params: { id: session.user.id },
-	// })
+	if (session.status === 'unauthenticated') {
+		return <Unauthorized />
+	}
 
 	return (
-		<div className='w-full pr-[6.375rem] flex flex-col items-center'>
+		<div className='w-full flex flex-col items-center'>
 			<div className='w-full foreground pt-8 pb-10 rounded-t-[0.625rem] border-t-primary-light border-t'>
-				<Image
-					alt='profile-img'
-					src={profileImg}
-					width={231}
-					height={283}
-					className='rounded-[10.71875rem] mx-auto'
-				/>
+				{profile.user?.avatar ? (
+					<Image
+						alt='profile-img'
+						src={
+							!!profile.user.avatar.includes('blob')
+								? profile.user.avatar
+								: `${process.env.SERVER_URL}/${profile.user.avatar}`
+						}
+						width={231}
+						height={283}
+						className='w-[231px] h-[283px] object-cover rounded-[10.71875rem] mx-auto'
+					/>
+				) : (
+					<Image
+						alt='profile-img'
+						src={defaultProfilePic}
+						width={231}
+						height={283}
+						className='w-[231px] h-[283px] object-cover rounded-[10.71875rem] mx-auto'
+					/>
+				)}
 			</div>
 
 			<div className='w-full h-[8.75rem] bg-primary-dark flex justify-center items-center'>
-				<ProfileInfo title='Имя' value='Даниил Соколов' />
-				<ProfileInfo title='Возраст' value='21 год (17.08.2002)' />
-				<ProfileInfo title='Специализация' value='Тату-мастер' />
-				<ProfileInfo title='Телефон' value='8 906 267 91 99' />
+				<ProfileInfo title='Имя' value={profile.user?.name ?? null} />
+				<ProfileInfo title='Возраст' value={profile.user?.birthday ?? null} />
+				<ProfileInfo
+					title='Специализация'
+					value={profile.user?.specialisation ?? null}
+				/>
+				<ProfileInfo title='Телефон' value={profile.user?.phone ?? null} />
 			</div>
 
 			<div className='w-full foreground flex flex-col items-center pt-10 pb-[1.875rem] mb-[3.125rem] rounded-b-[0.625rem]'>
-				<div className='w-[60.6875rem] mb-10'>
-					<p className='font-medium text-[1.25rem] leading-[1.5rem] mb-[1.1875rem]'>
-						Описание
-					</p>
-					<p className='font-light text-[1.125rem] leading-[1.375rem]'>
-						Привет! Я тату-мастер с опытом работы в индустрии татуировок более 3
-						лет. Моя страсть к искусству и творчеству позволяет мне создавать
-						уникальные и индивидуальные дизайны, которые выражают личность и
-						жизненные ценности каждого клиента. Моя цель - не просто нанести
-						татуировку, а создать произведение искусства, которое будет радовать
-						вас на протяжении многих лет.
-						<br />
-						<br />
-						Каждая работа для меня - это уникальный проект, который я
-						разрабатываю в тесном взаимодействии с клиентом, учитывая его
-						пожелания и предпочтения.
-						<br />
-						<br />
-						Если вы ищете татуировщика, который сможет воплотить ваши идеи в
-						жизнь с мастерством и тщательностью, обращайтесь ко мне. Я всегда
-						готов воплотить ваши тату-идеи в реальность и создать для вас
-						произведение искусства.
-					</p>
-				</div>
+				{profile.user?.description && (
+					<div className='w-[60.6875rem] mb-10'>
+						<p className='font-medium text-[1.25rem] leading-[1.5rem] mb-[1.1875rem]'>
+							Описание
+						</p>
+						<p className='font-light text-[1.125rem] leading-[1.375rem]'>
+							{htmlParse(profile.user.description)}
+						</p>
+					</div>
+				)}
+
 				<div className='w-full h-9 flex items-center'>
 					<hr className='flex-1 border-t border-t-white rounded-full' />
 					<Button

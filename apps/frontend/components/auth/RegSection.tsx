@@ -3,12 +3,16 @@ import { AuthSection } from './AuthModalContent'
 import { AuthFormInput, AuthFormPasswordInput, Button } from '@workify/ui'
 import { toast } from 'sonner'
 import { regsiterSchema } from '@/lib/constants'
+import { signIn } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 interface RegSectionProps {
 	setActiveSection: (section: AuthSection) => void
 }
 
 export function RegSection({ setActiveSection }: RegSectionProps) {
+	const router = useRouter()
+
 	const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 		const formData = new FormData(e.currentTarget)
@@ -41,6 +45,23 @@ export function RegSection({ setActiveSection }: RegSectionProps) {
 		} catch (e) {
 			if (e instanceof AxiosError) {
 				toast.error(e.response?.data.message)
+			}
+		}
+
+		const data = await signIn('credentials', {
+			username: email,
+			password: password,
+			redirect: false,
+		})
+
+		if (data?.ok) {
+			toast.success('Вход выполнен')
+			router.push('/vacancy')
+		} else {
+			if (data?.error === 'CredentialsSignin') {
+				toast.error('Неверная почта или пароль')
+			} else {
+				toast.error('Что-то пошло не так')
 			}
 		}
 	}
