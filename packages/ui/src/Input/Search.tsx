@@ -18,7 +18,7 @@ export function Search({
 			name={name}
 			placeholder={placeholder}
 			className={cn(
-				'w-[29.0625rem] h-9 bg-transparent text-primary-light placeholder:text-primary-light placeholder:text-opacity-80 outline-none border border-white rounded-[0.5625rem] pl-[0.9375rem] text-xl',
+				'w-[29.0625rem] h-9 bg-transparent text-primary-light placeholder:text-primary-light placeholder:text-opacity-80 outline-none border border-primary-light rounded-[0.5625rem] pl-[0.9375rem] text-xl',
 				className
 			)}
 		/>

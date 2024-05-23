@@ -22,7 +22,7 @@ model User {
   avatar         String?
   specialisation String?
   password       String
-  Vacancy        Vacancy[]
+  vacancies      Vacancy[]
 
   @@map("users")
 }
@@ -32,10 +32,8 @@ model City {
   subject    String
   population Int       @default(0)
   Vacancy    Vacancy[]
-}
 
-model Profile {
-  id Int @id @default(autoincrement())
+  @@map("cities")
 }
 
 model Vacancy {
@@ -59,9 +57,9 @@ model Vacancy {
 }
 
 model VacancyCategory {
-  id      Int       @id @default(autoincrement())
-  title   String    @unique
-  Vacancy Vacancy[]
+  id        Int       @id @default(autoincrement())
+  title     String    @unique
+  vacancies Vacancy[]
 
   @@map("vacancy_categories")
 }

@@ -54,7 +54,7 @@ export default function Sort() {
 			<button
 				onClick={() => setIsOpen(!isOpen)}
 				className={cn(
-					'w-[2.25rem] aspect-square bg-white border border-white hover:bg-transparent rounded-[1.125rem] flex flex-col justify-center items-center group transition-colors',
+					'w-[2.25rem] aspect-square bg-primary-light border border-primary-light hover:bg-transparent rounded-[1.125rem] flex flex-col justify-center items-center group transition-colors',
 					{
 						'bg-transparent': isOpen,
 					}
@@ -65,7 +65,7 @@ export default function Sort() {
 
 			<div
 				className={cn(
-					'w-48 bg-white absolute -bottom-2 translate-y-full rounded-[0.625rem] transition-opacity z-30',
+					'w-48 bg-primary-light absolute -bottom-2 translate-y-full rounded-[0.625rem] transition-opacity z-30',
 					{
 						'opacity-0 invisible': !isOpen,
 						'opacity-100 visible': isOpen,

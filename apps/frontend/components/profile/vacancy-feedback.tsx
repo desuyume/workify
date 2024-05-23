@@ -4,8 +4,13 @@ import { NavButton } from '@workify/ui'
 import { useState } from 'react'
 import ProfileVacancies from './profile-vacancies'
 import ProfileFeedbacks from './profile-feedbacks'
+import { IUserVacancy } from '@workify/shared'
 
-export default function VacancyFeedback() {
+interface VacancyFeedbackProps {
+	vacancies: IUserVacancy[]
+}
+
+export default function VacancyFeedback({ vacancies }: VacancyFeedbackProps) {
 	const [activeSection, setActiveSection] = useState<'vacancy' | 'feedback'>(
 		'vacancy'
 	)
@@ -28,7 +33,9 @@ export default function VacancyFeedback() {
 				/>
 			</nav>
 
-			{activeSection === 'vacancy' && <ProfileVacancies />}
+			{activeSection === 'vacancy' && (
+				<ProfileVacancies vacancies={vacancies} />
+			)}
 			{activeSection === 'feedback' && <ProfileFeedbacks />}
 		</div>
 	)

@@ -1,3 +1,5 @@
+import { IUserVacancy } from './vacancy'
+
 export interface IUserPayload {
 	id: number
 	login: string
@@ -14,4 +16,5 @@ export interface IUser {
 	description: string | null
 	phone: string | null
 	specialisation: string | null
+	vacancies: IUserVacancy[]
 }

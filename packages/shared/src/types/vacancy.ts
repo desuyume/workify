@@ -15,6 +15,10 @@ export interface IVacancy {
 	isVacancyHidden: boolean
 }
 
+export interface IUserVacancy extends IVacancy {
+	user: IUser
+}
+
 export interface IVacancyPhoto {
 	id: number
 	url: string | File
@@ -33,6 +37,7 @@ export type SortBy = 'rating' | 'cost' | 'reviews'
 
 export interface IVacancyQuery {
 	page?: string
+	limit?: string
 	search?: string
 	sortBy?: SortBy
 	category?: string

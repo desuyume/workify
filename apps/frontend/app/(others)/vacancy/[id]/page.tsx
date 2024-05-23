@@ -6,27 +6,18 @@ import VacancyGeneralInfo from '@/components/vacancy/vacancy-general-info'
 import { getVacancyById } from '@/lib/api/requests/vacancy/id'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/options'
+import { notFound } from 'next/navigation'
+import RemoveVacancyButton from '@/components/vacancy/remove-vacancy-button'
 
 export default async function Page({ params }: { params: { id: string } }) {
 	const session = await getServerSession(authOptions)
 	const vacancy = await getVacancyById({ params })
 
-	if (!vacancy.data)
-		return (
-			<div className='w-full h-full flex flex-col justify-center items-center'>
-				<p className='text-xl font-medium mb-4'>Анкета не найдена</p>
-				<Link href={'/vacancy'}>
-					<Button
-						title='К анкетам'
-						variant='light-transparent'
-						width='12rem'
-						height='3rem'
-					/>
-				</Link>
-			</div>
-		)
+	if (!vacancy.data) {
+		notFound()
+	}
 
-	const isOwner = session?.user.id === vacancy.data.user.id
+	const isOwner: boolean = session?.user.id === vacancy.data.user.id
 
 	return (
 		<div className='w-full foreground pt-[1.625rem] pb-10 flex flex-col items-center rounded-[0.625rem]'>
@@ -53,7 +44,7 @@ export default async function Page({ params }: { params: { id: string } }) {
 						alt='vacancy-photo'
 						width={275}
 						height={348}
-						className='rounded-[0.3125rem]'
+						className='w-[275px] h-[348px] object-cover rounded-[0.3125rem]'
 					/>
 				))}
 			</div>
@@ -61,7 +52,11 @@ export default async function Page({ params }: { params: { id: string } }) {
 			<div className='w-full h-9 flex items-center'>
 				<hr className='flex-1 border-t border-t-white rounded-full' />
 				<Link
-					href={isOwner ? `${params.id}/edit` : '/profile'}
+					href={
+						isOwner
+							? `${params.id}/edit`
+							: `/profile/${vacancy.data.user.login}`
+					}
 					className='mx-10 h-full'
 				>
 					<Button
@@ -71,6 +66,12 @@ export default async function Page({ params }: { params: { id: string } }) {
 						height='100%'
 					/>
 				</Link>
+				{isOwner && (
+					<>
+						<hr className='w-10 border-t border-t-white rounded-full' />
+						<RemoveVacancyButton vacancyId={vacancy.data.id} />
+					</>
+				)}
 				<hr className='flex-1 border-t border-t-white rounded-full' />
 			</div>
 		</div>

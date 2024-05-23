@@ -7,12 +7,10 @@ import CreateEditVacancyCover from './create-edit-vacancy-cover'
 import VacancyCityButton from '../vacancy-city-button'
 
 interface CreateEditVacancyFormProps {
-	type: CreateEditVacancyType
 	className?: string
 }
 
 export default function CreateEditVacancyForm({
-	type,
 	className,
 }: CreateEditVacancyFormProps) {
 	const { vacancy, setVacancy } = useCreateEditVacancy()

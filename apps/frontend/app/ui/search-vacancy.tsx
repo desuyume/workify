@@ -1,6 +1,6 @@
 'use client'
 
-import { Search } from '@workify/ui'
+import { Button, Search } from '@workify/ui'
 import { getUrlWithSearchVacancy } from '@/lib/utils'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useRouter } from 'next/navigation'
@@ -28,15 +28,19 @@ export default function SearchVacancy() {
 			<Search
 				value={search}
 				onChange={e => setSearch(e.target.value)}
+				onKeyDown={e => e.key === 'Enter' && clickSearchHandler()}
 				placeholder='Поиск анкет'
 				className='mr-[1.1875rem]'
 			/>
-			<button
+			<Button
+				variant='light-transparent'
+				title='Найти'
+				width='5.75rem'
+				height='100%'
+				borderRadius='1.125rem'
 				onClick={clickSearchHandler}
-				className='w-[5.75rem] h-full bg-white text-black text-xl rounded-[1.125rem] border border-white mr-5 hover:bg-transparent hover:text-white transition-colors'
-			>
-				Найти
-			</button>
+				className='mr-5'
+			/>
 			<Sort />
 		</div>
 	)

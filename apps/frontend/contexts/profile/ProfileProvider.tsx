@@ -24,6 +24,7 @@ export const ProfileProvider: React.FC<ProfileProviderProps> = ({
 			phone: null,
 			specialisation: null,
 			password: null,
+			vacancies: [],
 		},
 	})
 
@@ -44,7 +45,7 @@ export const ProfileProvider: React.FC<ProfileProviderProps> = ({
 						password: null,
 						birthday: !!res.data.birthday
 							? new Date(res.data.birthday).toISOString().split('T')[0]
-							: '',
+							: null,
 					},
 				})
 			)

@@ -88,26 +88,29 @@ export const getUrlWithSearchVacancy = (
 	return params.size ? `/vacancy?${params.toString()}` : pathname
 }
 
-interface SearchParams {
-	[key: string]: string | number | undefined
-}
+export const generateQueryString = (params?: {
+	[key: string]: any
+}): string => {
+	if (!params) return ''
 
-export const processSearchParams = (searchParams: SearchParams): string => {
-	let result = ''
+	const queryParams: string[] = []
 
-	for (const param in searchParams) {
-		if (
-			Object.prototype.hasOwnProperty.call(searchParams, param) &&
-			searchParams[param] !== undefined
-		) {
-			result += `${param}=${searchParams[param]}&`
+	for (const key in params) {
+		if (params.hasOwnProperty(key) && params[key] !== undefined) {
+			let paramValue = params[key]
+			if (Array.isArray(paramValue)) {
+				paramValue.forEach(value => {
+					queryParams.push(
+						`${encodeURIComponent(key)}=${encodeURIComponent(value)}`
+					)
+				})
+			} else {
+				queryParams.push(
+					`${encodeURIComponent(key)}=${encodeURIComponent(paramValue)}`
+				)
+			}
 		}
 	}
 
-	// Remove trailing '&' if any
-	if (result.endsWith('&')) {
-		result = result.slice(0, -1)
-	}
-
-	return result === '' ? '' : `?${result}`
+	return queryParams.length > 0 ? '?' + queryParams.join('&') : ''
 }

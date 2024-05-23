@@ -62,6 +62,35 @@ export class UsersService {
         description: true,
         phone: true,
         specialisation: true,
+        vacancies: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
+
+  async findByLogin(login: string) {
+    const user = await this.prisma.client.user.findUnique({
+      where: { login },
+      select: {
+        id: true,
+        login: true,
+        email: true,
+        name: true,
+        avatar: true,
+        birthday: true,
+        description: true,
+        phone: true,
+        specialisation: true,
+        vacancies: {
+          include: {
+            user: true,
+          },
+        },
       },
     });
     if (!user) throw new NotFoundException('User not found');

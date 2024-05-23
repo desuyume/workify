@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Param,
   Patch,
   Req,
   UploadedFile,
@@ -24,6 +25,11 @@ export class UsersController {
   async getProfile(@Req() req) {
     const { id } = req.user as IUserPayload;
     return await this.usersService.findById(id);
+  }
+
+  @Get('profile/:login')
+  async getProfileByLogin(@Param('login') login: string) {
+    return await this.usersService.findByLogin(login);
   }
 
   @UseGuards(JwtGuard)

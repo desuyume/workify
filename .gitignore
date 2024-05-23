@@ -1,12 +1,12 @@
 node_modules
 
 .env
-.env.dev
 
 dist
 build
 .next
 out
+static
 
 tsconfig.tsbuildinfo
 .turbo

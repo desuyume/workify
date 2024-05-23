@@ -4,7 +4,7 @@ import SettingSwitch from '@/app/ui/setting-switch'
 import CreateEditVacancyForm from './create-edit-vacancy-form'
 import CreateEditVacancyPhotos from './create-edit-vacancy-photos'
 import { Button } from '@workify/ui'
-import { VacancyRating, cn, isNumber } from '@workify/shared'
+import { IFetchedVacancy, VacancyRating, cn, isNumber } from '@workify/shared'
 import { useCreateEditVacancy } from '@/contexts/create-edit-vacancy'
 import { useSession } from 'next-auth/react'
 import Loading from '@/app/ui/loading'
@@ -13,28 +13,20 @@ import { createVacancy } from '@/lib/api'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-import { getVacancyById } from '@/lib/api/requests/vacancy/id'
+import { updateVacancy } from '@/lib/api/requests/vacancy/id'
 
 export default function CreateEditVacancy({
 	type,
-	vacancyId,
+	fetchedVacancy,
 	className,
 }: {
 	type: CreateEditVacancyType
-	vacancyId?: string
+	fetchedVacancy?: IFetchedVacancy
 	className?: string
 }) {
 	const { vacancy, setVacancy } = useCreateEditVacancy()
 	const session = useSession()
 	const router = useRouter()
-
-	if (session.status === 'loading') {
-		return <Loading className='w-full h-full' />
-	}
-
-	if (session.status === 'unauthenticated') {
-		return <Unauthorized />
-	}
 
 	const mutateVacancy = () => {
 		const data = new FormData()
@@ -74,6 +66,14 @@ export default function CreateEditVacancy({
 				clearVacancy()
 			})
 		}
+
+		if (type === 'edit' && fetchedVacancy?.id) {
+			updateVacancy({ params: { data, id: fetchedVacancy.id } }).then(res => {
+				toast.success('Вакансия успешно обновлена')
+				router.push(`/vacancy/${res.data.id}`)
+				clearVacancy()
+			})
+		}
 	}
 
 	const clearVacancy = () => {
@@ -93,11 +93,30 @@ export default function CreateEditVacancy({
 
 	useEffect(() => {
 		if (type === 'edit') {
-			getVacancyById({ params: { id: `${vacancyId}` } }).then(res => {
-				setVacancy({ ...res.data, price: `${res.data.price}` })
-			})
+			if (fetchedVacancy) {
+				setVacancy({
+					title: fetchedVacancy.title,
+					description: fetchedVacancy.description,
+					rating: fetchedVacancy.rating,
+					category: fetchedVacancy.category,
+					price: !!fetchedVacancy.price ? `${fetchedVacancy.price}` : null,
+					cover: fetchedVacancy.cover,
+					photos: fetchedVacancy.photos,
+					city: fetchedVacancy.city,
+					isLocationHidden: fetchedVacancy.isLocationHidden,
+					isVacancyHidden: fetchedVacancy.isVacancyHidden,
+				})
+			}
 		}
-	}, [type])
+	}, [])
+
+	if (session.status === 'loading') {
+		return <Loading className='w-full h-full' />
+	}
+
+	if (session.status === 'unauthenticated') {
+		return <Unauthorized />
+	}
 
 	return (
 		session.status === 'authenticated' && (
@@ -107,7 +126,7 @@ export default function CreateEditVacancy({
 					className
 				)}
 			>
-				<CreateEditVacancyForm className='mb-[1.875rem]' type={type} />
+				<CreateEditVacancyForm className='mb-[1.875rem]' />
 
 				<div className='w-[55.3125rem] mb-[3.75rem]'>
 					<p className='font-medium text-[1.25rem] leading-6 mb-5'>

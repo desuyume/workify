@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   Req,
@@ -55,6 +57,38 @@ export class VacancyController {
     const cover = files?.cover?.[0] || null;
     const photos = files?.photos || [];
     return await this.vacancyService.create(id, dto, cover, photos);
+  }
+
+  @UseGuards(JwtGuard)
+  @Patch(':id')
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: 'cover', maxCount: 1 },
+        { name: 'photos', maxCount: 6 },
+      ],
+      multerOptions,
+    ),
+  )
+  @UseFilters(DeleteFileOnErrorFilter)
+  async update(
+    @Req() req,
+    @Param('id') vacancyId: number,
+    @Body() dto: CreateVacancyDto,
+    @UploadedFiles()
+    files: { cover: Express.Multer.File[]; photos: Express.Multer.File[] },
+  ) {
+    const { id } = req.user as IUserPayload;
+    const cover = files?.cover?.[0] || null;
+    const photos = files?.photos || [];
+    return await this.vacancyService.update(id, vacancyId, dto, cover, photos);
+  }
+
+  @UseGuards(JwtGuard)
+  @Delete(':id')
+  async delete(@Req() req, @Param('id') vacancyId: number) {
+    const { id: userId } = req.user as IUserPayload;
+    return await this.vacancyService.delete(userId, vacancyId);
   }
 
   @Get('categories')

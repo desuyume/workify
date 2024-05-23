@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumberString } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
 
 export class CreateVacancyDto {
   @IsNotEmpty()
@@ -6,7 +6,6 @@ export class CreateVacancyDto {
   description: string;
   categoryId: string;
   city: string;
-  @IsNumberString()
   price: string;
   isLocationHidden: string;
   isVacancyHidden: string;

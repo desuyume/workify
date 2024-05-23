@@ -139,7 +139,7 @@ export function SettingInput({
 				{settingType === 'password' ? (
 					<PasswordInput
 						{...props}
-						inputWidth={inputWidth}
+						width={inputWidth}
 						className='mt-[0.9375rem]'
 						value={value}
 						onChange={e => setValue(e.target.value)}
@@ -147,7 +147,7 @@ export function SettingInput({
 				) : (
 					<Input
 						{...props}
-						inputWidth={inputWidth}
+						width={inputWidth}
 						className='mt-[0.9375rem]'
 						value={value}
 						onChange={e => setValue(e.target.value)}

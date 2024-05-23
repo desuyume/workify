@@ -25,7 +25,7 @@
 		"tsx": "^4.7.2",
 		"turbo": "^1.13.2"
 	},
-	"packageManager": "pnpm@9.1.0",
+	"packageManager": "pnpm@9.1.2",
 	"dependencies": {
 		"dotenv-cli": "^7.4.1",
 		"node-jose-tools": "^2.0.4"

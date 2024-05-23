@@ -1,17 +1,20 @@
 import authApiInstance, { apiInstance } from '@/lib/api/instance'
-import { IVacancy } from '@workify/shared'
+import { generateQueryString } from '@/lib/utils'
+import { IUserVacancy, IVacancy, IVacancyQuery } from '@workify/shared'
 
 interface GetAllVacancyParam {
-	searchParams?: string
+	query?: IVacancyQuery
 }
 
 type GetAllVacancyConfig = RequestConfig<GetAllVacancyParam>
 
-export const getAllVacancy = ({ params, config }: GetAllVacancyConfig) =>
-	apiInstance.get<IVacancy[]>(
-		`/vacancy${params.searchParams && `?${params.searchParams}`}`,
+export const getAllVacancy = ({ params, config }: GetAllVacancyConfig) => {
+	const queryString = generateQueryString(params.query)
+	return apiInstance.get<{ vacancies: IUserVacancy[]; totalPages: number }>(
+		`/vacancy${queryString}`,
 		config
 	)
+}
 
 interface CreateVacancyParam {
 	data: FormData

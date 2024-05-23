@@ -3,7 +3,7 @@
 import { IUser } from '@workify/shared'
 import React from 'react'
 
-interface IUserProfile extends Omit<IUser, 'id'> {
+export interface IUserProfile extends Omit<IUser, 'id'> {
 	password: string | null
 }
 
@@ -28,6 +28,7 @@ export const ProfileContext = React.createContext<ProfileContextProps>({
 			phone: null,
 			specialisation: null,
 			password: null,
+			vacancies: [],
 		},
 	},
 	setProfile: () => {},
