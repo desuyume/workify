@@ -12,17 +12,19 @@ generator client {
 }
 
 model User {
-  id             Int       @id @default(autoincrement())
-  login          String    @unique
-  email          String    @unique
-  name           String?
-  birthday       DateTime?
-  phone          String?
-  description    String?
-  avatar         String?
-  specialisation String?
-  password       String
-  vacancies      Vacancy[]
+  id              Int               @id @default(autoincrement())
+  login           String            @unique
+  email           String            @unique
+  name            String?
+  birthday        DateTime?
+  phone           String?
+  description     String?
+  avatar          String?
+  specialisation  String?
+  password        String
+  vacancies       Vacancy[]
+  FeedbackOnUsers FeedbackOnUsers[]
+  Feedback        Feedback[]
 
   @@map("users")
 }
@@ -71,4 +73,23 @@ model VacancyPhoto {
   vacancyId Int?
 
   @@map("vacancy_photos")
+}
+
+model Feedback {
+  id              Int               @id @default(autoincrement())
+  comment         String?           @db.VarChar(1500)
+  rating          Float             @default(0)
+  photo           String?
+  date_created    DateTime          @default(now())
+  customer        User              @relation(fields: [customerId], references: [id])
+  customerId      Int
+  FeedbackOnUsers FeedbackOnUsers[]
+}
+
+model FeedbackOnUsers {
+  id         Int      @id @default(autoincrement())
+  feedback   Feedback @relation(fields: [feedbackId], references: [id])
+  feedbackId Int
+  executor   User     @relation(fields: [executorId], references: [id])
+  executorId Int
 }

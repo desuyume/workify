@@ -1,8 +1,8 @@
-import { VacancyRating, cn } from '@workify/shared'
+import { Rating, cn } from '@workify/shared'
 import StarIcon from './icons/StarIcon'
 
 interface StarsProps {
-	rating: VacancyRating
+	rating: Rating
 	className?: string
 }
 

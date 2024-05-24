@@ -1,10 +1,10 @@
 import Stars from '@/app/ui/stars'
-import { IVacancyCategory, VacancyRating } from '@workify/shared'
+import { IVacancyCategory, Rating } from '@workify/shared'
 import parse from 'html-react-parser'
 
 interface VacancyGeneralInfoProps {
 	title: string
-	rating: VacancyRating
+	rating: Rating
 	description: string
 	category: IVacancyCategory | null
 }

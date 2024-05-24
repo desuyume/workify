@@ -5,7 +5,7 @@ import {
 	CreateEditVacancy,
 	CreateEditVacancyContext,
 } from './CreateEditVacancyContext'
-import { VacancyRating } from '@workify/shared'
+import { Rating } from '@workify/shared'
 
 export interface CreateEditVacancyProviderProps {
 	children: React.ReactNode
@@ -17,7 +17,7 @@ export const CreateEditVacancyProvider: React.FC<
 	const [vacancy, setVacancy] = React.useState<CreateEditVacancy>({
 		title: '',
 		description: '',
-		rating: VacancyRating.zero,
+		rating: Rating.zero,
 		category: null,
 		price: null,
 		cover: null,

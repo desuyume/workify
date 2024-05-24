@@ -5,7 +5,7 @@ export interface IVacancy {
 	id: number
 	title: string
 	description: string
-	rating: VacancyRating
+	rating: Rating
 	category: IVacancyCategory | null
 	price: number
 	cover: string | File | null
@@ -24,7 +24,7 @@ export interface IVacancyPhoto {
 	url: string | File
 }
 
-export enum VacancyRating {
+export enum Rating {
 	'zero' = 0,
 	'one' = 1,
 	'two' = 2,

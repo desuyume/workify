@@ -4,7 +4,7 @@ import SettingSwitch from '@/app/ui/setting-switch'
 import CreateEditVacancyForm from './create-edit-vacancy-form'
 import CreateEditVacancyPhotos from './create-edit-vacancy-photos'
 import { Button } from '@workify/ui'
-import { IFetchedVacancy, VacancyRating, cn, isNumber } from '@workify/shared'
+import { IFetchedVacancy, Rating, cn, isNumber } from '@workify/shared'
 import { useCreateEditVacancy } from '@/contexts/create-edit-vacancy'
 import { useSession } from 'next-auth/react'
 import Loading from '@/app/ui/loading'
@@ -80,7 +80,7 @@ export default function CreateEditVacancy({
 		setVacancy({
 			title: '',
 			description: '',
-			rating: VacancyRating.zero,
+			rating: Rating.zero,
 			category: null,
 			price: null,
 			cover: null,

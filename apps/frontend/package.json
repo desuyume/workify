@@ -9,7 +9,6 @@
 		"lint": "next lint"
 	},
 	"dependencies": {
-		"@tanstack/react-query": "^5.35.1",
 		"@workify/shared": "workspace:*",
 		"@workify/ui": "workspace:*",
 		"axios": "^1.6.8",

@@ -15,7 +15,11 @@ export default async function Page({
 		<div className='w-full flex justify-center'>
 			<div className='w-[1214px] flex flex-col items-center mr-[2.8125rem]'>
 				<Vacancies vacancies={vacancies.data.vacancies} />
-				<Pagination totalPages={vacancies.data.totalPages} />
+				<Pagination
+					totalPages={
+						vacancies.data.totalPages > 0 ? vacancies.data.totalPages : 1
+					}
+				/>
 			</div>
 			<Filters />
 		</div>

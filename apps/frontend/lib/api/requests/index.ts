@@ -13,3 +13,5 @@ export * from './users/specialisation'
 export * from './vacancy'
 export * from './vacancy/id'
 export * from './vacancy/categories'
+
+export * from './feedback'

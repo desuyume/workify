@@ -1,6 +1,6 @@
 'use client'
 
-import { IVacancy, VacancyRating } from '@workify/shared'
+import { IVacancy, Rating } from '@workify/shared'
 import React from 'react'
 
 export interface CreateEditVacancy extends Omit<IVacancy, 'id' | 'price'> {
@@ -17,7 +17,7 @@ export const CreateEditVacancyContext =
 		vacancy: {
 			title: '',
 			description: '',
-			rating: VacancyRating.zero,
+			rating: Rating.zero,
 			category: null,
 			price: null,
 			cover: null,

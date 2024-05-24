@@ -12,9 +12,17 @@ import { MulterModule } from '@nestjs/platform-express';
 import { CitiesModule } from './cities/cities.module';
 import * as path from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { FeedbackModule } from './feedback/feedback.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
+    // ThrottlerModule.forRoot([
+    //   {
+    //     ttl: 15 * 60 * 1000, // 15 minutes
+    //     limit: 100,
+    //   },
+    // ]),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -31,6 +39,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
     AuthModule,
     VacancyModule,
     CitiesModule,
+    FeedbackModule,
   ],
   controllers: [AppController],
   providers: [AppService],
