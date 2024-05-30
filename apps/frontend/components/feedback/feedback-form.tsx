@@ -1,12 +1,14 @@
 'use client'
 
-import { Button, Input, Textarea } from '@workify/ui'
+import { Button, Textarea } from '@workify/ui'
 import { Rating, cn } from '@workify/shared'
 import { useState } from 'react'
 import FeedbackPhoto from './feedback-photo'
-import { IFeedback } from '../../../../packages/shared/src/types/feedback'
 import RatingSelect from '@/app/ui/rating-select'
 import { createFeedback } from '@/lib/api'
+import { toast } from 'sonner'
+import { AxiosError } from 'axios'
+import { useRouter } from 'next/navigation'
 
 interface FeedbackFormProps {
 	executorLogin: string
@@ -16,6 +18,7 @@ export default function FeedbackForm({ executorLogin }: FeedbackFormProps) {
 	const [comment, setComment] = useState<string>('')
 	const [photo, setPhoto] = useState<string | File | null>(null)
 	const [rating, setRating] = useState<Rating>(1)
+	const router = useRouter()
 
 	const handleSend = () => {
 		const feedbackData = new FormData()
@@ -26,7 +29,22 @@ export default function FeedbackForm({ executorLogin }: FeedbackFormProps) {
 		}
 
 		createFeedback({ params: { executorLogin, data: feedbackData } })
-		console.log(feedbackData)
+			.then(() => {
+				toast.success('Отзыв успешно отправлен')
+				router.push(`/profile/${executorLogin}`)
+				clearFields()
+			})
+			.catch(err => {
+				if (err instanceof AxiosError) {
+					toast.error(err.response?.data.message)
+				}
+			})
+	}
+
+	const clearFields = () => {
+		setComment('')
+		setPhoto(null)
+		setRating(1)
 	}
 
 	return (

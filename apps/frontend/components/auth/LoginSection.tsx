@@ -16,7 +16,7 @@ export function LoginSection({ setActiveSection }: LoginSectionProps) {
 		const formData = new FormData(e.currentTarget)
 
 		const data = await signIn('credentials', {
-			username: formData.get('username'),
+			email: formData.get('email'),
 			password: formData.get('password'),
 			redirect: false,
 		})
@@ -36,8 +36,8 @@ export function LoginSection({ setActiveSection }: LoginSectionProps) {
 	return (
 		<form onSubmit={onSubmit} className='flex flex-col items-center'>
 			<AuthFormInput
-				name='username'
-				placeholder='Логин / Почта'
+				name='email'
+				placeholder='Почта'
 				className='mb-[0.625rem]'
 			/>
 			<AuthFormPasswordInput

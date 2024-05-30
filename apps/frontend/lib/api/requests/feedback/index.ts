@@ -1,5 +1,6 @@
-import { IFeedback } from '@workify/shared'
-import authApiInstance from '../../instance'
+import { FeedbackSortBy, IFeedback, IFeedbackRating } from '@workify/shared'
+import authApiInstance, { apiInstance } from '../../instance'
+import { generateQueryString } from '@/lib/utils'
 
 interface CreateFeedbackParam {
 	executorLogin: string
@@ -12,6 +13,43 @@ export const createFeedback = ({ params, config }: CreateFeedbackConfig) => {
 	return authApiInstance.post<any, { data: IFeedback }>(
 		`/feedback/${params.executorLogin}`,
 		params.data,
+		config
+	)
+}
+
+interface GetExecutorFeedbacksParam {
+	executorLogin: string
+	query: {
+		sortBy: FeedbackSortBy
+		take?: number
+	}
+}
+
+type GetExecutorFeedbacksConfig = RequestConfig<GetExecutorFeedbacksParam>
+
+export const getExecutorFeedbacks = ({
+	params,
+	config,
+}: GetExecutorFeedbacksConfig) => {
+	const queryString = generateQueryString(params.query)
+	return apiInstance.get<IFeedback[]>(
+		`/feedback/${params.executorLogin}${queryString}`,
+		config
+	)
+}
+
+interface GetExecutorRatingParam {
+	executorLogin: string
+}
+
+type GetExecutorRatingConfig = RequestConfig<GetExecutorRatingParam>
+
+export const getExecutorRating = ({
+	params,
+	config,
+}: GetExecutorRatingConfig) => {
+	return apiInstance.get<IFeedbackRating>(
+		`/feedback/${params.executorLogin}/rating`,
 		config
 	)
 }

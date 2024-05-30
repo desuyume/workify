@@ -2,9 +2,9 @@ import axios, { AxiosError } from 'axios'
 import { AuthSection } from './AuthModalContent'
 import { AuthFormInput, AuthFormPasswordInput, Button } from '@workify/ui'
 import { toast } from 'sonner'
-import { regsiterSchema } from '@/lib/constants'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { IRegFields, regValidation } from '@/lib/utils/validation'
 
 interface RegSectionProps {
 	setActiveSection: (section: AuthSection) => void
@@ -17,40 +17,36 @@ export function RegSection({ setActiveSection }: RegSectionProps) {
 		e.preventDefault()
 		const formData = new FormData(e.currentTarget)
 
-		const validatedFields = regsiterSchema.safeParse({
-			login: formData.get('login'),
-			email: formData.get('email'),
-			password: formData.get('password'),
-			rePassword: formData.get('re-password'),
-		})
-
-		if (!validatedFields.success) {
-			toast.error('Заполните все поля')
-			console.log({
-				errors: validatedFields.error.flatten().fieldErrors,
-				message: 'Заполните все поля',
-			})
-			return
+		const fields: IRegFields = {
+			login: formData.get('login')?.toString() ?? '',
+			email: formData.get('email')?.toString() ?? '',
+			password: formData.get('password')?.toString() ?? '',
+			rePassword: formData.get('re-password')?.toString() ?? '',
 		}
 
-		const { login, email, password, rePassword } = validatedFields.data
+		const isValid = regValidation(fields)
+		if (!isValid) return
 
 		try {
 			await axios.post(`${process.env.API_URL}/auth/register`, {
-				login,
-				email,
-				password,
-				rePassword,
+				login: fields.login,
+				email: fields.email,
+				password: fields.password,
+				rePassword: fields.rePassword,
 			})
 		} catch (e) {
 			if (e instanceof AxiosError) {
 				toast.error(e.response?.data.message)
 			}
+			return
 		}
 
+		console.log(fields);
+		
+
 		const data = await signIn('credentials', {
-			username: email,
-			password: password,
+			username: fields.login,
+			password: fields.password,
 			redirect: false,
 		})
 
@@ -58,11 +54,7 @@ export function RegSection({ setActiveSection }: RegSectionProps) {
 			toast.success('Вход выполнен')
 			router.push('/vacancy')
 		} else {
-			if (data?.error === 'CredentialsSignin') {
-				toast.error('Неверная почта или пароль')
-			} else {
-				toast.error('Что-то пошло не так')
-			}
+			toast.error('Что-то пошло не так')
 		}
 	}
 

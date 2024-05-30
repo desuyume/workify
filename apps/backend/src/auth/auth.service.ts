@@ -39,10 +39,10 @@ export class AuthService {
   }
 
   async validateUser(dto: LoginDto) {
-    const user = await this.usersService.findByEmail(dto.username);
+    const user = await this.usersService.findByEmail(dto.email);
 
     if (!user)
-      throw new UnauthorizedException('User with this email not found');
+      throw new UnauthorizedException('Пользователя с такой эл.почтой не существует');
 
     const isPassEqual = await compare(dto.password, user.password);
 

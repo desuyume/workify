@@ -14,6 +14,7 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { updateVacancy } from '@/lib/api/requests/vacancy/id'
+import { AxiosError } from 'axios'
 
 export default function CreateEditVacancy({
 	type,
@@ -60,17 +61,24 @@ export default function CreateEditVacancy({
 		}
 
 		if (type === 'create') {
-			createVacancy({ params: { data } }).then(res => {
-				toast.success('Вакансия успешно создана')
-				router.push(`/vacancy/${res.data.id}`)
-				clearVacancy()
-			})
+			createVacancy({ params: { data } })
+				.then(res => {
+					router.push(`/vacancy/${res.data.id}`)
+					toast.success('Вакансия успешно создана')
+					clearVacancy()
+				})
+				.catch(err => {
+					if (err instanceof AxiosError) {
+						toast.error(err.response?.data.message)
+					}
+					console.log(err)
+				})
 		}
 
 		if (type === 'edit' && fetchedVacancy?.id) {
 			updateVacancy({ params: { data, id: fetchedVacancy.id } }).then(res => {
-				toast.success('Вакансия успешно обновлена')
 				router.push(`/vacancy/${res.data.id}`)
+				toast.success('Вакансия успешно обновлена')
 				clearVacancy()
 			})
 		}
@@ -80,7 +88,6 @@ export default function CreateEditVacancy({
 		setVacancy({
 			title: '',
 			description: '',
-			rating: Rating.zero,
 			category: null,
 			price: null,
 			cover: null,
@@ -97,7 +104,6 @@ export default function CreateEditVacancy({
 				setVacancy({
 					title: fetchedVacancy.title,
 					description: fetchedVacancy.description,
-					rating: fetchedVacancy.rating,
 					category: fetchedVacancy.category,
 					price: !!fetchedVacancy.price ? `${fetchedVacancy.price}` : null,
 					cover: fetchedVacancy.cover,

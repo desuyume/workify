@@ -21,7 +21,10 @@ export default async function Page({ params }: { params: { id: string } }) {
 
 	return (
 		<div className='w-full foreground pt-[1.625rem] pb-10 flex flex-col items-center rounded-[0.625rem]'>
-			<VacancyGeneralInfo {...vacancy.data} />
+			<VacancyGeneralInfo
+				{...vacancy.data}
+				rating={Math.round(vacancy.data.user.rating)}
+			/>
 
 			{!vacancy.data.isLocationHidden && vacancy.data.city && (
 				<div className='w-full h-[1.5625rem] flex items-center mb-[2.0625rem]'>

@@ -21,16 +21,30 @@ export class UsersService {
   ) {}
 
   async create(dto: CreateUserDto) {
-    const user = await this.prisma.client.user.findUnique({
+    const userByEmail = await this.prisma.client.user.findUnique({
       where: {
         email: dto.email,
       },
     });
 
-    if (user) throw new ConflictException('User already exists');
+    if (userByEmail)
+      throw new ConflictException(
+        'Пользователь с такой эл.почтой уже существует',
+      );
+
+    const userByLogin = await this.prisma.client.user.findUnique({
+      where: {
+        login: dto.login,
+      },
+    });
+
+    if (userByLogin)
+      throw new ConflictException(
+        'Пользователь с таким логином уже существует',
+      );
 
     if (dto.password !== dto.rePassword) {
-      throw new BadRequestException('Passwords do not match');
+      throw new BadRequestException('Пароли не совпадают');
     }
 
     const newUser = await this.prisma.client.user.create({

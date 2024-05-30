@@ -4,7 +4,7 @@ import { Button } from '@workify/ui'
 import VacancyFeedback from '@/components/profile/vacancy-feedback'
 import htmlParse from 'html-react-parser'
 import defaultProfilePic from '@/public/images/default-profile-pic.webp'
-import { IUser } from '@workify/shared'
+import { IUser, formatDate, getAgeByBirthday } from '@workify/shared'
 import { IUserProfile } from '@/contexts/profile'
 import Link from 'next/link'
 
@@ -63,7 +63,9 @@ export default function ProfileContent({
 					title='Возраст'
 					value={
 						user.birthday
-							? new Date(user?.birthday).toISOString().split('T')[0]
+							? `${getAgeByBirthday(new Date(user.birthday))} (${formatDate(
+									new Date(user.birthday)
+								)})`
 							: null
 					}
 				/>
@@ -99,7 +101,7 @@ export default function ProfileContent({
 				</div>
 			</div>
 
-			<VacancyFeedback vacancies={user.vacancies} />
+			<VacancyFeedback vacancies={user.vacancies} userLogin={user.login} />
 		</div>
 	)
 }

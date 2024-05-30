@@ -29,11 +29,13 @@ export default function VacancyGeneralInfo({
 					</div>
 				</div>
 
-				<div className='h-full foreground rounded-[0.3125rem] flex justify-center items-center self-end'>
-					<p className='font-montserrat font-light text-xl text-primary-light px-4'>
-						{category?.title.toLowerCase()}
-					</p>
-				</div>
+				{!!category && (
+					<div className='h-full foreground rounded-[0.3125rem] flex justify-center items-center self-end'>
+						<p className='font-montserrat font-light text-xl text-primary-light px-4'>
+							{category?.title.toLowerCase()}
+						</p>
+					</div>
+				)}
 			</div>
 
 			<div className='w-full flex-1 overflow-y-auto foreground rounded-[0.3125rem] py-5 px-7'>

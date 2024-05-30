@@ -27,16 +27,18 @@ export const authOptions: NextAuthOptions = {
 		CredentialsProvider({
 			name: 'Credentials',
 			credentials: {
-				username: { label: 'Username', type: 'text' },
+				email: { label: 'Email', type: 'text' },
 				password: { label: 'Password', type: 'password' },
 			},
 			async authorize(credentials) {
-				if (!credentials?.username || !credentials?.password) return null
-				const { username, password } = credentials
+				if (!credentials?.email || !credentials?.password) return null
+				const { email, password } = credentials
+
+				console.log(email, password)
 
 				try {
 					const res = await axios.post(`${process.env.API_URL}/auth/login`, {
-						username,
+						email,
 						password,
 					})
 					return res.data

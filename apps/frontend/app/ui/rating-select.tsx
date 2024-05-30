@@ -37,11 +37,6 @@ export default function RatingSelect({ rating, setRating }: RatingSelectProps) {
 	return (
 		<div className='flex'>
 			<RatingButton
-				buttonRating={Rating.zero}
-				rating={rating}
-				setRating={setRating}
-			/>
-			<RatingButton
 				buttonRating={Rating.one}
 				rating={rating}
 				setRating={setRating}

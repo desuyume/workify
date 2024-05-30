@@ -17,7 +17,6 @@ export const CreateEditVacancyContext =
 		vacancy: {
 			title: '',
 			description: '',
-			rating: Rating.zero,
 			category: null,
 			price: null,
 			cover: null,

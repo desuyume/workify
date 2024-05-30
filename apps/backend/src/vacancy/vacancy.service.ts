@@ -100,7 +100,9 @@ export class VacancyService {
         break;
       case 'rating':
         filterOptions.orderBy = {
-          rating: 'desc',
+          user: {
+            rating: 'desc',
+          },
         };
         break;
       default:
@@ -134,7 +136,7 @@ export class VacancyService {
     photos: Express.Multer.File[] | null,
   ) {
     if (!!dto.price && !isNumber(dto.price)) {
-      throw new BadRequestException('Price must be a number');
+      throw new BadRequestException('Цена должна быть числом');
     }
 
     const user = await this.prisma.client.user.findUnique({
@@ -142,6 +144,16 @@ export class VacancyService {
         id,
       },
     });
+
+    const vacanciesCount = await this.prisma.client.vacancy.count({
+      where: {
+        userId: user.id,
+      }
+    })
+
+    if (vacanciesCount == 2) {
+      throw new ForbiddenException('Вы не можете создать более 2 вакансий');
+    }
 
     let vacancyCategory: VacancyCategory | null = null;
 

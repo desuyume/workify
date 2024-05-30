@@ -16,5 +16,6 @@ export interface IUser {
 	description: string | null
 	phone: string | null
 	specialisation: string | null
+	rating: number
 	vacancies: IUserVacancy[]
 }

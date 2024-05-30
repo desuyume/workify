@@ -7,10 +7,14 @@ import ProfileFeedbacks from './profile-feedbacks'
 import { IUserVacancy } from '@workify/shared'
 
 interface VacancyFeedbackProps {
+	userLogin: string
 	vacancies: IUserVacancy[]
 }
 
-export default function VacancyFeedback({ vacancies }: VacancyFeedbackProps) {
+export default function VacancyFeedback({
+	userLogin,
+	vacancies,
+}: VacancyFeedbackProps) {
 	const [activeSection, setActiveSection] = useState<'vacancy' | 'feedback'>(
 		'vacancy'
 	)
@@ -36,7 +40,9 @@ export default function VacancyFeedback({ vacancies }: VacancyFeedbackProps) {
 			{activeSection === 'vacancy' && (
 				<ProfileVacancies vacancies={vacancies} />
 			)}
-			{activeSection === 'feedback' && <ProfileFeedbacks />}
+			{activeSection === 'feedback' && (
+				<ProfileFeedbacks userLogin={userLogin} />
+			)}
 		</div>
 	)
 }

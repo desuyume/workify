@@ -10,13 +10,13 @@ export default function FeedbackStars({
 	reviewsCount,
 }: FeedbackStarsProps) {
 	return (
-		<div className='w-full flex items-end mb-[0.3125rem] last-of-type:mb-0'>
+		<div className='w-full flex items-center mb-[0.3125rem] last-of-type:mb-0'>
 			<div className='flex h-5'>
 				{[...Array(starsCount)].map((_, index) => (
 					<StarIcon key={index} isFilled />
 				))}
 			</div>
-			<hr className='flex-1 border-t border-t-white rounded-full mr-[0.625rem]' />
+			<hr className='flex-1 border-t border-t-white rounded-full mr-[0.625rem] self-end mb-1.5' />
 			<p className='font-light text-lg leading-[1.375rem]'>
 				{reviewsCount} отзывов
 			</p>

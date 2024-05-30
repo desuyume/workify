@@ -1,27 +1,36 @@
 import Image from 'next/image'
-import reviewImg from '@/public/images/review-image.png'
-import profileImg from '@/public/images/review-profile.png'
+import defaultProfileImg from '@/public/images/default-profile-pic.webp'
 import Stars from '@/app/ui/stars'
+import { IFeedback, formatDate } from '@workify/shared'
+import parse from 'html-react-parser'
 
 interface FeedbackProps {
-	withImage?: boolean
+	feedback: IFeedback
 }
 
-export default function Feedback({ withImage = true }: FeedbackProps) {
+export default function Feedback({ feedback }: FeedbackProps) {
 	return (
 		<div className='w-[26.9375rem] flex flex-col'>
 			<div className='flex mb-[1.4375rem]'>
 				<Image
-					src={profileImg}
+					src={
+						!!feedback.customer.avatar
+							? `${process.env.SERVER_URL}/${feedback.customer.avatar}`
+							: defaultProfileImg
+					}
 					alt='profile-image'
 					width={89}
 					height={89}
-					className='rounded-[0.3125rem] mr-6'
+					className='w-[89px] h-[89px] object-cover rounded-[0.3125rem] mr-6'
 				/>
 				<div className='flex flex-col justify-between'>
-					<p className='text-lg leading-[1.375rem]'>Артемий Якушев</p>
-					<Stars rating={5} />
-					<p className='text-lg leading-[1.375rem]'>01.05.2024</p>
+					<p className='text-lg leading-[1.375rem]'>
+						{feedback.customer.name ?? feedback.customer.login}
+					</p>
+					<Stars rating={feedback.rating} />
+					<p className='text-lg leading-[1.375rem]'>
+						{formatDate(new Date(feedback.date_created))}
+					</p>
 				</div>
 			</div>
 			<div className='mb-[0.8125rem]'>
@@ -29,24 +38,19 @@ export default function Feedback({ withImage = true }: FeedbackProps) {
 					Комментарий
 				</p>
 				<p className='font-light text-[0.9375rem] leading-[1.125rem] line-clamp-[7]'>
-					Я хотел бы выразить огромную благодарность] за невероятную работу! Это
-					был мой первый опыт получения татуировки, и я был немного взволнован,
-					но мастер сделал процесс очень комфортным и приятным.
-					<br /> С самого начала он проявил внимательное отношение к моим
-					пожеланиям. Он внимательно выслушал мои пававыав ыывааыв авываыаываыв
-					ываыав ыва ываав ы аыв
+					{parse(feedback.comment)}
 				</p>
 			</div>
 			<button className='font-medium text-[0.9375rem] leading-[1.125rem] underline skip-ink-none self-end'>
 				Читать еще
 			</button>
-			{withImage && (
+			{feedback.photo && (
 				<Image
-					src={reviewImg}
-					alt='review-image'
+					src={`${process.env.SERVER_URL}/${feedback.photo}`}
+					alt='feedback-image'
 					width={313}
 					height={193}
-					className='rounded-[0.625rem]'
+					className='w-[313px] h-[193px] object-cover rounded-[0.625rem]'
 				/>
 			)}
 

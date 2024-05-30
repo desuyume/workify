@@ -24,6 +24,7 @@ export const ProfileProvider: React.FC<ProfileProviderProps> = ({
 			phone: null,
 			specialisation: null,
 			password: null,
+			rating: 0,
 			vacancies: [],
 		},
 	})

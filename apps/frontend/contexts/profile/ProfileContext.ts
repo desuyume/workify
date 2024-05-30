@@ -28,6 +28,7 @@ export const ProfileContext = React.createContext<ProfileContextProps>({
 			phone: null,
 			specialisation: null,
 			password: null,
+			rating: 0,
 			vacancies: [],
 		},
 	},

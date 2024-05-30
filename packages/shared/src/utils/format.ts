@@ -10,3 +10,12 @@ export const formatMoney = (
 export const stringToBoolean = (str: string): boolean => {
 	return str.toLowerCase() === 'true'
 }
+
+export const formatDate = (date: Date, separator = '.'): string => {
+	const formattedDate = date.toLocaleDateString('ru-RU', {
+		day: '2-digit',
+		month: '2-digit',
+		year: 'numeric',
+	})
+	return formattedDate.replace(/\//g, separator)
+}

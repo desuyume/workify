@@ -52,14 +52,13 @@ export default function Home() {
 				</div>
 				<div className='w-[31.35vw] aspect-[602/258] bg-primary-dark flex flex-col flex-center rounded-[2.9375rem] absolute top-[29%] right-[11.7%]'>
 					<div className='w-full h-[28%] flex justify-between items-center pl-[5.5%] mb-[1.375rem]'>
-						<Link className='w-[78%] h-full' href='/vacancy/create'>
+						<Link className='w-[78%] h-full peer' href='/vacancy/create'>
 							<Button
 								title='создать анкету'
 								variant='light'
 								width='100%'
 								height='100%'
 								fontSize='1.2vw'
-								className='peer'
 							/>
 						</Link>
 
@@ -92,14 +91,13 @@ export default function Home() {
 						</div>
 					</div>
 					<div className='w-full h-[28%] flex justify-between items-center pl-[5.5%]'>
-						<Link className='w-[78%] h-full' href='/vacancy'>
+						<Link className='w-[78%] h-full peer' href='/vacancy'>
 							<Button
 								title='найти исполнителя'
 								variant='dark'
 								width='100%'
 								height='100%'
 								fontSize='1.2vw'
-								className='peer'
 							/>
 						</Link>
 
