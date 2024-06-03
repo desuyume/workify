@@ -30,6 +30,10 @@ export const ProfileContext = React.createContext<ProfileContextProps>({
 			password: null,
 			rating: 0,
 			vacancies: [],
+			communication: {
+				isEmailVisible: true,
+				isPhoneVisible: true,
+			},
 		},
 	},
 	setProfile: () => {},

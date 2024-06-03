@@ -13,6 +13,7 @@
 		"@workify/ui": "workspace:*",
 		"axios": "^1.6.8",
 		"clsx": "^2.1.1",
+		"countup.js": "^2.8.0",
 		"html-react-parser": "^5.1.10",
 		"next": "14.2.2",
 		"next-auth": "^4.24.7",

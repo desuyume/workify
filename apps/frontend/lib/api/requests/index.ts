@@ -1,5 +1,6 @@
 export * from './users/avatar'
 export * from './users/birthday'
+export * from './users/communication'
 export * from './users/description'
 export * from './users/email'
 export * from './users/id'
@@ -15,3 +16,6 @@ export * from './vacancy/id'
 export * from './vacancy/categories'
 
 export * from './feedback'
+export * from './feedback/id'
+
+export * from './statistic'

@@ -139,6 +139,10 @@ export class VacancyService {
       throw new BadRequestException('Цена должна быть числом');
     }
 
+    if (!dto.categoryId) {
+      throw new BadRequestException('Необходимо выбрать категорию');
+    }
+
     const user = await this.prisma.client.user.findUnique({
       where: {
         id,
@@ -148,8 +152,8 @@ export class VacancyService {
     const vacanciesCount = await this.prisma.client.vacancy.count({
       where: {
         userId: user.id,
-      }
-    })
+      },
+    });
 
     if (vacanciesCount == 2) {
       throw new ForbiddenException('Вы не можете создать более 2 вакансий');

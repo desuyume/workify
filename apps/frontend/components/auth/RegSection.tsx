@@ -41,11 +41,8 @@ export function RegSection({ setActiveSection }: RegSectionProps) {
 			return
 		}
 
-		console.log(fields);
-		
-
 		const data = await signIn('credentials', {
-			username: fields.login,
+			email: fields.email,
 			password: fields.password,
 			redirect: false,
 		})

@@ -24,7 +24,7 @@ export default function EmailSettingsConfirm({
 				className='rounded-b-none'
 				settingType='email'
 			/>
-			<div className='w-[24.375rem] h-10 foreground rounded-b-[0.3125rem] pt-0.5 flex flex-col items-center'>
+			{/* <div className='w-[24.375rem] h-10 foreground rounded-b-[0.3125rem] pt-0.5 flex flex-col items-center'>
 				<hr className='w-[22.875rem]' />
 				<div className='flex-1 self-start flex items-center ml-3'>
 					{isConfirmed ? (
@@ -40,7 +40,7 @@ export default function EmailSettingsConfirm({
 						</button>
 					)}
 				</div>
-			</div>
+			</div> */}
 		</div>
 	)
 }

@@ -4,8 +4,15 @@ import { Button, Glow } from '@workify/ui'
 import gridImg from '@/public/images/mainGrid.png'
 import Statistic from './ui/statistic'
 import LoginRegButton from './ui/login-reg-button'
+import { getStatistic } from '@/lib/api'
 
-export default function Home() {
+export default async function Home() {
+	const statistic = await getStatistic({
+		params: {},
+	})
+		.then(res => res.data)
+		.catch(() => null)
+
 	return (
 		<>
 			<header className='w-full h-[7.1875rem] px-[10.125rem] flex justify-between items-center'>
@@ -24,29 +31,37 @@ export default function Home() {
 					<h1 className='text-[2.34375rem] mb-[1.875rem] inline-block font-santello'>
 						Workify - ваш путь к новым возможностям
 					</h1>
-					<h2 className='text-[3.8125rem] leading-tight font-santello max-w-[50rem] mb-[9.5rem]'>
+					<h2 className='text-[3.8125rem] leading-tight font-santello max-w-[50rem] mb-[7.5rem]'>
 						СОЗДАВАЙТЕ, НАХОДИТЕ, РАБОТАЙТЕ
 					</h2>
 					<div className='w-[39.125rem] h-[20.8125rem] flex flex-wrap justify-between content-between'>
 						<Statistic
 							width='17.0625rem'
-							statNumber='750'
+							statNumber={statistic?.usersCount || 750}
 							title='зарегистрированных
 							пользователей'
 							isTwoLine
+							type='usersCount'
 						/>
 						<Statistic
 							width='14.3125rem'
-							statNumber='95%'
+							statNumber={statistic?.satisfiedUsersPercennt || 95}
 							title='удовлетворенных
 							клиентов'
 							isTwoLine
+							type='satisfiedUsersPercennt'
 						/>
-						<Statistic width='14rem' statNumber='500' title='успешных сделок' />
+						<Statistic
+							width='14rem'
+							statNumber={statistic?.feedbacksCount || 500}
+							title='отзывов'
+							type='feedbacksCount'
+						/>
 						<Statistic
 							width='14.3125rem'
-							statNumber='600'
+							statNumber={statistic?.activeVacanciesCount || 600}
 							title='активных анкет'
+							type='activeVacanciesCount'
 						/>
 					</div>
 				</div>

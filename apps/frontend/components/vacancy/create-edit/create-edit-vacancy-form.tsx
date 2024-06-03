@@ -81,11 +81,12 @@ export default function CreateEditVacancyForm({
 						title='Скрыть местоположение'
 						switchId='hide-location'
 						width='21.25rem'
-						isChecked={vacancy.isLocationHidden}
+						checked={vacancy.isLocationHidden}
 						onChange={e =>
 							setVacancy({ ...vacancy, isLocationHidden: e.target.checked })
 						}
 						className='px-5'
+						settingType='hide-location'
 					/>
 				</div>
 			</div>

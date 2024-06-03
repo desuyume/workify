@@ -21,6 +21,11 @@ export default function FeedbackForm({ executorLogin }: FeedbackFormProps) {
 	const router = useRouter()
 
 	const handleSend = () => {
+		if (comment.length > 1500) {
+			toast.error('Комментарий не должен превышать 1500 символов')
+			return
+		}
+
 		const feedbackData = new FormData()
 		feedbackData.append('comment', comment)
 		feedbackData.append('rating', `${rating}`)

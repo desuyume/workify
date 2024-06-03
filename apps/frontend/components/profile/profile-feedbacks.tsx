@@ -14,6 +14,7 @@ export default function ProfileFeedbacks({ userLogin }: ProfileFeedbacksProps) {
 	const [sortBy, setSortBy] = useState<FeedbackSortBy>('date')
 	const [isFeedbacksLoading, setIsFeedbackLoading] = useState<boolean>(true)
 	const [feedbacks, setFeedbacks] = useState<IFeedback[]>([])
+	const [totalCount, setTotalCount] = useState<number>(0)
 	const [rating, setRating] = useState<IFeedbackRating>({
 		1: 0,
 		2: 0,
@@ -28,8 +29,8 @@ export default function ProfileFeedbacks({ userLogin }: ProfileFeedbacksProps) {
 			params: { executorLogin: userLogin, query: { sortBy, take: 4 } },
 		})
 			.then(res => {
-				setFeedbacks(res.data)
-				console.log(res.data)
+				setFeedbacks(res.data.feedbacks)
+				setTotalCount(res.data.count)
 			})
 			.finally(() => setIsFeedbackLoading(false))
 	}
@@ -40,6 +41,22 @@ export default function ProfileFeedbacks({ userLogin }: ProfileFeedbacksProps) {
 		}).then(res => {
 			setRating(res.data)
 		})
+	}
+
+	const handleClickShowMore = () => {
+		getExecutorFeedbacks({
+			params: {
+				executorLogin: userLogin,
+				query: { sortBy, take: 4, skip: feedbacks.length },
+			},
+		}).then(res => {
+			setFeedbacks([...feedbacks, ...res.data.feedbacks])
+			setTotalCount(res.data.count)
+		})
+	}
+
+	const handleClickHideMore = () => {
+		setFeedbacks(feedbacks.slice(0, 4))
 	}
 
 	useEffect(() => {
@@ -92,15 +109,28 @@ export default function ProfileFeedbacks({ userLogin }: ProfileFeedbacksProps) {
 				)}
 			</div>
 
-			{feedbacks.length > 4 && (
-				<Button
-					title='Показать еще отзывы'
-					variant='light-transparent'
-					width='16.4375rem'
-					height='2.25rem'
-					className='self-center'
-				/>
-			)}
+			<div className='flex justify-center'>
+				{feedbacks.length > 4 && (
+					<Button
+						title='Скрыть'
+						variant='dark-transparent'
+						width='16.4375rem'
+						height='2.25rem'
+						className='self-center mr-4'
+						onClick={handleClickHideMore}
+					/>
+				)}
+				{totalCount > 4 && feedbacks.length < totalCount && (
+					<Button
+						title='Показать еще'
+						variant='light-transparent'
+						width='16.4375rem'
+						height='2.25rem'
+						className='self-center mr-0'
+						onClick={handleClickShowMore}
+					/>
+				)}
+			</div>
 		</div>
 	)
 }

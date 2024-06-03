@@ -3,6 +3,7 @@ import Stars from '@/app/ui/stars'
 import { IUserVacancy, cn, formatMoney } from '@workify/shared'
 import Link from 'next/link'
 import parse from 'html-react-parser'
+import defaultProfilePic from '@/public/images/default-profile-pic.webp'
 
 interface VacancyProps {
 	vacancy: IUserVacancy
@@ -20,13 +21,19 @@ export default function Vacancy({ vacancy, inProfile = false }: VacancyProps) {
 			})}
 		>
 			{!inProfile && (
-				<Image
-					src={`${process.env.SERVER_URL}/${vacancy.user.avatar}`}
-					alt='profile-img'
-					width={201}
-					height={244}
-					className='w-[201px] h-[244px] object-cover rounded-tl-[0.3125rem] rounded-b-[0.3125rem] rounded-tr-[5rem] mr-[1.875rem]'
-				/>
+				<Link className='mr-[1.875rem]' href={`/profile/${vacancy.user.login}`}>
+					<Image
+						src={
+							!!vacancy.user.avatar
+								? `${process.env.SERVER_URL}/${vacancy.user.avatar}`
+								: defaultProfilePic
+						}
+						alt='profile-img'
+						width={201}
+						height={244}
+						className='min-w-[201px] max-w-[201px] h-[244px] object-cover rounded-tl-[0.3125rem] rounded-b-[0.3125rem] rounded-tr-[5rem]'
+					/>
+				</Link>
 			)}
 
 			<div className='w-full h-full flex flex-col'>

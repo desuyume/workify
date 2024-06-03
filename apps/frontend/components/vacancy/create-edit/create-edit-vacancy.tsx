@@ -147,10 +147,11 @@ export default function CreateEditVacancy({
 						switchId='hide-vacancy'
 						className='px-5'
 						width='15.0625rem'
-						isChecked={vacancy.isVacancyHidden}
+						checked={vacancy.isVacancyHidden}
 						onChange={e =>
 							setVacancy({ ...vacancy, isVacancyHidden: e.target.checked })
 						}
+						settingType='hide-vacancy'
 					/>
 				</div>
 

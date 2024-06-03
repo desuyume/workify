@@ -47,11 +47,14 @@ export class UsersService {
       throw new BadRequestException('Пароли не совпадают');
     }
 
+    const communication = await this.prisma.client.communication.create({});
+
     const newUser = await this.prisma.client.user.create({
       data: {
         login: dto.login,
         email: dto.email,
         password: await hash(dto.password, 10),
+        communicationId: communication.id,
       },
     });
 
@@ -81,6 +84,7 @@ export class UsersService {
             user: true,
           },
         },
+        communication: true,
       },
     });
     if (!user) throw new NotFoundException('User not found');
@@ -105,6 +109,7 @@ export class UsersService {
             user: true,
           },
         },
+        communication: true,
       },
     });
     if (!user) throw new NotFoundException('User not found');
@@ -202,6 +207,32 @@ export class UsersService {
       where: { id },
       data: {
         password: await hash(password, 10),
+      },
+    });
+  }
+
+  async updateEmailCommunication(id: number, isVisible: boolean) {
+    const user = await this.findById(id);
+    return await this.prisma.client.communication.upsert({
+      where: { id: user.communication.id },
+      create: {
+        isEmailVisible: isVisible,
+      },
+      update: {
+        isEmailVisible: isVisible,
+      },
+    });
+  }
+
+  async updatePhoneCommunication(id: number, isVisible: boolean) {
+    const user = await this.findById(id);
+    return await this.prisma.client.communication.upsert({
+      where: { id: user.communication.id },
+      create: {
+        isPhoneVisible: isVisible,
+      },
+      update: {
+        isPhoneVisible: isVisible,
       },
     });
   }

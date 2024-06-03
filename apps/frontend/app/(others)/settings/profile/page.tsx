@@ -14,7 +14,7 @@ export default async function Page() {
 					<SettingInput
 						id='name'
 						name='name'
-						label='Имя/Логин'
+						label='Имя'
 						inputWidth='28.3125rem'
 						settingType='name'
 					/>

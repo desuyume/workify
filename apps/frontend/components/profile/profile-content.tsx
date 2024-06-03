@@ -7,6 +7,7 @@ import defaultProfilePic from '@/public/images/default-profile-pic.webp'
 import { IUser, formatDate, getAgeByBirthday } from '@workify/shared'
 import { IUserProfile } from '@/contexts/profile'
 import Link from 'next/link'
+import CommunicationButton from './communication-button'
 
 interface ProfileContentProps {
 	user: IUser | IUserProfile
@@ -73,7 +74,7 @@ export default function ProfileContent({
 					title='Специализация'
 					value={user?.specialisation ?? null}
 				/>
-				<ProfileInfo title='Телефон' value={user?.phone ?? null} />
+				{/* <ProfileInfo title='Телефон' value={user?.phone ?? null} /> */}
 			</div>
 
 			<div className='w-full foreground flex flex-col items-center pt-10 pb-[1.875rem] mb-[3.125rem] rounded-b-[0.625rem]'>
@@ -88,17 +89,12 @@ export default function ProfileContent({
 					</div>
 				)}
 
-				<div className='w-full h-9 flex items-center'>
-					<hr className='flex-1 border-t border-t-white rounded-full' />
-					<Button
-						title='Связаться'
-						variant='light-transparent'
-						className='mx-[2.1875rem]'
-						width='11.0625rem'
-						height='100%'
-					/>
-					<hr className='w-[17.3125rem] border-t border-t-white rounded-full' />
-				</div>
+				<CommunicationButton
+					communication={user.communication}
+					username={user.name ?? user.login}
+					email={user.email}
+					phone={user.phone ?? ''}
+				/>
 			</div>
 
 			<VacancyFeedback vacancies={user.vacancies} userLogin={user.login} />

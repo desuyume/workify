@@ -3,7 +3,7 @@ import { NavButton } from '@workify/ui'
 import Link from 'next/link'
 
 interface SettingsNavProps {
-	activeSection: 'profile' | 'security' | 'notifications'
+	activeSection: 'profile' | 'security' | 'communication'
 	className?: string
 }
 
@@ -27,10 +27,10 @@ export default function SettingsNav({
 					isActive={activeSection === 'security'}
 				/>
 			</Link>
-			<Link href={'/settings/notifications'}>
+			<Link href={'/settings/communication'}>
 				<NavButton
-					title='Уведомления'
-					isActive={activeSection === 'notifications'}
+					title='Связь'
+					isActive={activeSection === 'communication'}
 				/>
 			</Link>
 		</nav>

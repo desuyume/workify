@@ -1,5 +1,5 @@
 import {
-  BadRequestException,
+  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
@@ -11,6 +11,7 @@ import {
 import { FeedbackSortBy } from '@workify/shared';
 import { Prisma } from '@workify/database';
 import { CreateFeedbackDto } from './dto/feedback.dto';
+import { removeFile } from '@/utils/removeFIle';
 
 @Injectable()
 export class FeedbackService {
@@ -95,6 +96,7 @@ export class FeedbackService {
     executorLogin: string,
     sortBy: FeedbackSortBy,
     take?: number,
+    skip?: number,
   ) {
     const executor = await this.prisma.client.user.findUnique({
       where: { login: executorLogin },
@@ -111,6 +113,9 @@ export class FeedbackService {
             executorId: executor.id,
           },
         },
+      },
+      include: {
+        customer: true,
       },
     };
 
@@ -139,13 +144,22 @@ export class FeedbackService {
       filterOptions = {
         ...filterOptions,
         take,
-        include: {
-          customer: true,
-        },
       };
     }
 
-    return await this.prisma.client.feedback.findMany(filterOptions);
+    if (!!skip) {
+      filterOptions = {
+        ...filterOptions,
+        skip,
+      };
+    }
+
+    const [feedbacks, count] = await this.prisma.client.$transaction([
+      this.prisma.client.feedback.findMany(filterOptions),
+      this.prisma.client.feedback.count({ where: filterOptions.where }),
+    ]);
+
+    return { feedbacks, count };
   }
 
   async getExecutorRatingsCount(executorLogin: string) {
@@ -174,5 +188,91 @@ export class FeedbackService {
       4: feedbacks.filter((feedback) => feedback.rating === 4).length,
       5: feedbacks.filter((feedback) => feedback.rating === 5).length,
     };
+  }
+
+  async getFeedbackById(id: number) {
+    const feedback = await this.prisma.client.feedback.findUnique({
+      where: { id },
+      include: {
+        customer: true,
+        FeedbackOnUsers: {
+          select: {
+            executor: {
+              select: {
+                id: true,
+                login: true,
+                email: true,
+                name: true,
+                avatar: true,
+                birthday: true,
+                description: true,
+                phone: true,
+                specialisation: true,
+                vacancies: {
+                  include: {
+                    user: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!feedback) {
+      throw new NotFoundException('Отзыв не найден');
+    }
+
+    return { ...feedback, executor: feedback.FeedbackOnUsers[0].executor };
+  }
+
+  async deleteFeedback(userId: number, feedbackId: number) {
+    const feedback = await this.prisma.client.feedback.findUnique({
+      where: { id: feedbackId },
+      include: {
+        FeedbackOnUsers: {
+          select: {
+            executor: {
+              select: {
+                id: true,
+                login: true,
+                email: true,
+                name: true,
+                avatar: true,
+                birthday: true,
+                description: true,
+                phone: true,
+                specialisation: true,
+                vacancies: {
+                  include: {
+                    user: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!feedback) {
+      throw new NotFoundException('Отзыв не найден');
+    }
+
+    if (feedback.customerId !== userId) {
+      throw new ForbiddenException('Нельзя удалить чужой отзыв');
+    }
+
+    await this.prisma.client.feedbackOnUsers.deleteMany({
+      where: { feedbackId },
+    });
+    await this.prisma.client.feedback.delete({ where: { id: feedbackId } });
+
+    if (!!feedback.photo) {
+      removeFile(feedback.photo);
+    }
+
+    return { ...feedback, executor: feedback.FeedbackOnUsers[0].executor };
   }
 }

@@ -10,6 +10,16 @@ export interface IFeedback {
 	customer: IUser
 }
 
+export interface IFeedbackWithExecutor {
+	id: number
+	comment: string
+	rating: Rating
+	photo: string | File | null
+	date_created: string
+	customer: IUser
+	executor: IUser
+}
+
 export type FeedbackSortBy = 'date' | 'rating'
 
 export interface IFeedbackRating {

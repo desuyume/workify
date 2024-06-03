@@ -22,6 +22,7 @@ interface GetExecutorFeedbacksParam {
 	query: {
 		sortBy: FeedbackSortBy
 		take?: number
+		skip?: number
 	}
 }
 
@@ -32,8 +33,8 @@ export const getExecutorFeedbacks = ({
 	config,
 }: GetExecutorFeedbacksConfig) => {
 	const queryString = generateQueryString(params.query)
-	return apiInstance.get<IFeedback[]>(
-		`/feedback/${params.executorLogin}${queryString}`,
+	return apiInstance.get<{ feedbacks: IFeedback[]; count: number }>(
+		`/feedback/executor/${params.executorLogin}${queryString}`,
 		config
 	)
 }

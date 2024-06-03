@@ -26,6 +26,10 @@ export const ProfileProvider: React.FC<ProfileProviderProps> = ({
 			password: null,
 			rating: 0,
 			vacancies: [],
+			communication: {
+				isEmailVisible: true,
+				isPhoneVisible: true,
+			},
 		},
 	})
 

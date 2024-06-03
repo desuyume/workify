@@ -98,4 +98,18 @@ export class UsersController {
     const { id } = req.user as IUserPayload;
     return await this.usersService.updatePassword(id, dto.password);
   }
+
+  @UseGuards(JwtGuard)
+  @Patch('communication/email')
+  async updateEmailCommunication(@Req() req, @Body() dto: { isVisible: boolean }) {
+    const { id } = req.user as IUserPayload;
+    return await this.usersService.updateEmailCommunication(id, dto.isVisible);
+  }
+
+  @UseGuards(JwtGuard)
+  @Patch('communication/phone')
+  async updatePhoneCommunication(@Req() req, @Body() dto: { isVisible: boolean }) {
+    const { id } = req.user as IUserPayload;
+    return await this.usersService.updatePhoneCommunication(id, dto.isVisible);
+  }
 }

@@ -26,8 +26,17 @@ model User {
   vacancies       Vacancy[]
   FeedbackOnUsers FeedbackOnUsers[]
   Feedback        Feedback[]
+  communication   Communication?    @relation(fields: [communicationId], references: [id])
+  communicationId Int?              @unique
 
   @@map("users")
+}
+
+model Communication {
+  id             Int     @id @default(autoincrement())
+  isEmailVisible Boolean @default(false)
+  isPhoneVisible Boolean @default(false)
+  User           User?
 }
 
 model City {

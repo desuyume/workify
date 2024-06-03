@@ -14,6 +14,7 @@ import * as path from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { FeedbackModule } from './feedback/feedback.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { StatisticModule } from './statistic/statistic.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
     VacancyModule,
     CitiesModule,
     FeedbackModule,
+    StatisticModule,
   ],
   controllers: [AppController],
   providers: [AppService],

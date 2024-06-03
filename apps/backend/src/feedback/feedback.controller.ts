@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -37,21 +38,35 @@ export class FeedbackController {
     return await this.feedbackService.create(userId, executorLogin, dto, photo);
   }
 
-  @Get(':login')
+  @Get('executor/:login')
   async getExecutorFeedbacks(
     @Param('login') executorLogin: string,
     @Query('sortBy') sortBy: FeedbackSortBy,
     @Query('take') take: number,
+    @Query('skip') skip: number,
   ) {
     return await this.feedbackService.getExecutorFeedbacks(
       executorLogin,
       sortBy,
       take,
+      skip,
     );
   }
 
   @Get(':login/rating')
   async getExecutorRatingsCount(@Param('login') executorLogin: string) {
     return await this.feedbackService.getExecutorRatingsCount(executorLogin);
+  }
+
+  @Get(':id')
+  async getFeedbackById(@Param('id') id: number) {
+    return await this.feedbackService.getFeedbackById(id);
+  }
+
+  @UseGuards(JwtGuard)
+  @Delete(':id')
+  async deleteFeedback(@Req() req, @Param('id') feedbackId: number) {
+    const { id: userId } = req.user as IUserPayload;
+    return await this.feedbackService.deleteFeedback(userId, feedbackId);
   }
 }
