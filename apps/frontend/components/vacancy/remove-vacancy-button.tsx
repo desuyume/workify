@@ -23,7 +23,8 @@ export default function RemoveVacancyButton({
 			.then(() => {
 				setIsRemoveModalOpen(false)
 				toast.success('Анкета успешно удалена')
-				router.push('/vacancy')
+				router.push('/profile')
+				router.refresh()
 			})
 			.catch(() => {
 				toast.error('Не удалось удалить анкету')

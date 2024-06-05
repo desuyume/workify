@@ -1,26 +1,35 @@
 'use client'
 
 import { Button, Textarea } from '@workify/ui'
-import { Rating, cn } from '@workify/shared'
+import { IFeedbackWithExecutor, Rating, cn } from '@workify/shared'
 import { useState } from 'react'
 import FeedbackPhoto from './feedback-photo'
 import RatingSelect from '@/app/ui/rating-select'
-import { createFeedback } from '@/lib/api'
+import { createFeedback, deleteFeedback, updateFeedback } from '@/lib/api'
 import { toast } from 'sonner'
 import { AxiosError } from 'axios'
 import { useRouter } from 'next/navigation'
+import { imgSrcToFile } from '@/lib/utils/imageConvert'
 
 interface FeedbackFormProps {
 	executorLogin: string
+	feedback: IFeedbackWithExecutor | null
 }
 
-export default function FeedbackForm({ executorLogin }: FeedbackFormProps) {
-	const [comment, setComment] = useState<string>('')
-	const [photo, setPhoto] = useState<string | File | null>(null)
-	const [rating, setRating] = useState<Rating>(1)
+export default function FeedbackForm({
+	executorLogin,
+	feedback,
+}: FeedbackFormProps) {
+	const [comment, setComment] = useState<string>(feedback?.comment ?? '')
+	const [photo, setPhoto] = useState<string | File | null>(
+		feedback?.photo ?? null
+	)
+	const [rating, setRating] = useState<Rating>(feedback?.rating ?? 1)
 	const router = useRouter()
 
-	const handleSend = () => {
+	const isCreated = feedback !== null
+
+	const handleSend = async () => {
 		if (comment.length > 1500) {
 			toast.error('Комментарий не должен превышать 1500 символов')
 			return
@@ -30,20 +39,57 @@ export default function FeedbackForm({ executorLogin }: FeedbackFormProps) {
 		feedbackData.append('comment', comment)
 		feedbackData.append('rating', `${rating}`)
 		if (photo) {
-			feedbackData.append('photo', photo)
+			if (photo instanceof File) {
+				feedbackData.append('photo', photo)
+			}
+			if (typeof photo === 'string') {
+				feedbackData.append('photo', await imgSrcToFile(photo))
+			}
 		}
 
-		createFeedback({ params: { executorLogin, data: feedbackData } })
-			.then(() => {
-				toast.success('Отзыв успешно отправлен')
-				router.push(`/profile/${executorLogin}`)
-				clearFields()
+		if (isCreated) {
+			updateFeedback({
+				params: { executorLogin, feedbackId: feedback?.id, data: feedbackData },
 			})
-			.catch(err => {
-				if (err instanceof AxiosError) {
-					toast.error(err.response?.data.message)
-				}
-			})
+				.then(res => {
+					toast.success('Отзыв успешно обновлен')
+					router.push(`/feedback/${res.data.id}`)
+					router.refresh()
+					clearFields()
+				})
+				.catch(err => {
+					if (err instanceof AxiosError) {
+						toast.error(err.response?.data.message)
+					}
+				})
+			return
+		} else {
+			createFeedback({ params: { executorLogin, data: feedbackData } })
+				.then(res => {
+					toast.success('Отзыв успешно отправлен')
+					router.push(`/feedback/${res.data.id}`)
+					router.refresh()
+					clearFields()
+				})
+				.catch(err => {
+					if (err instanceof AxiosError) {
+						toast.error(err.response?.data.message)
+					}
+				})
+		}
+	}
+
+	const handleDelete = () => {
+		if (feedback) {
+			deleteFeedback({ params: { id: feedback?.id } })
+				.then(() => {
+					toast.success('Отзыв успешно удален')
+					router.push(`/profile/${executorLogin}`)
+					router.refresh()
+					clearFields()
+				})
+				.catch(() => toast.error('Не удалось удалить отзыв'))
+		}
 	}
 
 	const clearFields = () => {
@@ -95,12 +141,23 @@ export default function FeedbackForm({ executorLogin }: FeedbackFormProps) {
 
 			<div className='w-full flex justify-center'>
 				<Button
-					title='Отправить'
+					title={isCreated ? 'Сохранить' : 'Отправить'}
 					variant='light-transparent'
 					width='12rem'
-					height='3rem'
+					height='2.5rem'
 					onClick={handleSend}
 				/>
+
+				{isCreated && (
+					<Button
+						title='Удалить'
+						variant='transparent-light'
+						width='12rem'
+						height='2.5rem'
+						onClick={handleDelete}
+						className='ml-5'
+					/>
+				)}
 			</div>
 		</div>
 	)

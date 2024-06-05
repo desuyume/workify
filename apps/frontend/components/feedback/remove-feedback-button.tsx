@@ -19,7 +19,7 @@ export default function RemoveFeedbackButton({
 	const router = useRouter()
 
 	const handleClickRemove = () => {
-		deleteFeedback({ params: { id: `${feedbackId}` } })
+		deleteFeedback({ params: { id: feedbackId } })
 			.then(res => {
 				setIsRemoveModalOpen(false)
 				toast.success('Отзыв успешно удалена')

@@ -17,6 +17,22 @@ export const createFeedback = ({ params, config }: CreateFeedbackConfig) => {
 	)
 }
 
+interface UpdateFeedbackParam {
+	executorLogin: string
+	feedbackId: number
+	data: FormData
+}
+
+type UpdateFeedbackConfig = RequestConfig<UpdateFeedbackParam>
+
+export const updateFeedback = ({ params, config }: UpdateFeedbackConfig) => {
+	return authApiInstance.patch<any, { data: IFeedback }>(
+		`/feedback/${params.executorLogin}/${params.feedbackId}`,
+		params.data,
+		config
+	)
+}
+
 interface GetExecutorFeedbacksParam {
 	executorLogin: string
 	query: {

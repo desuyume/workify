@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -34,22 +35,22 @@ export class FeedbackService {
       throw new NotFoundException('Исполнитель не найден');
     }
 
-    // const feedbackInDb = await this.prisma.client.feedback.findFirst({
-    //   where: {
-    //     customerId: userId,
-    //     FeedbackOnUsers: {
-    //       some: {
-    //         executorId: executor.id,
-    //       },
-    //     },
-    //   },
-    // });
+    const feedbackInDb = await this.prisma.client.feedback.findFirst({
+      where: {
+        customerId: userId,
+        FeedbackOnUsers: {
+          some: {
+            executorId: executor.id,
+          },
+        },
+      },
+    });
 
-    // if (feedbackInDb) {
-    //   throw new BadRequestException(
-    //     'Вы уже оставляли отзыв на этого исполнителя',
-    //   );
-    // }
+    if (feedbackInDb) {
+      throw new BadRequestException(
+        'Вы уже оставляли отзыв на этого исполнителя',
+      );
+    }
 
     const feedback = await this.prisma.client.feedback.create({
       data: {
@@ -90,6 +91,73 @@ export class FeedbackService {
     });
 
     return feedback;
+  }
+
+  async update(
+    userId: number,
+    executorLogin: string,
+    feedbackId: number,
+    dto: CreateFeedbackDto,
+    photo: Express.Multer.File,
+  ) {
+    const executor = await this.prisma.client.user.findUnique({
+      where: { login: executorLogin },
+    });
+
+    if (!executor) {
+      throw new NotFoundException('Исполнитель не найден');
+    }
+
+    const feedback = await this.prisma.client.feedback.findFirst({
+      where: {
+        id: feedbackId,
+      },
+    });
+
+    if (!feedback) {
+      throw new BadRequestException(
+        'Вы не оставляли отзыв на этого исполнителя',
+      );
+    }
+
+    if (!!feedback.photo) {
+      await removeFile(feedback.photo);
+    }
+
+    const updatedFeedback = await this.prisma.client.feedback.update({
+      where: {
+        id: feedbackId,
+      },
+      data: {
+        comment: dto.comment,
+        rating: +dto.rating ?? 0,
+        photo: photo?.filename ?? null,
+      },
+    });
+
+    // update average executor rating
+    const feedbacks = await this.prisma.client.feedback.findMany({
+      where: {
+        FeedbackOnUsers: {
+          some: {
+            executorId: executor.id,
+          },
+        },
+      },
+    });
+    const avgRating =
+      feedbacks.reduce((sum, feedback) => sum + feedback.rating, 0) /
+      feedbacks.length;
+    await this.prisma.client.user.update({
+      where: {
+        id: executor.id,
+      },
+      data: {
+        rating: avgRating,
+      },
+    });
+
+    return updatedFeedback;
   }
 
   async getExecutorFeedbacks(
@@ -225,6 +293,54 @@ export class FeedbackService {
     }
 
     return { ...feedback, executor: feedback.FeedbackOnUsers[0].executor };
+  }
+
+  async getCreatedFeedback(userId: number, login: string) {
+    const executor = await this.prisma.client.user.findUnique({
+      where: { login },
+    });
+
+    if (!executor) {
+      throw new NotFoundException('Исполнитель не найден');
+    }
+
+    const feedbacks = await this.prisma.client.feedback.findMany({
+      where: {
+        customerId: userId,
+        FeedbackOnUsers: {
+          some: {
+            executorId: executor.id,
+          },
+        },
+      },
+      include: {
+        customer: true,
+        FeedbackOnUsers: {
+          select: {
+            executor: {
+              select: {
+                id: true,
+                login: true,
+                email: true,
+                name: true,
+                avatar: true,
+                birthday: true,
+                description: true,
+                phone: true,
+                specialisation: true,
+                vacancies: {
+                  include: {
+                    user: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return feedbacks.length > 0 ? feedbacks[0] : null;
   }
 
   async deleteFeedback(userId: number, feedbackId: number) {

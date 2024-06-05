@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { updateVacancy } from '@/lib/api/requests/vacancy/id'
 import { AxiosError } from 'axios'
+import { imgSrcToFile } from '@/lib/utils/imageConvert'
 
 export default function CreateEditVacancy({
 	type,
@@ -29,7 +30,7 @@ export default function CreateEditVacancy({
 	const session = useSession()
 	const router = useRouter()
 
-	const mutateVacancy = () => {
+	const mutateVacancy = async () => {
 		const data = new FormData()
 		if (!vacancy.title) {
 			toast.error('Название вакансии не может быть пустым')
@@ -54,16 +55,29 @@ export default function CreateEditVacancy({
 		data.append('isLocationHidden', `${vacancy.isLocationHidden}`)
 		data.append('isVacancyHidden', `${vacancy.isVacancyHidden}`)
 		if (vacancy.cover) {
-			data.append('cover', vacancy.cover)
+			if (vacancy.cover instanceof File) {
+				data.append('cover', vacancy.cover)
+			}
+			if (typeof vacancy.cover === 'string') {
+				data.append('cover', await imgSrcToFile(vacancy.cover, 'cover.jpg'))
+			}
 		}
 		for (const photo of vacancy.photos) {
-			data.append('photos', photo.url)
+			if (photo.url instanceof File) {
+				data.append('photos', photo.url)
+			}
+			if (typeof photo.url === 'string') {
+				console.log('123')
+
+				data.append('photos', await imgSrcToFile(photo.url, 'photo.jpg'))
+			}
 		}
 
 		if (type === 'create') {
 			createVacancy({ params: { data } })
 				.then(res => {
 					router.push(`/vacancy/${res.data.id}`)
+					router.refresh()
 					toast.success('Вакансия успешно создана')
 					clearVacancy()
 				})
@@ -76,11 +90,19 @@ export default function CreateEditVacancy({
 		}
 
 		if (type === 'edit' && fetchedVacancy?.id) {
-			updateVacancy({ params: { data, id: fetchedVacancy.id } }).then(res => {
-				router.push(`/vacancy/${res.data.id}`)
-				toast.success('Вакансия успешно обновлена')
-				clearVacancy()
-			})
+			updateVacancy({ params: { data, id: fetchedVacancy.id } })
+				.then(res => {
+					router.push(`/vacancy/${res.data.id}`)
+					router.refresh()
+					toast.success('Вакансия успешно обновлена')
+					clearVacancy()
+				})
+				.catch(err => {
+					if (err instanceof AxiosError) {
+						toast.error(err.response?.data.message)
+					}
+					console.log(err)
+				})
 		}
 	}
 

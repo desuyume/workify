@@ -2,7 +2,6 @@ import Image from 'next/image'
 import Stars from '@/app/ui/stars'
 import { IUserVacancy, cn, formatMoney } from '@workify/shared'
 import Link from 'next/link'
-import parse from 'html-react-parser'
 import defaultProfilePic from '@/public/images/default-profile-pic.webp'
 
 interface VacancyProps {
@@ -38,7 +37,9 @@ export default function Vacancy({ vacancy, inProfile = false }: VacancyProps) {
 
 			<div className='w-full h-full flex flex-col'>
 				<div className='w-full h-[1.5625rem] flex items-center pr-[0.9375rem] mb-[1.0625rem]'>
-					<p className='text-xl font-santello'>{vacancy.title}</p>
+					<p className='text-xl font-santello max-w-[20rem] truncate'>
+						{vacancy.title}
+					</p>
 					<hr className='w-[5.3125rem] border-t border-t-white rounded-full mx-[0.625rem] mt-[0.125rem]' />
 					<Stars rating={Math.round(vacancy.user.rating)} />
 					<hr className='flex-1 border-t border-t-white rounded-full mx-[0.625rem] mt-[0.125rem]' />
@@ -56,14 +57,14 @@ export default function Vacancy({ vacancy, inProfile = false }: VacancyProps) {
 					>
 						<p
 							className={cn(
-								'text-[0.9375rem] leading-[1.1328125rem] font-light text-opacity-70 max-w-[35.875rem] line-clamp-[8]',
+								'text-[0.9375rem] leading-[1.1328125rem] font-light text-opacity-70 max-w-[35.875rem] line-clamp-[8] break-words whitespace-pre-wrap',
 								{
 									'ml-[8.0625rem]': inProfile,
 									'ml-[6.0625rem]': !inProfile,
 								}
 							)}
 						>
-							{parse(vacancy.description)}
+							{vacancy.description}
 						</p>
 						<div
 							className={cn(

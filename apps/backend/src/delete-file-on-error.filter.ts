@@ -2,19 +2,23 @@ import {
   ExceptionFilter,
   Catch,
   ArgumentsHost,
-  BadRequestException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { isArray } from 'class-validator';
 import { Request, Response } from 'express';
 import { removeFile } from './utils/removeFIle';
 
-@Catch(BadRequestException)
+@Catch()
 export class DeleteFileOnErrorFilter implements ExceptionFilter {
-  catch(exception: BadRequestException, host: ArgumentsHost) {
+  catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-    const status = exception.getStatus();
+    const status =
+      exception instanceof HttpException
+        ? exception.getStatus()
+        : HttpStatus.INTERNAL_SERVER_ERROR;
 
     const getFiles = (files: Express.Multer.File[] | unknown | undefined) => {
       if (!files) return [];
@@ -23,6 +27,11 @@ export class DeleteFileOnErrorFilter implements ExceptionFilter {
     };
 
     const filePaths = getFiles(request.files);
+    const file = request.file;
+
+    if (file) {
+      removeFile(file.filename);
+    }
 
     for (const file of filePaths) {
       if (isArray(file)) {
@@ -33,6 +42,17 @@ export class DeleteFileOnErrorFilter implements ExceptionFilter {
         removeFile(file.filename);
       }
     }
-    response.status(status).json(exception.getResponse());
+
+    const message =
+      exception instanceof HttpException
+        ? exception.message
+        : 'Internal server error';
+
+    response.status(status).json({
+      statusCode: status,
+      timestamp: new Date().toISOString(),
+      path: request.url,
+      message,
+    });
   }
 }

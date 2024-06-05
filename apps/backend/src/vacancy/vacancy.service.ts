@@ -89,23 +89,69 @@ export class VacancyService {
 
     switch (query.sortBy) {
       case 'cost':
-        filterOptions.orderBy = {
-          price: 'asc',
-        };
+        filterOptions.orderBy = [
+          { price: 'asc' },
+          {
+            user: {
+              FeedbackOnUsers: {
+                _count: 'desc',
+              },
+            },
+          },
+          {
+            user: {
+              rating: 'desc',
+            },
+          },
+        ];
         break;
       case 'reviews':
-        filterOptions.orderBy = {
-          id: 'desc',
-        };
+        filterOptions.orderBy = [
+          {
+            user: {
+              FeedbackOnUsers: {
+                _count: 'desc',
+              },
+            },
+          },
+          {
+            user: {
+              rating: 'desc',
+            },
+          },
+        ];
         break;
       case 'rating':
-        filterOptions.orderBy = {
-          user: {
-            rating: 'desc',
+        filterOptions.orderBy = [
+          {
+            user: {
+              rating: 'desc',
+            },
           },
-        };
+          {
+            user: {
+              FeedbackOnUsers: {
+                _count: 'desc',
+              },
+            },
+          },
+        ];
         break;
       default:
+        filterOptions.orderBy = [
+          {
+            user: {
+              FeedbackOnUsers: {
+                _count: 'desc',
+              },
+            },
+          },
+          {
+            user: {
+              rating: 'desc',
+            },
+          },
+        ];
         break;
     }
 
@@ -155,8 +201,8 @@ export class VacancyService {
       },
     });
 
-    if (vacanciesCount == 2) {
-      throw new ForbiddenException('Вы не можете создать более 2 вакансий');
+    if (vacanciesCount >= 3) {
+      throw new ForbiddenException('Вы не можете создать более 3 вакансий');
     }
 
     let vacancyCategory: VacancyCategory | null = null;
@@ -212,15 +258,15 @@ export class VacancyService {
     });
 
     if (!vacancy) {
-      throw new NotFoundException('Vacancy not found');
+      throw new NotFoundException('Вакансия не найдена');
     }
 
     if (vacancy.userId !== id) {
-      throw new ForbiddenException('You are not allowed to edit this vacancy');
+      throw new ForbiddenException('Вы не можете редактировать эту вакансию');
     }
 
     if (!!dto.price && !isNumber(dto.price)) {
-      throw new BadRequestException('Price must be a number');
+      throw new BadRequestException('Цена должна быть числом');
     }
 
     let vacancyCategory: VacancyCategory | null = null;

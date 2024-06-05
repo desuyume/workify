@@ -1,7 +1,6 @@
 import { authOptions } from '@/app/api/auth/[...nextauth]/options'
 import FeedbackGeneralInfo from '@/components/feedback/feedback-general-info'
 import RemoveFeedbackButton from '@/components/feedback/remove-feedback-button'
-import RemoveVacancyButton from '@/components/vacancy/remove-vacancy-button'
 import { getFeedbackById } from '@/lib/api'
 import { Button } from '@workify/ui'
 import { AxiosError } from 'axios'
@@ -10,7 +9,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
-const fetchFeedback = async (id: string) => {
+const fetchFeedback = async (id: number) => {
 	return await getFeedbackById({ params: { id } })
 		.then(res => res.data)
 		.catch(e => {
@@ -23,7 +22,7 @@ const fetchFeedback = async (id: string) => {
 		})
 }
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page({ params }: { params: { id: number } }) {
 	const feedback = await fetchFeedback(params.id)
 	const session = await getServerSession(authOptions)
 
@@ -48,6 +47,7 @@ export default async function Page({ params }: { params: { id: string } }) {
 			<FeedbackGeneralInfo
 				avatar={feedback.customer.avatar}
 				username={feedback.customer.name || feedback.customer.login}
+				login={feedback.customer.login}
 				comment={feedback.comment}
 				date_created={feedback.date_created}
 				rating={feedback.rating}

@@ -2,7 +2,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/options'
 import ErrorUI from '@/app/ui/error-ui'
 import Unauthorized from '@/app/ui/unauthorized'
 import FeedbackForm from '@/components/feedback/feedback-form'
-import { getUserProfileByLogin } from '@/lib/api'
+import { getCreatedFeedback, getUserProfileByLogin } from '@/lib/api'
 import { cn } from '@workify/shared'
 import { getServerSession } from 'next-auth'
 import { notFound } from 'next/navigation'
@@ -15,9 +15,16 @@ const fetchUser = async (login: string) => {
 		})
 }
 
+const fetchCreatedFeedback = async (login: string) => {
+	return await getCreatedFeedback({ params: { login } })
+		.then(res => res)
+		.catch(() => null)
+}
+
 export default async function Page({ params }: { params: { login: string } }) {
 	const session = await getServerSession(authOptions)
 	const user = await fetchUser(params.login)
+	const feedback = await fetchCreatedFeedback(params.login)
 
 	if (!user) {
 		notFound()
@@ -42,7 +49,10 @@ export default async function Page({ params }: { params: { login: string } }) {
 				'w-full foreground py-[1.625rem] flex flex-col items-center rounded-[0.625rem]'
 			)}
 		>
-			<FeedbackForm executorLogin={user.login} />
+			<FeedbackForm
+				executorLogin={user.login}
+				feedback={feedback?.data || null}
+			/>
 		</div>
 	)
 }

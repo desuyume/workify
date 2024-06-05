@@ -2,7 +2,6 @@ import Image from 'next/image'
 import ProfileInfo from '@/components/profile/profile-info'
 import { Button } from '@workify/ui'
 import VacancyFeedback from '@/components/profile/vacancy-feedback'
-import htmlParse from 'html-react-parser'
 import defaultProfilePic from '@/public/images/default-profile-pic.webp'
 import { IUser, formatDate, getAgeByBirthday } from '@workify/shared'
 import { IUserProfile } from '@/contexts/profile'
@@ -83,8 +82,8 @@ export default function ProfileContent({
 						<p className='font-medium text-[1.25rem] leading-[1.5rem] mb-[1.1875rem]'>
 							Описание
 						</p>
-						<p className='font-light text-[1.125rem] leading-[1.375rem]'>
-							{htmlParse(user.description)}
+						<p className='font-light text-[1.125rem] leading-[1.375rem] whitespace-pre-wrap'>
+							{user.description}
 						</p>
 					</div>
 				)}

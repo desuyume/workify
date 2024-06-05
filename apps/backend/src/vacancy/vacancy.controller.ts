@@ -9,7 +9,6 @@ import {
   Query,
   Req,
   UploadedFiles,
-  UseFilters,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -19,7 +18,6 @@ import { CreateVacancyDto } from './dto/vacancy.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { JwtGuard } from '@/auth/guards/jwt.guard';
 import { multerOptions } from '@/config/multer.config';
-import { DeleteFileOnErrorFilter } from '@/delete-file-on-error.filter';
 
 @Controller('vacancy')
 export class VacancyController {
@@ -46,7 +44,6 @@ export class VacancyController {
       multerOptions,
     ),
   )
-  @UseFilters(DeleteFileOnErrorFilter)
   async create(
     @Req() req,
     @Body() dto: CreateVacancyDto,
@@ -70,7 +67,6 @@ export class VacancyController {
       multerOptions,
     ),
   )
-  @UseFilters(DeleteFileOnErrorFilter)
   async update(
     @Req() req,
     @Param('id') vacancyId: number,

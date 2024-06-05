@@ -82,6 +82,7 @@ export class UsersService {
         vacancies: {
           include: {
             user: true,
+            category: true,
           },
         },
         communication: true,
@@ -107,6 +108,7 @@ export class UsersService {
         vacancies: {
           include: {
             user: true,
+            category: true,
           },
         },
         communication: true,

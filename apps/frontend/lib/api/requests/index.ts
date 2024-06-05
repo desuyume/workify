@@ -17,5 +17,6 @@ export * from './vacancy/categories'
 
 export * from './feedback'
 export * from './feedback/id'
+export * from './feedback/created'
 
 export * from './statistic'

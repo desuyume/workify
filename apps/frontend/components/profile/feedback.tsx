@@ -2,7 +2,6 @@ import Image from 'next/image'
 import defaultProfileImg from '@/public/images/default-profile-pic.webp'
 import Stars from '@/app/ui/stars'
 import { IFeedback, formatDate } from '@workify/shared'
-import parse from 'html-react-parser'
 import Link from 'next/link'
 
 interface FeedbackProps {
@@ -45,8 +44,8 @@ export default function Feedback({ feedback }: FeedbackProps) {
 				<p className='text-[1.25rem] leading-6 font-medium mb-[1.1875rem]'>
 					Комментарий
 				</p>
-				<p className='font-light text-[0.9375rem] leading-[1.125rem] line-clamp-[7] break-words'>
-					{parse(feedback.comment)}
+				<p className='font-light text-[0.9375rem] leading-[1.125rem] line-clamp-[7] break-words whitespace-pre-wrap'>
+					{feedback.comment}
 				</p>
 			</div>
 			<Link

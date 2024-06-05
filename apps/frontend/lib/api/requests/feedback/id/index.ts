@@ -2,7 +2,7 @@ import authApiInstance, { apiInstance } from '@/lib/api/instance'
 import { IFeedbackWithExecutor } from '@workify/shared'
 
 interface GetFeedbackByIdParam {
-	id: string
+	id: number
 }
 
 type GetFeedbackByIdConfig = RequestConfig<GetFeedbackByIdParam>
@@ -11,7 +11,7 @@ export const getFeedbackById = ({ params, config }: GetFeedbackByIdConfig) =>
 	apiInstance.get<IFeedbackWithExecutor>(`/feedback/${params.id}`, config)
 
 interface DeleteFeedbackParam {
-	id: string
+	id: number
 }
 
 type DeleteFeedbackConfig = RequestConfig<DeleteFeedbackParam>
