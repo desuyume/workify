@@ -58,7 +58,7 @@ export default function ProfileContent({
 			</div>
 
 			<div className='w-full h-[8.75rem] bg-primary-dark flex justify-center items-center'>
-				<ProfileInfo title='Имя' value={user?.name ?? null} />
+				<ProfileInfo title='Имя' value={user.name ? user.name : null} />
 				<ProfileInfo
 					title='Возраст'
 					value={
@@ -71,7 +71,7 @@ export default function ProfileContent({
 				/>
 				<ProfileInfo
 					title='Специализация'
-					value={user?.specialisation ?? null}
+					value={user.specialisation ? user.specialisation : null}
 				/>
 				{/* <ProfileInfo title='Телефон' value={user?.phone ?? null} /> */}
 			</div>
