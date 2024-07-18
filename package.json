@@ -8,6 +8,7 @@
 	"scripts": {
 		"start": "dotenv -- turbo run start",
 		"build": "dotenv -- turbo run build",
+		"build:libs": "dotenv -- pnpm --filter database --filter shared --filter ui run build",
 		"dev": "dotenv -- turbo run dev",
 		"predev": "dotenv -- pnpm --filter=database run db:migrate:deploy",
 		"db:seed": "dotenv -- pnpm --filter=database run db:seed",
