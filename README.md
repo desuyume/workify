@@ -2,7 +2,7 @@
 
 Service for search and promotion of self-employed citizens
 
-# Stack
+## Stack
 
 - Next.js
 - NestJS
@@ -12,14 +12,14 @@ Service for search and promotion of self-employed citizens
 - Prisma
 - Tailwind CSS
 
-# Development
+## Development
 
-## Requirements
+### Requirements
 
 * [Node.js (20+)](https://nodejs.org/en)
 * [Pnpm](https://pnpm.io/)
 
-## Run project
+### Run project
 
 * Clone repository
 ```bash
