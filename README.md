@@ -2,12 +2,22 @@
 
 Service for search and promotion of self-employed citizens
 
+# Stack
+
+- Next.js
+- NestJS
+- TypeScript
+- Turborepo
+- PostgreSQL
+- Prisma
+- Tailwind CSS
+
 # Development
 
 ## Requirements
 
-* [Node.js (21.7.3+)](https://nodejs.org/en)
-* [Pnpm (9.1.2+)](https://pnpm.io/)
+* [Node.js (20+)](https://nodejs.org/en)
+* [Pnpm](https://pnpm.io/)
 
 ## Run project
 
