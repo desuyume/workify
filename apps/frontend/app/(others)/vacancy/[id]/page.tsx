@@ -8,8 +8,9 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/options'
 import { notFound } from 'next/navigation'
 import RemoveVacancyButton from '@/components/vacancy/remove-vacancy-button'
+import VacancyFeedbacks from '@/components/vacancy/vacancy-feedbacks'
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page({ params }: { params: { id: number } }) {
 	const session = await getServerSession(authOptions)
 	const vacancy = await getVacancyById({ params })
 
@@ -21,10 +22,7 @@ export default async function Page({ params }: { params: { id: string } }) {
 
 	return (
 		<div className='w-full foreground pt-[1.625rem] pb-10 flex flex-col items-center rounded-[0.625rem]'>
-			<VacancyGeneralInfo
-				{...vacancy.data}
-				rating={Math.round(vacancy.data.user.rating)}
-			/>
+			<VacancyGeneralInfo {...vacancy.data} />
 
 			{!vacancy.data.isLocationHidden && vacancy.data.city && (
 				<div className='w-full h-[1.5625rem] flex items-center mb-[2.0625rem]'>
@@ -52,14 +50,10 @@ export default async function Page({ params }: { params: { id: string } }) {
 				))}
 			</div>
 
-			<div className='w-full h-9 flex items-center'>
+			<div className='w-full h-9 flex items-center mb-[2.8125rem]'>
 				<hr className='flex-1 border-t border-t-white rounded-full' />
 				<Link
-					href={
-						isOwner
-							? `${params.id}/edit`
-							: `/profile/${vacancy.data.user.login}`
-					}
+					href={isOwner ? `${params.id}/edit` : `/profile/${vacancy.data.user.login}`}
 					className='mx-10 h-full'
 				>
 					<Button
@@ -69,14 +63,28 @@ export default async function Page({ params }: { params: { id: string } }) {
 						height='100%'
 					/>
 				</Link>
-				{isOwner && (
+				{isOwner ? (
 					<>
 						<hr className='w-10 border-t border-t-white rounded-full' />
 						<RemoveVacancyButton vacancyId={vacancy.data.id} />
 					</>
+				) : (
+					<>
+						<hr className='w-10 border-t border-t-white rounded-full' />
+						<Link href={`/vacancy/${vacancy.data.id}/feedback`} className='h-full mx-10'>
+							<Button
+								title='Оставить отзыв'
+								variant='dark-transparent'
+								width='15.9375rem'
+								height='100%'
+							/>
+						</Link>
+					</>
 				)}
 				<hr className='flex-1 border-t border-t-white rounded-full' />
 			</div>
+
+			<VacancyFeedbacks vacancyId={vacancy.data.id} />
 		</div>
 	)
 }

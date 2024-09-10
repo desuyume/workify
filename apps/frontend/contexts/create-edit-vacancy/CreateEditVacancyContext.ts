@@ -24,6 +24,7 @@ export const CreateEditVacancyContext =
 			city: null,
 			isLocationHidden: false,
 			isVacancyHidden: false,
+			rating: 0
 		},
 		setVacancy: () => {},
 	})

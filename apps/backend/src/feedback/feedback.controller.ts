@@ -24,50 +24,55 @@ export class FeedbackController {
   constructor(private readonly feedbackService: FeedbackService) {}
 
   @UseGuards(JwtGuard)
-  @Post(':login')
+  @Post(':vacancyId')
   @UseInterceptors(FileInterceptor('photo', multerOptions))
   async create(
     @Req() req,
-    @Param('login') executorLogin: string,
+    @Param('vacancyId') vacancyId: number,
     @Body() dto: CreateFeedbackDto,
     @UploadedFile() photo: Express.Multer.File,
   ) {
     const { id: userId } = req.user as IUserPayload;
-    return await this.feedbackService.create(userId, executorLogin, dto, photo);
+    return await this.feedbackService.create(userId, vacancyId, dto, photo);
   }
 
   @UseGuards(JwtGuard)
-  @Patch(':login/:id')
+  @Patch(':vacancyId/:feedbackId')
   @UseInterceptors(FileInterceptor('photo', multerOptions))
   async update(
-    @Req() req,
-    @Param('login') executorLogin: string,
-    @Param('id') feedbackId: number,
+    @Param('vacancyId') vacancyId: number,
+    @Param('feedbackId') feedbackId: number,
     @Body() dto: CreateFeedbackDto,
     @UploadedFile() photo: Express.Multer.File,
   ) {
-    const { id: userId } = req.user as IUserPayload;
-    return await this.feedbackService.update(userId, executorLogin, feedbackId, dto, photo);
+    return await this.feedbackService.update(vacancyId, feedbackId, dto, photo);
   }
 
-  @Get('executor/:login')
-  async getExecutorFeedbacks(
-    @Param('login') executorLogin: string,
+  @UseGuards(JwtGuard)
+  @Delete(':id')
+  async deleteFeedback(@Req() req, @Param('id') feedbackId: number) {
+    const { id: userId } = req.user as IUserPayload;
+    return await this.feedbackService.deleteFeedback(userId, feedbackId);
+  }
+
+  @Get('vacancy/:vacancyId')
+  async getVacancyFeedbacks(
+    @Param('vacancyId') vacancyId: number,
     @Query('sortBy') sortBy: FeedbackSortBy,
     @Query('take') take: number,
     @Query('skip') skip: number,
   ) {
-    return await this.feedbackService.getExecutorFeedbacks(
-      executorLogin,
+    return await this.feedbackService.getVacancyFeedbacks(
+      vacancyId,
       sortBy,
       take,
       skip,
     );
   }
 
-  @Get(':login/rating')
-  async getExecutorRatingsCount(@Param('login') executorLogin: string) {
-    return await this.feedbackService.getExecutorRatingsCount(executorLogin);
+  @Get(':vacancyId/rating')
+  async getVacancyRatingsCount(@Param('vacancyId') vacancyId: number) {
+    return await this.feedbackService.getVacancyRatingsCount(vacancyId);
   }
 
   @Get(':id')
@@ -76,16 +81,9 @@ export class FeedbackController {
   }
 
   @UseGuards(JwtGuard)
-  @Get('created/:login')
-  async getCreatedFeedback(@Req() req, @Param('login') login: string) {
+  @Get('created/:vacancyId')
+  async getCreatedFeedback(@Req() req, @Param('vacancyId') vacancyId: number) {
     const { id: userId } = req.user as IUserPayload;
-    return await this.feedbackService.getCreatedFeedback(userId, login);
-  }
-
-  @UseGuards(JwtGuard)
-  @Delete(':id')
-  async deleteFeedback(@Req() req, @Param('id') feedbackId: number) {
-    const { id: userId } = req.user as IUserPayload;
-    return await this.feedbackService.deleteFeedback(userId, feedbackId);
+    return await this.feedbackService.getCreatedFeedback(userId, vacancyId);
   }
 }

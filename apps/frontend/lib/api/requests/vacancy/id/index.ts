@@ -2,7 +2,7 @@ import authApiInstance, { apiInstance } from '@/lib/api/instance'
 import { IFetchedVacancy, IVacancy } from '@workify/shared'
 
 interface GetByIdParam {
-	id: string
+	id: number
 }
 
 type GetByIdConfig = RequestConfig<GetByIdParam>

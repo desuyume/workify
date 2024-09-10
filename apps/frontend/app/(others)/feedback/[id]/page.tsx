@@ -23,8 +23,8 @@ const fetchFeedback = async (id: number) => {
 }
 
 export default async function Page({ params }: { params: { id: number } }) {
-	const feedback = await fetchFeedback(params.id)
 	const session = await getServerSession(authOptions)
+	const feedback = await fetchFeedback(params.id)
 
 	if (!feedback) {
 		notFound()
@@ -38,9 +38,9 @@ export default async function Page({ params }: { params: { id: number } }) {
 				Отзыв на{' '}
 				<Link
 					className='font-bold text-primary-light hover:text-primary-dark transition-colors'
-					href={`/profile/${feedback.executor.login}`}
+					href={`/vacancy/${feedback.vacancy.id}`}
 				>
-					{feedback.executor.name || feedback.executor.login}
+					{feedback.vacancy.title}
 				</Link>
 			</h3>
 
@@ -70,7 +70,7 @@ export default async function Page({ params }: { params: { id: number } }) {
 				<Link
 					href={
 						isOwner
-							? `/profile/${feedback.executor.login}/feedback`
+							? `/vacancy/${feedback.vacancy.id}/feedback`
 							: `/profile/${feedback.customer.login}`
 					}
 					className='mx-10 h-full'

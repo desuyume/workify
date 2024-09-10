@@ -92,10 +92,8 @@ export class VacancyService {
         filterOptions.orderBy = [
           { price: 'asc' },
           {
-            user: {
-              FeedbackOnUsers: {
-                _count: 'desc',
-              },
+            FeedbackOnVacancy: {
+              _count: 'desc',
             },
           },
           {
@@ -108,10 +106,8 @@ export class VacancyService {
       case 'reviews':
         filterOptions.orderBy = [
           {
-            user: {
-              FeedbackOnUsers: {
-                _count: 'desc',
-              },
+            FeedbackOnVacancy: {
+              _count: 'desc',
             },
           },
           {
@@ -129,10 +125,8 @@ export class VacancyService {
             },
           },
           {
-            user: {
-              FeedbackOnUsers: {
-                _count: 'desc',
-              },
+            FeedbackOnVacancy: {
+              _count: 'desc',
             },
           },
         ];
@@ -140,10 +134,8 @@ export class VacancyService {
       default:
         filterOptions.orderBy = [
           {
-            user: {
-              FeedbackOnUsers: {
-                _count: 'desc',
-              },
+            FeedbackOnVacancy: {
+              _count: 'desc',
             },
           },
           {
@@ -362,6 +354,77 @@ export class VacancyService {
     return await this.prisma.client.vacancyCategory.findMany({
       orderBy: {
         id: 'asc',
+      },
+    });
+  }
+
+  async updateRating(vacancyId: number) {
+    const vacancy = await this.prisma.client.vacancy.findUnique({
+      where: {
+        id: vacancyId,
+      },
+      select: {
+        id: true,
+        rating: true,
+        userId: true,
+      },
+    });
+    if (!vacancy) {
+      throw new NotFoundException('Вакансия не найдена');
+    }
+
+    const currentVacancyFeedbacks = await this.prisma.client.feedback.findMany({
+      where: {
+        FeedbackOnVacancy: {
+          some: {
+            vacancyId,
+          },
+        },
+      },
+      select: {
+        rating: true,
+      },
+    });
+    const avgCurrentVacancyRating =
+      currentVacancyFeedbacks.reduce(
+        (sum, feedback) => sum + feedback.rating,
+        0,
+      ) / currentVacancyFeedbacks.length;
+    await this.prisma.client.vacancy.update({
+      where: {
+        id: vacancy.id,
+      },
+      data: {
+        rating: avgCurrentVacancyRating,
+      },
+    });
+
+    const allExecutorsFeedbacks = await this.prisma.client.feedback.findMany({
+      where: {
+        FeedbackOnVacancy: {
+          some: {
+            vacancy: {
+              userId: vacancy.userId,
+            },
+          },
+        },
+      },
+      select: {
+        rating: true,
+      },
+    });
+    const avgAllExecutorsVacancyRating =
+      allExecutorsFeedbacks.reduce(
+        (sum, feedback) => sum + feedback.rating,
+        0,
+      ) / allExecutorsFeedbacks.length;
+
+    await this.prisma.client.user.update({
+      where: {
+        id: vacancy.userId,
+      },
+      data: {
+        rating: avgAllExecutorsVacancyRating,
       },
     });
   }

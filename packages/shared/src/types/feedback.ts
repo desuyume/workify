@@ -1,5 +1,5 @@
 import { IUser } from './user'
-import { Rating } from './vacancy'
+import { IVacancy, Rating } from './vacancy'
 
 export interface IFeedback {
 	id: number
@@ -18,6 +18,7 @@ export interface IFeedbackWithExecutor {
 	date_created: string
 	customer: IUser
 	executor: IUser
+	vacancy: IVacancy
 }
 
 export type FeedbackSortBy = 'date' | 'rating'

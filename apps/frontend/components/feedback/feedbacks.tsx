@@ -1,72 +1,30 @@
-import FeedbackStars from './feedback-stars'
-import Feedback from './feedback'
+import FeedbackStars from '../feedback/feedback-stars'
+import Feedback from '../feedback/feedback'
 import { Button } from '@workify/ui'
-import { useEffect, useState } from 'react'
 import { IFeedback, IFeedbackRating } from '@workify/shared'
 import type { FeedbackSortBy } from '@workify/shared'
-import { getExecutorFeedbacks, getExecutorRating } from '@/lib/api'
 
-interface ProfileFeedbacksProps {
-	userLogin: string
+interface FeedbacksProps {
+	rating: IFeedbackRating
+	sortBy: FeedbackSortBy
+	setSortBy: (sortBy: FeedbackSortBy) => void
+	isFeedbacksLoading: boolean
+	feedbacks: IFeedback[]
+	handleClickHideMore: () => void
+	handleClickShowMore: () => void
+	totalCount: number
 }
 
-export default function ProfileFeedbacks({ userLogin }: ProfileFeedbacksProps) {
-	const [sortBy, setSortBy] = useState<FeedbackSortBy>('date')
-	const [isFeedbacksLoading, setIsFeedbackLoading] = useState<boolean>(true)
-	const [feedbacks, setFeedbacks] = useState<IFeedback[]>([])
-	const [totalCount, setTotalCount] = useState<number>(0)
-	const [rating, setRating] = useState<IFeedbackRating>({
-		1: 0,
-		2: 0,
-		3: 0,
-		4: 0,
-		5: 0,
-	})
-
-	const fetchFeedbacks = async () => {
-		setIsFeedbackLoading(true)
-		getExecutorFeedbacks({
-			params: { executorLogin: userLogin, query: { sortBy, take: 4 } },
-		})
-			.then(res => {
-				setFeedbacks(res.data.feedbacks)
-				setTotalCount(res.data.count)
-			})
-			.finally(() => setIsFeedbackLoading(false))
-	}
-
-	const fetchRating = async () => {
-		getExecutorRating({
-			params: { executorLogin: userLogin },
-		}).then(res => {
-			setRating(res.data)
-		})
-	}
-
-	const handleClickShowMore = () => {
-		getExecutorFeedbacks({
-			params: {
-				executorLogin: userLogin,
-				query: { sortBy, take: 4, skip: feedbacks.length },
-			},
-		}).then(res => {
-			setFeedbacks([...feedbacks, ...res.data.feedbacks])
-			setTotalCount(res.data.count)
-		})
-	}
-
-	const handleClickHideMore = () => {
-		setFeedbacks(feedbacks.slice(0, 4))
-	}
-
-	useEffect(() => {
-		fetchRating()
-	}, [])
-
-	useEffect(() => {
-		fetchFeedbacks()
-	}, [sortBy])
-
+export default function Feedbacks({
+	rating,
+	sortBy,
+	setSortBy,
+	isFeedbacksLoading,
+	feedbacks,
+	handleClickHideMore,
+	handleClickShowMore,
+	totalCount,
+}: FeedbacksProps) {
 	return (
 		<div className={'w-[60.5rem] pb-[3.75rem] transition-all flex flex-col'}>
 			<div className='w-full flex flex-col mb-[3.4375rem]'>

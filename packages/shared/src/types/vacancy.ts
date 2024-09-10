@@ -10,6 +10,7 @@ export interface IVacancy {
 	cover: string | File | null
 	photos: IVacancyPhoto[]
 	city: ICity | null
+	rating: number
 	isLocationHidden: boolean
 	isVacancyHidden: boolean
 }

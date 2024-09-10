@@ -13,43 +13,44 @@ import { FeedbackSortBy } from '@workify/shared';
 import { Prisma } from '@workify/database';
 import { CreateFeedbackDto } from './dto/feedback.dto';
 import { removeFile } from '@/utils/removeFIle';
+import { VacancyService } from '@/vacancy/vacancy.service';
 
 @Injectable()
 export class FeedbackService {
   constructor(
     @Inject(CUSTOM_PRISMA_SERVICE)
     private prisma: CUSTOM_PRISMA_TYPE,
+    private vacancyService: VacancyService,
   ) {}
 
   async create(
     userId: number,
-    executorLogin: string,
+    vacancyId: number,
     dto: CreateFeedbackDto,
     photo: Express.Multer.File,
   ) {
-    const executor = await this.prisma.client.user.findUnique({
-      where: { login: executorLogin },
+    const vacancy = await this.prisma.client.vacancy.findUnique({
+      where: { id: vacancyId },
+      select: { id: true, userId: true },
     });
 
-    if (!executor) {
-      throw new NotFoundException('Исполнитель не найден');
+    if (!vacancy) {
+      throw new NotFoundException('Вакансия не найдена');
     }
 
     const feedbackInDb = await this.prisma.client.feedback.findFirst({
       where: {
         customerId: userId,
-        FeedbackOnUsers: {
+        FeedbackOnVacancy: {
           some: {
-            executorId: executor.id,
+            vacancyId: vacancy.id,
           },
         },
       },
     });
 
     if (feedbackInDb) {
-      throw new BadRequestException(
-        'Вы уже оставляли отзыв на этого исполнителя',
-      );
+      throw new BadRequestException('Вы уже оставляли отзыв на эту вакансию');
     }
 
     const feedback = await this.prisma.client.feedback.create({
@@ -61,51 +62,32 @@ export class FeedbackService {
       },
     });
 
-    await this.prisma.client.feedbackOnUsers.create({
+    await this.prisma.client.feedbackOnVacancy.create({
       data: {
         feedbackId: feedback.id,
-        executorId: executor.id,
+        vacancyId: vacancy.id,
       },
     });
 
     // update average executor rating
-    const feedbacks = await this.prisma.client.feedback.findMany({
-      where: {
-        FeedbackOnUsers: {
-          some: {
-            executorId: executor.id,
-          },
-        },
-      },
-    });
-    const avgRating =
-      feedbacks.reduce((sum, feedback) => sum + feedback.rating, 0) /
-      feedbacks.length;
-    await this.prisma.client.user.update({
-      where: {
-        id: executor.id,
-      },
-      data: {
-        rating: avgRating,
-      },
-    });
+    await this.vacancyService.updateRating(vacancy.id);
 
     return feedback;
   }
 
   async update(
-    userId: number,
-    executorLogin: string,
+    vacancyId: number,
     feedbackId: number,
     dto: CreateFeedbackDto,
     photo: Express.Multer.File,
   ) {
-    const executor = await this.prisma.client.user.findUnique({
-      where: { login: executorLogin },
+    const vacancy = await this.prisma.client.vacancy.findUnique({
+      where: { id: vacancyId },
+      select: { id: true, userId: true },
     });
 
-    if (!executor) {
-      throw new NotFoundException('Исполнитель не найден');
+    if (!vacancy) {
+      throw new NotFoundException('Вакансия не найден');
     }
 
     const feedback = await this.prisma.client.feedback.findFirst({
@@ -115,9 +97,7 @@ export class FeedbackService {
     });
 
     if (!feedback) {
-      throw new BadRequestException(
-        'Вы не оставляли отзыв на этого исполнителя',
-      );
+      throw new BadRequestException('Вы не оставляли отзыв на эту вакансию');
     }
 
     if (!!feedback.photo) {
@@ -136,49 +116,93 @@ export class FeedbackService {
     });
 
     // update average executor rating
-    const feedbacks = await this.prisma.client.feedback.findMany({
-      where: {
-        FeedbackOnUsers: {
-          some: {
-            executorId: executor.id,
-          },
-        },
-      },
-    });
-    const avgRating =
-      feedbacks.reduce((sum, feedback) => sum + feedback.rating, 0) /
-      feedbacks.length;
-    await this.prisma.client.user.update({
-      where: {
-        id: executor.id,
-      },
-      data: {
-        rating: avgRating,
-      },
-    });
+    await this.vacancyService.updateRating(vacancy.id);
 
     return updatedFeedback;
   }
 
-  async getExecutorFeedbacks(
-    executorLogin: string,
+  async deleteFeedback(userId: number, feedbackId: number) {
+    const feedback = await this.prisma.client.feedback.findUnique({
+      where: { id: feedbackId },
+      include: {
+        FeedbackOnVacancy: {
+          select: {
+            vacancy: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    login: true,
+                    email: true,
+                    name: true,
+                    avatar: true,
+                    birthday: true,
+                    description: true,
+                    phone: true,
+                    specialisation: true,
+                    vacancies: {
+                      include: {
+                        user: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!feedback) {
+      throw new NotFoundException('Отзыв не найден');
+    }
+
+    if (feedback.customerId !== userId) {
+      throw new ForbiddenException('Нельзя удалить чужой отзыв');
+    }
+
+    await this.prisma.client.feedbackOnVacancy.deleteMany({
+      where: { feedbackId },
+    });
+    await this.prisma.client.feedback.delete({ where: { id: feedbackId } });
+
+    if (!!feedback.photo) {
+      removeFile(feedback.photo);
+    }
+
+    // update average executor rating
+    await this.vacancyService.updateRating(
+      feedback.FeedbackOnVacancy[0].vacancy.id,
+    );
+
+    return {
+      ...feedback,
+      executor: feedback.FeedbackOnVacancy[0].vacancy.user,
+      vacancy: feedback.FeedbackOnVacancy[0].vacancy,
+    };
+  }
+
+  async getVacancyFeedbacks(
+    vacancyId: number,
     sortBy: FeedbackSortBy,
     take?: number,
     skip?: number,
   ) {
-    const executor = await this.prisma.client.user.findUnique({
-      where: { login: executorLogin },
+    const vacancy = await this.prisma.client.vacancy.findUnique({
+      where: { id: vacancyId },
+      select: { id: true },
     });
 
-    if (!executor) {
-      throw new NotFoundException('Исполнитель не найден');
+    if (!vacancy) {
+      throw new NotFoundException('Вакансия не найдена');
     }
 
     let filterOptions: Prisma.FeedbackFindManyArgs = {
       where: {
-        FeedbackOnUsers: {
+        FeedbackOnVacancy: {
           some: {
-            executorId: executor.id,
+            vacancyId: vacancy.id,
           },
         },
       },
@@ -230,20 +254,21 @@ export class FeedbackService {
     return { feedbacks, count };
   }
 
-  async getExecutorRatingsCount(executorLogin: string) {
-    const executor = await this.prisma.client.user.findUnique({
-      where: { login: executorLogin },
+  async getVacancyRatingsCount(vacancyId: number) {
+    const vacancy = await this.prisma.client.vacancy.findUnique({
+      where: { id: vacancyId },
+      select: { id: true },
     });
 
-    if (!executor) {
-      throw new NotFoundException('Исполнитель не найден');
+    if (!vacancy) {
+      throw new NotFoundException('Вакансия не найдена');
     }
 
     const feedbacks = await this.prisma.client.feedback.findMany({
       where: {
-        FeedbackOnUsers: {
+        FeedbackOnVacancy: {
           some: {
-            executorId: executor.id,
+            vacancyId: vacancy.id,
           },
         },
       },
@@ -263,22 +288,26 @@ export class FeedbackService {
       where: { id },
       include: {
         customer: true,
-        FeedbackOnUsers: {
+        FeedbackOnVacancy: {
           select: {
-            executor: {
-              select: {
-                id: true,
-                login: true,
-                email: true,
-                name: true,
-                avatar: true,
-                birthday: true,
-                description: true,
-                phone: true,
-                specialisation: true,
-                vacancies: {
-                  include: {
-                    user: true,
+            vacancy: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    login: true,
+                    email: true,
+                    name: true,
+                    avatar: true,
+                    birthday: true,
+                    description: true,
+                    phone: true,
+                    specialisation: true,
+                    vacancies: {
+                      include: {
+                        user: true,
+                      },
+                    },
                   },
                 },
               },
@@ -292,45 +321,56 @@ export class FeedbackService {
       throw new NotFoundException('Отзыв не найден');
     }
 
-    return { ...feedback, executor: feedback.FeedbackOnUsers[0].executor };
+    return {
+      ...feedback,
+      executor: feedback.FeedbackOnVacancy[0].vacancy.user,
+      vacancy: feedback.FeedbackOnVacancy[0].vacancy,
+    };
   }
 
-  async getCreatedFeedback(userId: number, login: string) {
-    const executor = await this.prisma.client.user.findUnique({
-      where: { login },
+  async getCreatedFeedback(userId: number, vacancyId: number) {
+    const vacancy = await this.prisma.client.vacancy.findUnique({
+      where: { id: vacancyId },
+      select: { id: true },
     });
 
-    if (!executor) {
-      throw new NotFoundException('Исполнитель не найден');
+    if (!vacancy) {
+      throw new NotFoundException('Вакансия не найдена');
     }
 
     const feedbacks = await this.prisma.client.feedback.findMany({
       where: {
         customerId: userId,
-        FeedbackOnUsers: {
+        FeedbackOnVacancy: {
           some: {
-            executorId: executor.id,
+            vacancy: {
+              id: vacancy.id,
+            },
           },
         },
       },
       include: {
         customer: true,
-        FeedbackOnUsers: {
+        FeedbackOnVacancy: {
           select: {
-            executor: {
+            vacancy: {
               select: {
-                id: true,
-                login: true,
-                email: true,
-                name: true,
-                avatar: true,
-                birthday: true,
-                description: true,
-                phone: true,
-                specialisation: true,
-                vacancies: {
-                  include: {
-                    user: true,
+                user: {
+                  select: {
+                    id: true,
+                    login: true,
+                    email: true,
+                    name: true,
+                    avatar: true,
+                    birthday: true,
+                    description: true,
+                    phone: true,
+                    specialisation: true,
+                    vacancies: {
+                      include: {
+                        user: true,
+                      },
+                    },
                   },
                 },
               },
@@ -341,54 +381,5 @@ export class FeedbackService {
     });
 
     return feedbacks.length > 0 ? feedbacks[0] : null;
-  }
-
-  async deleteFeedback(userId: number, feedbackId: number) {
-    const feedback = await this.prisma.client.feedback.findUnique({
-      where: { id: feedbackId },
-      include: {
-        FeedbackOnUsers: {
-          select: {
-            executor: {
-              select: {
-                id: true,
-                login: true,
-                email: true,
-                name: true,
-                avatar: true,
-                birthday: true,
-                description: true,
-                phone: true,
-                specialisation: true,
-                vacancies: {
-                  include: {
-                    user: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!feedback) {
-      throw new NotFoundException('Отзыв не найден');
-    }
-
-    if (feedback.customerId !== userId) {
-      throw new ForbiddenException('Нельзя удалить чужой отзыв');
-    }
-
-    await this.prisma.client.feedbackOnUsers.deleteMany({
-      where: { feedbackId },
-    });
-    await this.prisma.client.feedback.delete({ where: { id: feedbackId } });
-
-    if (!!feedback.photo) {
-      removeFile(feedback.photo);
-    }
-
-    return { ...feedback, executor: feedback.FeedbackOnUsers[0].executor };
   }
 }

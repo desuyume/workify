@@ -7,9 +7,9 @@ import { getVacancyById } from '@/lib/api/requests/vacancy/id'
 import { getServerSession } from 'next-auth'
 import { notFound } from 'next/navigation'
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page({ params }: { params: { id: number } }) {
 	const session = await getServerSession(authOptions)
-	const vacancy = await getVacancyById({ params })
+	const vacancy = await getVacancyById({ params: { id: params.id } })
 
 	if (!session?.user) {
 		return <Unauthorized />

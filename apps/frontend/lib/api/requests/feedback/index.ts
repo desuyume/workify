@@ -3,7 +3,7 @@ import authApiInstance, { apiInstance } from '../../instance'
 import { generateQueryString } from '@/lib/utils'
 
 interface CreateFeedbackParam {
-	executorLogin: string
+	vacancyId: number
 	data: FormData
 }
 
@@ -11,14 +11,14 @@ type CreateFeedbackConfig = RequestConfig<CreateFeedbackParam>
 
 export const createFeedback = ({ params, config }: CreateFeedbackConfig) => {
 	return authApiInstance.post<any, { data: IFeedback }>(
-		`/feedback/${params.executorLogin}`,
+		`/feedback/${params.vacancyId}`,
 		params.data,
 		config
 	)
 }
 
 interface UpdateFeedbackParam {
-	executorLogin: string
+	vacancyId: number
 	feedbackId: number
 	data: FormData
 }
@@ -27,14 +27,14 @@ type UpdateFeedbackConfig = RequestConfig<UpdateFeedbackParam>
 
 export const updateFeedback = ({ params, config }: UpdateFeedbackConfig) => {
 	return authApiInstance.patch<any, { data: IFeedback }>(
-		`/feedback/${params.executorLogin}/${params.feedbackId}`,
+		`/feedback/${params.vacancyId}/${params.feedbackId}`,
 		params.data,
 		config
 	)
 }
 
-interface GetExecutorFeedbacksParam {
-	executorLogin: string
+interface GetVacancyFeedbacksParam {
+	vacancyId: number
 	query: {
 		sortBy: FeedbackSortBy
 		take?: number
@@ -42,31 +42,22 @@ interface GetExecutorFeedbacksParam {
 	}
 }
 
-type GetExecutorFeedbacksConfig = RequestConfig<GetExecutorFeedbacksParam>
+type GetVacancyFeedbacksConfig = RequestConfig<GetVacancyFeedbacksParam>
 
-export const getExecutorFeedbacks = ({
-	params,
-	config,
-}: GetExecutorFeedbacksConfig) => {
+export const getVacancyFeedbacks = ({ params, config }: GetVacancyFeedbacksConfig) => {
 	const queryString = generateQueryString(params.query)
 	return apiInstance.get<{ feedbacks: IFeedback[]; count: number }>(
-		`/feedback/executor/${params.executorLogin}${queryString}`,
+		`/feedback/vacancy/${params.vacancyId}${queryString}`,
 		config
 	)
 }
 
 interface GetExecutorRatingParam {
-	executorLogin: string
+	vacancyId: number
 }
 
 type GetExecutorRatingConfig = RequestConfig<GetExecutorRatingParam>
 
-export const getExecutorRating = ({
-	params,
-	config,
-}: GetExecutorRatingConfig) => {
-	return apiInstance.get<IFeedbackRating>(
-		`/feedback/${params.executorLogin}/rating`,
-		config
-	)
+export const getVacancyRating = ({ params, config }: GetExecutorRatingConfig) => {
+	return apiInstance.get<IFeedbackRating>(`/feedback/${params.vacancyId}/rating`, config)
 }

@@ -41,7 +41,7 @@ export default function Vacancy({ vacancy, inProfile = false }: VacancyProps) {
 						{vacancy.title}
 					</p>
 					<hr className='w-[5.3125rem] border-t border-t-white rounded-full mx-[0.625rem] mt-[0.125rem]' />
-					<Stars rating={Math.round(vacancy.user.rating)} />
+					<Stars rating={Math.round(vacancy.rating)} />
 					<hr className='flex-1 border-t border-t-white rounded-full mx-[0.625rem] mt-[0.125rem]' />
 					<p className='text-xl font-light text-right'>
 						{vacancy.category?.title.toLowerCase()}

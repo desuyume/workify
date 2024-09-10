@@ -3,7 +3,7 @@ import { IVacancyCategory, Rating } from '@workify/shared'
 
 interface VacancyGeneralInfoProps {
 	title: string
-	rating: Rating
+	rating: number
 	description: string
 	category: IVacancyCategory | null
 }
@@ -23,7 +23,7 @@ export default function VacancyGeneralInfo({
 					</p>
 				</div>
 				<div className='w-[10.9375rem] h-full foreground rounded-[0.3125rem] flex justify-center items-center'>
-					<Stars rating={rating} />
+					<Stars rating={Math.round(rating)} />
 				</div>
 
 				{!!category && (

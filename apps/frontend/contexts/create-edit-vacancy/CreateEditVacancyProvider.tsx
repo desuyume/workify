@@ -1,18 +1,15 @@
 'use client'
 
 import React, { useMemo } from 'react'
-import {
-	CreateEditVacancy,
-	CreateEditVacancyContext,
-} from './CreateEditVacancyContext'
+import { CreateEditVacancy, CreateEditVacancyContext } from './CreateEditVacancyContext'
 
 export interface CreateEditVacancyProviderProps {
 	children: React.ReactNode
 }
 
-export const CreateEditVacancyProvider: React.FC<
-	CreateEditVacancyProviderProps
-> = ({ children }) => {
+export const CreateEditVacancyProvider: React.FC<CreateEditVacancyProviderProps> = ({
+	children,
+}) => {
 	const [vacancy, setVacancy] = React.useState<CreateEditVacancy>({
 		title: '',
 		description: '',
@@ -23,6 +20,7 @@ export const CreateEditVacancyProvider: React.FC<
 		city: null,
 		isLocationHidden: false,
 		isVacancyHidden: false,
+		rating: 0,
 	})
 
 	const value = useMemo(
@@ -34,8 +32,6 @@ export const CreateEditVacancyProvider: React.FC<
 	)
 
 	return (
-		<CreateEditVacancyContext.Provider value={value}>
-			{children}
-		</CreateEditVacancyContext.Provider>
+		<CreateEditVacancyContext.Provider value={value}>{children}</CreateEditVacancyContext.Provider>
 	)
 }

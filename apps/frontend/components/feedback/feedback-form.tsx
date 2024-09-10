@@ -12,18 +12,13 @@ import { useRouter } from 'next/navigation'
 import { imgSrcToFile } from '@/lib/utils/imageConvert'
 
 interface FeedbackFormProps {
-	executorLogin: string
+	vacancyId: number
 	feedback: IFeedbackWithExecutor | null
 }
 
-export default function FeedbackForm({
-	executorLogin,
-	feedback,
-}: FeedbackFormProps) {
+export default function FeedbackForm({ vacancyId, feedback }: FeedbackFormProps) {
 	const [comment, setComment] = useState<string>(feedback?.comment ?? '')
-	const [photo, setPhoto] = useState<string | File | null>(
-		feedback?.photo ?? null
-	)
+	const [photo, setPhoto] = useState<string | File | null>(feedback?.photo ?? null)
 	const [rating, setRating] = useState<Rating>(feedback?.rating ?? 1)
 	const router = useRouter()
 
@@ -49,7 +44,7 @@ export default function FeedbackForm({
 
 		if (isCreated) {
 			updateFeedback({
-				params: { executorLogin, feedbackId: feedback?.id, data: feedbackData },
+				params: { vacancyId, feedbackId: feedback?.id, data: feedbackData },
 			})
 				.then(res => {
 					toast.success('Отзыв успешно обновлен')
@@ -64,7 +59,7 @@ export default function FeedbackForm({
 				})
 			return
 		} else {
-			createFeedback({ params: { executorLogin, data: feedbackData } })
+			createFeedback({ params: { vacancyId, data: feedbackData } })
 				.then(res => {
 					toast.success('Отзыв успешно отправлен')
 					router.push(`/feedback/${res.data.id}`)
@@ -84,7 +79,7 @@ export default function FeedbackForm({
 			deleteFeedback({ params: { id: feedback?.id } })
 				.then(() => {
 					toast.success('Отзыв успешно удален')
-					router.push(`/profile/${executorLogin}`)
+					router.push(`/vacancy/${vacancyId}`)
 					router.refresh()
 					clearFields()
 				})
@@ -117,9 +112,7 @@ export default function FeedbackForm({
 			</div>
 
 			<div className='w-full h-10 flex items-center'>
-				<p className='min-w-[6.875rem] mr-[2.8125rem] font-medium text-xl'>
-					Рейтинг
-				</p>
+				<p className='min-w-[6.875rem] mr-[2.8125rem] font-medium text-xl'>Рейтинг</p>
 				<RatingSelect rating={rating} setRating={setRating} />
 			</div>
 

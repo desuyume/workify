@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 datasource db {
   provider          = "postgresql"
   url               = env("DATABASE_URL")
@@ -12,9 +9,9 @@ generator client {
 }
 
 model User {
-  id              Int               @id @default(autoincrement())
-  login           String            @unique
-  email           String            @unique
+  id              Int            @id @default(autoincrement())
+  login           String         @unique
+  email           String         @unique
   name            String?
   birthday        DateTime?
   phone           String?
@@ -22,12 +19,11 @@ model User {
   avatar          String?
   specialisation  String?
   password        String
-  rating          Float             @default(0)
+  rating          Float          @default(0)
   vacancies       Vacancy[]
-  FeedbackOnUsers FeedbackOnUsers[]
+  communication   Communication? @relation(fields: [communicationId], references: [id])
+  communicationId Int?           @unique
   Feedback        Feedback[]
-  communication   Communication?    @relation(fields: [communicationId], references: [id])
-  communicationId Int?              @unique
 
   @@map("users")
 }
@@ -49,20 +45,23 @@ model City {
 }
 
 model Vacancy {
-  id                Int              @id @default(autoincrement())
-  title             String
-  category          VacancyCategory? @relation(fields: [vacancyCategoryId], references: [id])
-  cover             String?
-  photos            VacancyPhoto[]
-  description       String?          @db.VarChar(1500)
-  price             Float?
-  city              City?            @relation(fields: [cityName], references: [name])
-  isLocationHidden  Boolean          @default(false)
-  isVacancyHidden   Boolean          @default(false)
-  user              User             @relation(fields: [userId], references: [id])
+  id               Int              @id @default(autoincrement())
+  title            String
+  category         VacancyCategory? @relation(fields: [vacancyCategoryId], references: [id])
+  cover            String?
+  photos           VacancyPhoto[]
+  description      String?          @db.VarChar(1500)
+  price            Float?
+  city             City?            @relation(fields: [cityName], references: [name])
+  isLocationHidden Boolean          @default(false)
+  isVacancyHidden  Boolean          @default(false)
+  rating           Float            @default(0)
+
+  user              User                @relation(fields: [userId], references: [id])
   vacancyCategoryId Int?
   userId            Int
   cityName          String?
+  FeedbackOnVacancy FeedbackOnVacancy[]
 
   @@map("vacancies")
 }
@@ -85,20 +84,20 @@ model VacancyPhoto {
 }
 
 model Feedback {
-  id              Int               @id @default(autoincrement())
-  comment         String?           @db.VarChar(1500)
-  rating          Float             @default(0)
-  photo           String?
-  date_created    DateTime          @default(now())
-  customer        User              @relation(fields: [customerId], references: [id])
-  customerId      Int
-  FeedbackOnUsers FeedbackOnUsers[]
+  id                Int                 @id @default(autoincrement())
+  comment           String?             @db.VarChar(1500)
+  rating            Float               @default(0)
+  photo             String?
+  date_created      DateTime            @default(now())
+  customer          User                @relation(fields: [customerId], references: [id])
+  customerId        Int
+  FeedbackOnVacancy FeedbackOnVacancy[]
 }
 
-model FeedbackOnUsers {
+model FeedbackOnVacancy {
   id         Int      @id @default(autoincrement())
   feedback   Feedback @relation(fields: [feedbackId], references: [id])
   feedbackId Int
-  executor   User     @relation(fields: [executorId], references: [id])
-  executorId Int
+  vacancy    Vacancy  @relation(fields: [vacancyId], references: [id])
+  vacancyId  Int
 }

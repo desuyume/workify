@@ -17,5 +17,5 @@ export default async function Page({ params }: { params: { login: string } }) {
 		notFound()
 	}
 
-	return <ProfileContent user={user} isByLogin />
+	return <ProfileContent user={user} />
 }

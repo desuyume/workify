@@ -2,31 +2,29 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/options'
 import ErrorUI from '@/app/ui/error-ui'
 import Unauthorized from '@/app/ui/unauthorized'
 import FeedbackForm from '@/components/feedback/feedback-form'
-import { getCreatedFeedback, getUserProfileByLogin } from '@/lib/api'
+import { getCreatedFeedback, getVacancyById } from '@/lib/api'
 import { cn } from '@workify/shared'
 import { getServerSession } from 'next-auth'
 import { notFound } from 'next/navigation'
 
-const fetchUser = async (login: string) => {
-	return await getUserProfileByLogin({ params: { login } })
-		.then(res => res.data)
-		.catch(() => {
-			return null
-		})
-}
-
-const fetchCreatedFeedback = async (login: string) => {
-	return await getCreatedFeedback({ params: { login } })
+const fetchVacancy = async (id: number) => {
+	return await getVacancyById({ params: { id } })
 		.then(res => res)
 		.catch(() => null)
 }
 
-export default async function Page({ params }: { params: { login: string } }) {
-	const session = await getServerSession(authOptions)
-	const user = await fetchUser(params.login)
-	const feedback = await fetchCreatedFeedback(params.login)
+const fetchCreatedFeedback = async (id: number) => {
+	return await getCreatedFeedback({ params: { vacancyId: id } })
+		.then(res => res)
+		.catch(() => null)
+}
 
-	if (!user) {
+export default async function Page({ params }: { params: { id: number } }) {
+	const session = await getServerSession(authOptions)
+	const vacancy = await fetchVacancy(params.id)
+	const feedback = await fetchCreatedFeedback(params.id)
+
+	if (!vacancy?.data) {
 		notFound()
 	}
 
@@ -34,11 +32,11 @@ export default async function Page({ params }: { params: { login: string } }) {
 		return <Unauthorized />
 	}
 
-	if (session.user.id === user.id) {
+	if (session.user.id === vacancy.data.user.id) {
 		return (
 			<ErrorUI
 				title='Вы не можете оставить себе отзыв'
-				link={{ title: 'В профиль', href: `/profile/${user.login}` }}
+				link={{ title: 'К вакансии', href: `/vacancy/${params.id}` }}
 			/>
 		)
 	}
@@ -49,10 +47,7 @@ export default async function Page({ params }: { params: { login: string } }) {
 				'w-full foreground py-[1.625rem] flex flex-col items-center rounded-[0.625rem]'
 			)}
 		>
-			<FeedbackForm
-				executorLogin={user.login}
-				feedback={feedback?.data || null}
-			/>
+			<FeedbackForm vacancyId={params.id} feedback={feedback?.data || null} />
 		</div>
 	)
 }

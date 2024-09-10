@@ -117,6 +117,7 @@ export default function CreateEditVacancy({
 			city: null,
 			isLocationHidden: false,
 			isVacancyHidden: false,
+			rating: 0,
 		})
 	}
 
@@ -133,6 +134,7 @@ export default function CreateEditVacancy({
 					city: fetchedVacancy.city,
 					isLocationHidden: fetchedVacancy.isLocationHidden,
 					isVacancyHidden: fetchedVacancy.isVacancyHidden,
+					rating: fetchedVacancy.rating,
 				})
 			}
 		}
@@ -157,9 +159,7 @@ export default function CreateEditVacancy({
 				<CreateEditVacancyForm className='mb-[1.875rem]' />
 
 				<div className='w-[55.3125rem] mb-[3.75rem]'>
-					<p className='font-medium text-[1.25rem] leading-6 mb-5'>
-						Фотографии
-					</p>
+					<p className='font-medium text-[1.25rem] leading-6 mb-5'>Фотографии</p>
 					<CreateEditVacancyPhotos />
 				</div>
 
@@ -170,9 +170,7 @@ export default function CreateEditVacancy({
 						className='px-5'
 						width='15.0625rem'
 						checked={vacancy.isVacancyHidden}
-						onChange={e =>
-							setVacancy({ ...vacancy, isVacancyHidden: e.target.checked })
-						}
+						onChange={e => setVacancy({ ...vacancy, isVacancyHidden: e.target.checked })}
 						settingType='hide-vacancy'
 					/>
 				</div>
