@@ -6,5 +6,5 @@ interface GetStatisticParam {}
 type GetStatisticConfig = RequestConfig<GetStatisticParam>
 
 export const getStatistic = ({ params, config }: GetStatisticConfig) => {
-	return apiInstance.get<IStatistic>(`/statistic`, config)
+  return apiInstance.get<IStatistic>(`/statistic`, config)
 }

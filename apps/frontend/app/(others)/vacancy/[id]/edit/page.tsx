@@ -7,25 +7,35 @@ import { getVacancyById } from '@/lib/api/requests/vacancy/id'
 import { getServerSession } from 'next-auth'
 import { notFound } from 'next/navigation'
 
-export default async function Page({ params }: { params: { id: number } }) {
-	const session = await getServerSession(authOptions)
-	const vacancy = await getVacancyById({ params: { id: params.id } })
+export default async function Page({
+  params
+}: {
+  params: {
+    id: number
+  }
+}) {
+  const session = await getServerSession(authOptions)
+  const vacancy = await getVacancyById({
+    params: {
+      id: params.id
+    }
+  })
 
-	if (!session?.user) {
-		return <Unauthorized />
-	}
+  if (!session?.user) {
+    return <Unauthorized />
+  }
 
-	if (!vacancy.data) {
-		notFound()
-	}
+  if (!vacancy.data) {
+    notFound()
+  }
 
-	if (session?.user.id !== vacancy.data.user.id) {
-		return <ErrorUI title='Доступ запрещен' />
-	}
+  if (session?.user.id !== vacancy.data.user.id) {
+    return <ErrorUI title='Доступ запрещен' />
+  }
 
-	return (
-		<CreateEditVacancyProvider>
-			<CreateEditVacancy type='edit' fetchedVacancy={vacancy.data} />
-		</CreateEditVacancyProvider>
-	)
+  return (
+    <CreateEditVacancyProvider>
+      <CreateEditVacancy type='edit' fetchedVacancy={vacancy.data} />
+    </CreateEditVacancyProvider>
+  )
 }

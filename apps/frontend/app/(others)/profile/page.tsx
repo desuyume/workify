@@ -7,16 +7,16 @@ import Unauthorized from '@/app/ui/unauthorized'
 import ProfileContent from '@/components/profile/profile-content'
 
 export default function Page() {
-	const session = useSession()
-	const { profile } = useProfile()
+  const session = useSession()
+  const { profile } = useProfile()
 
-	if (session.status === 'loading') {
-		return <Loading className='w-full h-full' />
-	}
+  if (session.status === 'loading') {
+    return <Loading className='w-full h-full' />
+  }
 
-	if (session.status === 'unauthenticated') {
-		return <Unauthorized />
-	}
+  if (session.status === 'unauthenticated') {
+    return <Unauthorized />
+  }
 
-	return <ProfileContent user={profile.user} />
+  return <ProfileContent user={profile.user} />
 }

@@ -1,29 +1,21 @@
 import { authApiInstance } from '@/lib/api/instance'
 
 interface UpdateEmailCommunicationParams {
-	isVisible: boolean
+  isVisible: boolean
 }
 
-type UpdateEmailCommunicationConfig =
-	RequestConfig<UpdateEmailCommunicationParams>
+type UpdateEmailCommunicationConfig = RequestConfig<UpdateEmailCommunicationParams>
 
-export const updateEmailCommunication = ({
-	params,
-	config,
-}: UpdateEmailCommunicationConfig) => {
-	return authApiInstance.patch(`/users/communication/email`, params, config)
+export const updateEmailCommunication = ({ params, config }: UpdateEmailCommunicationConfig) => {
+  return authApiInstance.patch(`/users/communication/email`, params, config)
 }
 
 interface UpdatePhoneCommunicationParams {
-	isVisible: boolean
+  isVisible: boolean
 }
 
-type UpdatePhoneCommunicationConfig =
-	RequestConfig<UpdatePhoneCommunicationParams>
+type UpdatePhoneCommunicationConfig = RequestConfig<UpdatePhoneCommunicationParams>
 
-export const updatePhoneCommunication = ({
-	params,
-	config,
-}: UpdatePhoneCommunicationConfig) => {
-	return authApiInstance.patch(`/users/communication/phone`, params, config)
+export const updatePhoneCommunication = ({ params, config }: UpdatePhoneCommunicationConfig) => {
+  return authApiInstance.patch(`/users/communication/phone`, params, config)
 }

@@ -9,50 +9,52 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 
 interface RemoveFeedbackButtonProps {
-	feedbackId: number
+  feedbackId: number
 }
 
-export default function RemoveFeedbackButton({
-	feedbackId,
-}: RemoveFeedbackButtonProps) {
-	const [isRemoveModalOpen, setIsRemoveModalOpen] = useState<boolean>(false)
-	const router = useRouter()
+export default function RemoveFeedbackButton({ feedbackId }: RemoveFeedbackButtonProps) {
+  const [isRemoveModalOpen, setIsRemoveModalOpen] = useState<boolean>(false)
+  const router = useRouter()
 
-	const handleClickRemove = () => {
-		deleteFeedback({ params: { id: feedbackId } })
-			.then(res => {
-				setIsRemoveModalOpen(false)
-				toast.success('Отзыв успешно удалена')
-				router.push(`/profile/${res.data.executor.login}`)
-			})
-			.catch(e => {
-				console.log(e)
+  const handleClickRemove = () => {
+    deleteFeedback({
+      params: {
+        id: feedbackId
+      }
+    })
+      .then((res) => {
+        setIsRemoveModalOpen(false)
+        toast.success('Отзыв успешно удалена')
+        router.push(`/profile/${res.data.executor.login}`)
+      })
+      .catch((e) => {
+        console.log(e)
 
-				toast.error('Не удалось удалить отзыв')
-			})
-	}
+        toast.error('Не удалось удалить отзыв')
+      })
+  }
 
-	return (
-		<>
-			<Button
-				title='Удалить отзыв'
-				variant='dark-transparent'
-				width='15.9375rem'
-				height='100%'
-				className='mx-10'
-				onClick={() => setIsRemoveModalOpen(true)}
-			/>
+  return (
+    <>
+      <Button
+        title='Удалить отзыв'
+        variant='dark-transparent'
+        width='15.9375rem'
+        height='100%'
+        className='mx-10'
+        onClick={() => setIsRemoveModalOpen(true)}
+      />
 
-			<Modal
-				isVisible={isRemoveModalOpen}
-				onClose={() => setIsRemoveModalOpen(false)}
-				children={
-					<ConfirmRemove
-						onRemove={handleClickRemove}
-						onCancel={() => setIsRemoveModalOpen(false)}
-					/>
-				}
-			/>
-		</>
-	)
+      <Modal
+        isVisible={isRemoveModalOpen}
+        onClose={() => setIsRemoveModalOpen(false)}
+        children={
+          <ConfirmRemove
+            onRemove={handleClickRemove}
+            onCancel={() => setIsRemoveModalOpen(false)}
+          />
+        }
+      />
+    </>
+  )
 }

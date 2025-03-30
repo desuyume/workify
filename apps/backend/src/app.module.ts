@@ -1,20 +1,20 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
-import { AuthModule } from './auth/auth.module';
-import { CustomPrismaModule } from 'nestjs-prisma';
-import { PrismaClient, prisma } from '@workify/database';
-import { CUSTOM_PRISMA_SERVICE } from './constants/prisma.constants';
-import { ConfigModule } from '@nestjs/config';
-import { VacancyModule } from './vacancy/vacancy.module';
-import { MulterModule } from '@nestjs/platform-express';
-import { CitiesModule } from './cities/cities.module';
-import * as path from 'path';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { FeedbackModule } from './feedback/feedback.module';
-import { ThrottlerModule } from '@nestjs/throttler';
-import { StatisticModule } from './statistic/statistic.module';
+import { Module } from '@nestjs/common'
+import { AppController } from './app.controller'
+import { AppService } from './app.service'
+import { UsersModule } from './users/users.module'
+import { AuthModule } from './auth/auth.module'
+import { CustomPrismaModule } from 'nestjs-prisma'
+import { PrismaClient, prisma } from '@workify/database'
+import { CUSTOM_PRISMA_SERVICE } from './constants/prisma.constants'
+import { ConfigModule } from '@nestjs/config'
+import { VacancyModule } from './vacancy/vacancy.module'
+import { MulterModule } from '@nestjs/platform-express'
+import { CitiesModule } from './cities/cities.module'
+import * as path from 'path'
+import { ServeStaticModule } from '@nestjs/serve-static'
+import { FeedbackModule } from './feedback/feedback.module'
+import { ThrottlerModule } from '@nestjs/throttler'
+import { StatisticModule } from './statistic/statistic.module'
 
 @Module({
   imports: [
@@ -25,15 +25,15 @@ import { StatisticModule } from './statistic/statistic.module';
     //   },
     // ]),
     ConfigModule.forRoot({
-      isGlobal: true,
+      isGlobal: true
     }),
     ServeStaticModule.forRoot({
-      rootPath: path.join(__dirname, '..', 'static'),
+      rootPath: path.join(__dirname, '..', 'static')
     }),
     CustomPrismaModule.forRoot({
       name: CUSTOM_PRISMA_SERVICE,
       client: new PrismaClient(),
-      isGlobal: true,
+      isGlobal: true
     }),
     MulterModule.register({ dest: process.env.UPLOAD_LOCATION }),
     UsersModule,
@@ -41,9 +41,9 @@ import { StatisticModule } from './statistic/statistic.module';
     VacancyModule,
     CitiesModule,
     FeedbackModule,
-    StatisticModule,
+    StatisticModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService]
 })
 export class AppModule {}

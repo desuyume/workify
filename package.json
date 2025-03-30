@@ -1,34 +1,35 @@
 {
-	"name": "workify",
-	"private": true,
-	"prisma": {
-		"schema": "packages/database/prisma/schema.prisma",
-		"seed": "tsx packages/database/src/seed.ts"
-	},
-	"scripts": {
-		"start": "dotenv -- turbo run start",
-		"build": "dotenv -- turbo run build",
-		"build:libs": "dotenv -- pnpm --filter database --filter shared --filter ui run build",
-		"dev": "dotenv -- turbo run dev",
-		"predev": "dotenv -- pnpm --filter=database run db:migrate:deploy",
-		"db:seed": "dotenv -- pnpm --filter=database run db:seed",
-		"db:migrate": "dotenv -- pnpm --filter=database run db:migrate:dev",
-		"prisma:studio": "dotenv -- pnpm --filter=database run studio",
-		"format": "prettier --write \"**/*.{ts,tsx,md}\"",
-		"lint": "turbo run lint",
-		"clean": "turbo run clean"
-	},
-	"author": "desuyume <https://t.me/desuyume>",
-	"devDependencies": {
-		"@workify/eslint-config": "workspace:*",
-		"prettier": "^3.0.0",
-		"prettier-plugin-tailwindcss": "^0.5.14",
-		"tsx": "^4.7.2",
-		"turbo": "^1.13.2"
-	},
-	"packageManager": "pnpm@9.1.2",
-	"dependencies": {
-		"dotenv-cli": "^7.4.1",
-		"node-jose-tools": "^2.0.4"
-	}
+  "name": "workify",
+  "private": true,
+  "prisma": {
+    "schema": "packages/database/prisma/schema.prisma",
+    "seed": "tsx packages/database/src/seed.ts"
+  },
+  "scripts": {
+    "start": "dotenv -- turbo run start",
+    "build": "dotenv -- turbo run build",
+    "build:libs": "dotenv -- pnpm --filter database --filter shared --filter ui run build",
+    "dev": "dotenv -- turbo run dev",
+    "predev": "dotenv -- pnpm --filter=database run db:migrate:deploy",
+    "db:seed": "dotenv -- pnpm --filter=database run db:seed",
+    "db:migrate": "dotenv -- pnpm --filter=database run db:migrate:dev",
+    "prisma:studio": "dotenv -- pnpm --filter=database run studio",
+    "format": "turbo run format",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean"
+  },
+  "author": "desuyume <https://t.me/desuyume>",
+  "devDependencies": {
+    "@desuyume/prettier": "^1.0.0",
+    "@workify/eslint-config": "workspace:*",
+    "prettier": "^3.0.0",
+    "prettier-plugin-tailwindcss": "^0.5.14",
+    "tsx": "^4.7.2",
+    "turbo": "^1.13.2"
+  },
+  "packageManager": "pnpm@9.1.2",
+  "dependencies": {
+    "dotenv-cli": "^7.4.1",
+    "node-jose-tools": "^2.0.4"
+  }
 }

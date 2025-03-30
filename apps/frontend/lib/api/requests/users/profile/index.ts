@@ -6,5 +6,5 @@ interface GetUserProfileParams {}
 type GetUserProfileConfig = RequestConfig<GetUserProfileParams>
 
 export const getUserProfile = ({ params, config }: GetUserProfileConfig) => {
-	return authApiInstance.get<IUser>(`/users/profile`, config)
+  return authApiInstance.get<IUser>(`/users/profile`, config)
 }

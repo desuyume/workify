@@ -1,5 +1,5 @@
-import { Controller, Get } from '@nestjs/common';
-import { StatisticService } from './statistic.service';
+import { Controller, Get } from '@nestjs/common'
+import { StatisticService } from './statistic.service'
 
 @Controller('statistic')
 export class StatisticController {
@@ -7,6 +7,6 @@ export class StatisticController {
 
   @Get()
   async getStatistic() {
-    return await this.statisticService.getStatistics();
+    return await this.statisticService.getStatistics()
   }
 }

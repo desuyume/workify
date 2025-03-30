@@ -5,8 +5,5 @@ interface GetVacancyCategoriesParam {}
 
 type GetVacancyCategoriesConfig = RequestConfig<GetVacancyCategoriesParam>
 
-export const getAllVacancyCategories = ({
-	params,
-	config,
-}: GetVacancyCategoriesConfig) =>
-	apiInstance.get<IVacancyCategory[]>('/vacancy/categories', config)
+export const getAllVacancyCategories = ({ params, config }: GetVacancyCategoriesConfig) =>
+  apiInstance.get<IVacancyCategory[]>('/vacancy/categories', config)

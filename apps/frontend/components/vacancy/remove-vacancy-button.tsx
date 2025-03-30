@@ -9,49 +9,51 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 
 interface RemoveVacancyButtonProps {
-	vacancyId: number
+  vacancyId: number
 }
 
-export default function RemoveVacancyButton({
-	vacancyId,
-}: RemoveVacancyButtonProps) {
-	const [isRemoveModalOpen, setIsRemoveModalOpen] = useState<boolean>(false)
-	const router = useRouter()
+export default function RemoveVacancyButton({ vacancyId }: RemoveVacancyButtonProps) {
+  const [isRemoveModalOpen, setIsRemoveModalOpen] = useState<boolean>(false)
+  const router = useRouter()
 
-	const handleClickRemove = () => {
-		deleteVacancy({ params: { id: vacancyId } })
-			.then(() => {
-				setIsRemoveModalOpen(false)
-				toast.success('Анкета успешно удалена')
-				router.push('/profile')
-				router.refresh()
-			})
-			.catch(() => {
-				toast.error('Не удалось удалить анкету')
-			})
-	}
+  const handleClickRemove = () => {
+    deleteVacancy({
+      params: {
+        id: vacancyId
+      }
+    })
+      .then(() => {
+        setIsRemoveModalOpen(false)
+        toast.success('Анкета успешно удалена')
+        router.push('/profile')
+        router.refresh()
+      })
+      .catch(() => {
+        toast.error('Не удалось удалить анкету')
+      })
+  }
 
-	return (
-		<>
-			<Button
-				title='Удалить анкету'
-				variant='dark-transparent'
-				width='15.9375rem'
-				height='100%'
-				className='mx-10'
-				onClick={() => setIsRemoveModalOpen(true)}
-			/>
+  return (
+    <>
+      <Button
+        title='Удалить анкету'
+        variant='dark-transparent'
+        width='15.9375rem'
+        height='100%'
+        className='mx-10'
+        onClick={() => setIsRemoveModalOpen(true)}
+      />
 
-			<Modal
-				isVisible={isRemoveModalOpen}
-				onClose={() => setIsRemoveModalOpen(false)}
-				children={
-					<ConfirmRemove
-						onRemove={handleClickRemove}
-						onCancel={() => setIsRemoveModalOpen(false)}
-					/>
-				}
-			/>
-		</>
-	)
+      <Modal
+        isVisible={isRemoveModalOpen}
+        onClose={() => setIsRemoveModalOpen(false)}
+        children={
+          <ConfirmRemove
+            onRemove={handleClickRemove}
+            onCancel={() => setIsRemoveModalOpen(false)}
+          />
+        }
+      />
+    </>
+  )
 }
