@@ -1,27 +1,27 @@
 import { IUserVacancy } from './vacancy'
 
 export interface IUserPayload {
-	id: number
-	login: string
-	email: string
+  id: number
+  login: string
+  email: string
 }
 
 export interface IUser {
-	id: number
-	login: string
-	email: string
-	name: string | null
-	avatar: string | null
-	birthday: string | null
-	description: string | null
-	phone: string | null
-	specialisation: string | null
-	rating: number
-	vacancies: IUserVacancy[]
-	communication: IUserCommunication
+  id: number
+  login: string
+  email: string
+  name: string | null
+  avatar: string | null
+  birthday: string | null
+  description: string | null
+  phone: string | null
+  specialisation: string | null
+  rating: number
+  vacancies: IUserVacancy[]
+  communication: IUserCommunication
 }
 
 export interface IUserCommunication {
-	isEmailVisible: boolean
-	isPhoneVisible: boolean
+  isEmailVisible: boolean
+  isPhoneVisible: boolean
 }
