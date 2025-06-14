@@ -17,12 +17,15 @@ git clone https://github.com/desuyume/workify.git
 ```
 
 * Create a .env file and transfer the data from .env.dev into it
-  
-* Create two databases in Postgres and edit DATABASE_URL and SHADOW_DATABASE_URL variables in .env file with your created data
 
 * Install dependencies
 ```bash
 pnpm install
+```
+
+* Run needed services (Postgres, Adminer)
+```bash
+docker compose -f docker-compose.dev.yml up -d
 ```
 
 * Build libs

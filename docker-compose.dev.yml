@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - '8085:8080'
+    environment:
+      - ADMINER_DEFAULT_SERVER=postgres:5432
+    networks:
+      - workify-dev
+
+  postgres:
+    image: postgres:17.5-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: desuyume
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: workify
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - '54321:5432'
+    networks:
+      - workify-dev
+
+volumes:
+  postgres-data:
+
+networks:
+  workify-dev:
+    driver: bridge
