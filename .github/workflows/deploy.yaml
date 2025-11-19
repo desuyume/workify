@@ -51,7 +51,7 @@ jobs:
       run: pnpm run build
       
   deploy:
-    needs: test-and-build
+    needs: build
     runs-on: ubuntu-latest
     environment: production
     
