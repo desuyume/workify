@@ -1,0 +1,175 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # Ручной запуск
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+        
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+        run_install: false
+        
+    - name: Get pnpm store directory
+      shell: bash
+      run: |
+        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+        
+    - name: Setup pnpm cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+          
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+      
+    - name: Run tests
+      run: pnpm test
+      
+    - name: Build applications
+      run: pnpm run build
+      
+  deploy:
+    needs: test-and-build
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Build and push Frontend image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.frontend
+        push: true
+        tags: |
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Build and push Backend image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.backend
+        push: true
+        tags: |
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Create deployment package
+      run: |
+        mkdir -p deployment
+        cp docker-compose.yml deployment/
+        cp nginx.conf deployment/
+        cp init.sql deployment/ 2>/dev/null || true
+        
+        # Создаем скрипт деплоя
+        cat > deployment/deploy.sh << 'EOF'
+        #!/bin/bash
+        set -e
+        
+        echo "🚀 Starting deployment..."
+        cd /opt/workify
+        
+        # Pull latest images
+        docker compose pull
+        
+        # Run database migrations (если нужно)
+        docker compose run --rm backend pnpm run migration:run || true
+        
+        # Deploy new version
+        docker compose up -d --remove-orphans
+        
+        # Wait for services to be healthy
+        echo "⏳ Waiting for services to start..."
+        sleep 30
+        
+        # Run health checks
+        curl -f http://localhost/health || exit 1
+        
+        # Cleanup
+        docker image prune -f
+        
+        echo "✅ Deployment completed successfully!"
+        EOF
+        
+        chmod +x deployment/deploy.sh
+        
+        # Создаем архив для деплоя
+        tar -czf deployment-package.tar.gz deployment/
+        
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        script: |
+          set -e
+          echo "🚀 Starting automated deployment..."
+          
+          # Создаем папку приложения если не существует
+          sudo mkdir -p /opt/workify
+          sudo chown ${{ secrets.SERVER_USER }}:${{ secrets.SERVER_USER }} /opt/workify
+          cd /opt/workify
+          
+          # Копируем и распаковываем deployment package
+          tar -xzf /tmp/deployment-package.tar.gz -C . --strip-components=1
+          
+          # Заменяем DOMAIN_NAME в nginx.conf
+          sed -i "s/\${DOMAIN_NAME}/${{ secrets.DOMAIN_NAME }}/g" nginx.conf
+          
+          # Делаем скрипт исполняемым
+          chmod +x deploy.sh
+          
+          # Останавливаем существующие сервисы если есть
+          docker compose down --remove-orphans || true
+          
+          # Запускаем деплой
+          ./deploy.sh
+          
+          echo "🎉 Deployment completed without manual intervention!"
+          
+    - name: Verify deployment
+      run: |
+        sleep 30
+        curl -f https://${{ secrets.DOMAIN_NAME }}/health || exit 1
+        echo "✅ Production health check passed"
