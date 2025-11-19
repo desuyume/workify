@@ -21,9 +21,6 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-
-    # - name: Install PNPM
-    #   run: npm i -g pnpm
         
     - name: Setup pnpm
       uses: pnpm/action-setup@v2
@@ -46,9 +43,25 @@ jobs:
           
     - name: Install dependencies
       run: pnpm install
+
+    - name: Setup build-time environment variables
+      run: |
+        # Создаем .env файл для билда
+        cat > .env << EOF
+        # Build-time environment variables
+        DATABASE_URL=${{ secrets.DATABASE_URL }}
+        SHADOW_DATABASE_URL=${{ secrets.DATABASE_URL }}
+        EOF
+        
+    - name: Generate Prisma Client
+      run: pnpm run db:generate
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
       
     - name: Build applications
       run: pnpm run build
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
       
   deploy:
     needs: build
