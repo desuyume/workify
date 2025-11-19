@@ -60,7 +60,7 @@ jobs:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/workify
         
     - name: Run database migrations
-      run: pnpm run db:migrate
+      run: pnpm run db:migrate:deploy
       working-directory: ./packages/database
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/workify
