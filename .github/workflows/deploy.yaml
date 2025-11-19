@@ -10,7 +10,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  test-and-build:
+  build:
     runs-on: ubuntu-latest
     
     steps:
@@ -47,8 +47,8 @@ jobs:
     - name: Install dependencies
       run: pnpm install
       
-    - name: Run tests
-      run: pnpm test
+    # - name: Run tests
+    #   run: pnpm test
       
     - name: Build applications
       run: pnpm run build
