@@ -9,6 +9,8 @@
     "start": "dotenv -- turbo run start",
     "build": "dotenv -- turbo run build",
     "build:libs": "dotenv -- pnpm --filter database --filter shared --filter ui run build",
+    "build:frontend": "dotenv -- pnpm --filter frontend run build",
+    "build:backend": "dotenv -- pnpm --filter backend run build",
     "dev": "dotenv -- turbo run dev & pnpm run prisma:studio",
     "predev": "dotenv -- pnpm --filter=database run db:migrate:deploy",
     "db:generate": "dotenv -- pnpm --filter=database run db:generate",
