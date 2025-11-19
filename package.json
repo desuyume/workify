@@ -11,6 +11,7 @@
     "build:libs": "dotenv -- pnpm --filter database --filter shared --filter ui run build",
     "dev": "dotenv -- turbo run dev & pnpm run prisma:studio",
     "predev": "dotenv -- pnpm --filter=database run db:migrate:deploy",
+    "db:generate": "dotenv -- pnpm --filter=database run db:generate",
     "db:seed": "dotenv -- pnpm --filter=database run db:seed",
     "db:migrate": "dotenv -- pnpm --filter=database run db:migrate:dev",
     "prisma:studio": "dotenv -- pnpm --filter=database run studio",
