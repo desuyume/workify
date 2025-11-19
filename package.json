@@ -22,14 +22,14 @@
   "devDependencies": {
     "@desuyume/prettier": "^1.0.0",
     "@workify/eslint-config": "workspace:*",
-    "prettier": "^3.0.0",
+    "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.5.14",
-    "tsx": "^4.7.2",
-    "turbo": "^1.13.2"
+    "tsx": "^4.20.6",
+    "turbo": "^1.13.4"
   },
   "packageManager": "pnpm@9.1.2",
   "dependencies": {
-    "dotenv-cli": "^7.4.1",
+    "dotenv-cli": "^7.4.4",
     "node-jose-tools": "^2.0.4"
   }
 }

@@ -54,7 +54,7 @@ export class FeedbackService {
       data: {
         comment: dto.comment,
         customerId: userId,
-        rating: +dto.rating ?? 0,
+        rating: dto.rating ?? 0,
         photo: photo?.filename ?? null
       }
     })
@@ -107,7 +107,7 @@ export class FeedbackService {
       },
       data: {
         comment: dto.comment,
-        rating: +dto.rating ?? 0,
+        rating: dto.rating ?? 0,
         photo: photo?.filename ?? null
       }
     })
