@@ -136,6 +136,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Build UI and shared packages
+        run: pnpm run build:libs
+
       - name: Build and push Frontend image
         uses: docker/build-push-action@v5
         with:
