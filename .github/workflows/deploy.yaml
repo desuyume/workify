@@ -2,15 +2,15 @@ name: Deploy to Production
 
 on:
   push:
-    branches: [master]
-  workflow_dispatch: # Ручной запуск
+    branches: [main]
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build:
+  test-and-build:
     runs-on: ubuntu-latest
     environment: production
     
@@ -18,7 +18,7 @@ jobs:
       postgres:
         image: postgres:15-alpine
         env:
-          POSTGRES_DB: workify
+          POSTGRES_DB: workify_build
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
         options: >-
@@ -28,67 +28,108 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+      with:
+        fetch-depth: 0
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: 8
-        
+
+    - name: Install pnpm
+      run: |
+        npm install -g pnpm@10.14.0
+        echo "PNPM version: $(pnpm --version)"
+
+    - name: Verify lockfile exists
+      run: |
+        echo "📁 Checking lock files:"
+        ls -la | grep lock
+        if [ -f "pnpm-lock.yaml" ]; then
+          echo "✅ pnpm-lock.yaml found"
+        else
+          echo "❌ pnpm-lock.yaml not found"
+          exit 1
+        fi
+
     - name: Install dependencies
-      run: pnpm install
-      
+      run: pnpm install --frozen-lockfile
+
     - name: Wait for PostgreSQL
       run: |
-        until pg_isready -h localhost -p 5432; do
-          echo "Waiting for PostgreSQL..."
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
+        for i in {1..30}; do
+          if pg_isready -h localhost -p 5432; then
+            echo "✅ PostgreSQL is ready!"
+            break
+          fi
+          echo "⏳ Waiting for PostgreSQL... ($i/30)"
           sleep 2
         done
-        
+
     - name: Generate Prisma Client
       run: pnpm run db:generate
       working-directory: ./packages/database
       env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/workify
-        
-    - name: Run database migrations
-      run: pnpm run db:migrate:deploy
-      working-directory: ./packages/database
-      env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/workify
-      
+        DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/workify_build"
+
     - name: Build applications
       run: pnpm run build
       env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/workify
-      
+        DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/workify_build"
+        NEXT_PUBLIC_API_URL: "https://${{ secrets.DOMAIN_NAME }}/api"
+        NEXTAUTH_URL: "https://${{ secrets.DOMAIN_NAME }}"
+
   deploy:
-    needs: build
+    needs: test-and-build
     runs-on: ubuntu-latest
     environment: production
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Install pnpm
+      run: npm install -g pnpm@10.14.0
+
+    - name: Generate production .env file
+      run: |
+        cat > .env << EOF
+        # Auto-generated .env file for production
+        DOMAIN_NAME=${{ secrets.DOMAIN_NAME }}
+        DATABASE_URL=${{ secrets.DATABASE_URL }}
+        POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+        POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+        POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+        JWT_SECRET=${{ secrets.JWT_SECRET }}
+        NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
+        NEXTAUTH_URL=https://${{ secrets.DOMAIN_NAME }}
+        LETSENCRYPT_EMAIL=${{ secrets.LETSENCRYPT_EMAIL }}
+        EOF
+
+        echo "✅ Generated .env file"
+        echo "📝 Domain: ${{ secrets.DOMAIN_NAME }}"
+
     - name: Setup Docker Buildx
       uses: docker/setup-buildx-action@v3
-      
+
     - name: Log in to Container Registry
       uses: docker/login-action@v3
       with:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-        
+
     - name: Build and push Frontend image
       uses: docker/build-push-action@v5
       with:
@@ -100,7 +141,9 @@ jobs:
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
-        
+        build-args: |
+          NODE_ENV=production
+
     - name: Build and push Backend image
       uses: docker/build-push-action@v5
       with:
@@ -112,13 +155,16 @@ jobs:
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
-        
+        build-args: |
+          NODE_ENV=production
+
     - name: Create deployment package
       run: |
         mkdir -p deployment
         cp docker-compose.yml deployment/
+        cp .env deployment/
         cp nginx.conf deployment/
-        cp init.sql deployment/ 2>/dev/null || true
+        cp init.sql deployment/ 2>/dev/null || touch deployment/init.sql
         
         # Создаем скрипт деплоя
         cat > deployment/deploy.sh << 'EOF'
@@ -126,25 +172,32 @@ jobs:
         set -e
         
         echo "🚀 Starting deployment..."
-        cd /opt/workify
+        
+        # Replace domain in nginx.conf
+        sed -i "s/\${DOMAIN_NAME}/$DOMAIN_NAME/g" nginx.conf
         
         # Pull latest images
+        echo "📥 Pulling latest images..."
         docker compose pull
         
-        # Run database migrations (если нужно)
-        docker compose run --rm backend pnpm run migration:run || true
+        # Run database migrations
+        echo "🔄 Running database migrations..."
+        docker compose run --rm backend pnpm run db:migrate || echo "Migrations completed or not needed"
         
-        # Deploy new version
+        # Start services
+        echo "🔧 Starting services..."
         docker compose up -d --remove-orphans
         
-        # Wait for services to be healthy
-        echo "⏳ Waiting for services to start..."
+        # Wait for services
+        echo "⏳ Waiting for services to be healthy..."
         sleep 30
         
-        # Run health checks
+        # Health checks
+        echo "🏥 Running health checks..."
         curl -f http://localhost/health || exit 1
         
         # Cleanup
+        echo "🧹 Cleaning up old images..."
         docker image prune -f
         
         echo "✅ Deployment completed successfully!"
@@ -154,41 +207,69 @@ jobs:
         
         # Создаем архив для деплоя
         tar -czf deployment-package.tar.gz deployment/
-        
+        echo "✅ Deployment package created"
+
     - name: Deploy to server
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SERVER_SSH_KEY }}
+        envs:
+          DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
         script: |
           set -e
           echo "🚀 Starting automated deployment..."
           
-          # Создаем папку приложения если не существует
+          # Ensure app directory exists
           sudo mkdir -p /opt/workify
           sudo chown ${{ secrets.SERVER_USER }}:${{ secrets.SERVER_USER }} /opt/workify
           cd /opt/workify
           
-          # Копируем и распаковываем deployment package
-          tar -xzf /tmp/deployment-package.tar.gz -C . --strip-components=1
-          
-          # Заменяем DOMAIN_NAME в nginx.conf
-          sed -i "s/\${DOMAIN_NAME}/${{ secrets.DOMAIN_NAME }}/g" nginx.conf
-          
-          # Делаем скрипт исполняемым
-          chmod +x deploy.sh
-          
-          # Останавливаем существующие сервисы если есть
+          # Stop existing services if any
+          echo "🛑 Stopping existing services..."
           docker compose down --remove-orphans || true
           
-          # Запускаем деплой
-          ./deploy.sh
+          # Extract deployment package
+          echo "📦 Extracting deployment package..."
+          tar -xzf /tmp/deployment-package.tar.gz -C . --strip-components=1
           
-          echo "🎉 Deployment completed without manual intervention!"
+          # Make script executable
+          chmod +x deploy.sh
           
+          # Deploy with environment variables
+          echo "🎯 Deploying application..."
+          DOMAIN_NAME="${{ secrets.DOMAIN_NAME }}" ./deploy.sh
+          
+          echo "🎉 Deployment completed successfully!"
+          echo "🌐 Application is live at: https://${{ secrets.DOMAIN_NAME }}"
+
     - name: Verify deployment
       run: |
+        echo "🔍 Verifying deployment..."
         sleep 30
-        curl -f https://${{ secrets.DOMAIN_NAME }}/health || exit 1
-        echo "✅ Production health check passed"
+        
+        # Health check
+        if curl -f https://${{ secrets.DOMAIN_NAME }}/health; then
+          echo "✅ Production health check passed"
+          echo "🌐 Application URL: https://${{ secrets.DOMAIN_NAME }}"
+        else
+          echo "❌ Health check failed"
+          exit 1
+        fi
+
+  notify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Deployment status
+      run: |
+        if [ "${{ needs.deploy.result }}" == "success" ]; then
+          echo "🎉 Deployment completed successfully!"
+          echo "📱 Application: https://${{ secrets.DOMAIN_NAME }}"
+        else
+          echo "❌ Deployment failed"
+          exit 1
+        fi

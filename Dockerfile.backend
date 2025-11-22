@@ -1,54 +1,36 @@
-FROM node:18-alpine AS base
+FROM node:18-alpine
 
-# Устанавливаем pnpm
-RUN npm install -g pnpm
+RUN npm install -g pnpm@10.14.0
 
-# Этап установки зависимостей
-FROM base AS deps
 WORKDIR /app
 
 # Копируем конфигурационные файлы
 COPY package.json ./
-COPY apps/backend/package.json ./apps/backend/
-COPY packages/*/package.json ./packages/
 COPY pnpm-workspace.yaml ./
 COPY pnpm-lock.yaml ./
+COPY turbo.json ./
+COPY .npmrc ./
+
+# Копируем package.json всех workspace
+COPY apps/backend/package.json ./apps/backend/
+COPY apps/frontend/package.json ./apps/frontend/
+COPY packages/*/package.json ./packages/
 
 # Устанавливаем зависимости
-RUN pnpm install --frozen-lockfile --prod=false
+RUN pnpm install --frozen-lockfile
 
-# Этап сборки
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/pnpm-lock.yaml ./
+# Копируем исходный код
 COPY . .
+
+# Генерируем Prisma Client
+RUN pnpm run db:generate
 
 # Собираем приложение
 ENV NODE_ENV=production
 RUN pnpm run build:backend
 
-# Production образ
-FROM base AS production
-WORKDIR /app
-
-# Копируем конфигурационные файлы для production зависимостей
-COPY package.json ./
-COPY apps/backend/package.json ./apps/backend/
-COPY packages/*/package.json ./packages/
-COPY pnpm-workspace.yaml ./
-COPY pnpm-lock.yaml ./
-
-# Устанавливаем только production зависимости
-RUN pnpm install --frozen-lockfile --prod
-
-# Копируем собранное приложение
-COPY --from=builder /app/apps/backend/dist ./dist
-
 # Создаем пользователя
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
-
+RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 USER nextjs
 
 EXPOSE 8000
