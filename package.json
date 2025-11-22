@@ -14,6 +14,8 @@
     "build:packages": "dotenv -- pnpm --filter shared --filter ui --filter database run build",
     "build:apps": "dotenv -- pnpm --filter frontend --filter backend run build",
     "build:full": "pnpm run build:ci && pnpm run db:setup",
+    "build:frontend": "dotenv -- pnpm --filter frontend run build",
+    "build:backend": "dotenv -- pnpm --filter backend run build",
     
     "dev": "dotenv -- turbo run dev & pnpm run prisma:studio",
     "predev": "pnpm run db:setup",
