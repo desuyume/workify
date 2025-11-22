@@ -11,7 +11,7 @@
     "build": "pnpm run build:ci",
     "build:ci": "pnpm run build:packages && pnpm run build:apps",
     "build:local": "pnpm run build:packages && pnpm run db:setup && pnpm run build:apps",
-    "build:packages": "dotenv -- pnpm --filter shared --filter ui --filter database run build:no-db",
+    "build:packages": "dotenv -- pnpm --filter shared --filter ui --filter database run build",
     "build:apps": "dotenv -- pnpm --filter frontend --filter backend run build",
     "build:full": "pnpm run build:ci && pnpm run db:setup",
     
