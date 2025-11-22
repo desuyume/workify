@@ -19,15 +19,8 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile.frontend
-    environment:
-      - NODE_ENV=production
-      - DATABASE_URL=${DATABASE_URL}
-      - JWT_SECRET=${JWT_SECRET}
-      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
-      - NEXTAUTH_URL=https://${DOMAIN_NAME}
-      - API_URL=http://backend:${SERVER_PORT}
-      - NEXT_PUBLIC_API_URL=https://${DOMAIN_NAME}/api
+      dockerfile: ./apps/frontend/Dockerfile
+    env_file: ./.env
     networks:
       - workify-network
     restart: unless-stopped
@@ -35,13 +28,8 @@ services:
   backend:
     build:
       context: .
-      dockerfile: Dockerfile.backend
-    environment:
-      - NODE_ENV=production
-      - DATABASE_URL=${DATABASE_URL}
-      - JWT_SECRET=${JWT_SECRET}
-      - PORT=${SERVER_PORT}
-      - CORS_ORIGIN=https://${DOMAIN_NAME}
+      dockerfile: ./apps/backend/Dockerfile
+    env_file: ./.env
     depends_on:
       - postgres
     networks:
@@ -50,10 +38,7 @@ services:
 
   postgres:
     image: postgres:15-alpine
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    env_file: ./.env
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
     networks:

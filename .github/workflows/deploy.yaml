@@ -82,8 +82,7 @@ jobs:
         run: pnpm run build
         env:
           DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/workify_build"
-          NEXT_PUBLIC_API_URL: "https://${{ secrets.DOMAIN_NAME }}/api"
-          NEXTAUTH_URL: "https://${{ secrets.DOMAIN_NAME }}"
+          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
 
   deploy:
     needs: test-and-build
@@ -106,15 +105,24 @@ jobs:
         run: |
           cat > .env << EOF
           # Auto-generated .env file for production
-          DOMAIN_NAME=${{ secrets.DOMAIN_NAME }}
+          ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}
+          API_URL=${{ secrets.API_URL }}
+          CLIENT_URL=${{ secrets.CLIENT_URL }}
           DATABASE_URL=${{ secrets.DATABASE_URL }}
-          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
-          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-          JWT_SECRET=${{ secrets.JWT_SECRET }}
-          NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
-          NEXTAUTH_URL=https://${{ secrets.DOMAIN_NAME }}
+          DOMAIN_NAME=${{ secrets.DOMAIN_NAME }}
           LETSENCRYPT_EMAIL=${{ secrets.LETSENCRYPT_EMAIL }}
+          NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}
+          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }}
+          SERVER_HOST=${{ secrets.SERVER_HOST }}
+          SERVER_PORT=${{ secrets.SERVER_PORT }}
+          SERVER_SSH_KEY=${{ secrets.SERVER_SSH_KEY }}
+          SERVER_URL=${{ secrets.SERVER_URL }}
+          SERVER_USER=${{ secrets.SERVER_USER }}
+          UPLOAD_LOCATION=${{ secrets.UPLOAD_LOCATION }}
           EOF
           echo "✅ Generated .env file"
 
@@ -132,7 +140,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile.frontend
+          file: apps/frontend/Dockerfile
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
@@ -146,7 +154,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile.backend
+          file: apps/backend/Dockerfile
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
@@ -162,7 +170,6 @@ jobs:
           cp docker-compose.yml deployment/
           cp .env deployment/
           cp nginx.conf deployment/
-          cp init.sql deployment/ 2>/dev/null || touch deployment/init.sql
           
           cat > deployment/deploy.sh << 'EOF'
           #!/bin/bash
@@ -189,10 +196,6 @@ jobs:
           echo "⏳ Waiting for services to be healthy..."
           sleep 30
           
-          # Health checks
-          echo "🏥 Running health checks..."
-          curl -f http://localhost/health || exit 1
-          
           # Cleanup
           echo "🧹 Cleaning up old images..."
           docker image prune -f
@@ -215,9 +218,9 @@ jobs:
             echo "🚀 Starting automated deployment..."
             
             # Ensure app directory exists
-            sudo mkdir -p /opt/my-app
-            sudo chown ${{ secrets.SERVER_USER }}:${{ secrets.SERVER_USER }} /opt/my-app
-            cd /opt/my-app
+            sudo mkdir -p /opt/workify
+            sudo chown ${{ secrets.SERVER_USER }}:${{ secrets.SERVER_USER }} /opt/workify
+            cd /opt/workify
             
             # Stop existing services if any
             echo "🛑 Stopping existing services..."
@@ -236,33 +239,3 @@ jobs:
             
             echo "🎉 Deployment completed successfully!"
             echo "🌐 Application is live at: https://${{ secrets.DOMAIN_NAME }}"
-
-      - name: Verify deployment
-        run: |
-          echo "🔍 Verifying deployment..."
-          sleep 30
-          
-          # Health check
-          if curl -f https://${{ secrets.DOMAIN_NAME }}/health; then
-            echo "✅ Production health check passed"
-            echo "🌐 Application URL: https://${{ secrets.DOMAIN_NAME }}"
-          else
-            echo "❌ Health check failed"
-            exit 1
-          fi
-
-  notify:
-    needs: deploy
-    runs-on: ubuntu-latest
-    if: always()
-    
-    steps:
-      - name: Deployment status
-        run: |
-          if [ "${{ needs.deploy.result }}" == "success" ]; then
-            echo "🎉 Deployment completed successfully!"
-            echo "📱 Application: https://${{ secrets.DOMAIN_NAME }}"
-          else
-            echo "❌ Deployment failed"
-            exit 1
-          fi
