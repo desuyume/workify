@@ -135,6 +135,9 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Build UI and shared packages
         run: pnpm run build:libs
