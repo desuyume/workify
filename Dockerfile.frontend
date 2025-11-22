@@ -1,31 +1,41 @@
 FROM node:18-alpine AS base
 
 # Устанавливаем pnpm
-RUN npm install -g pnpm
+RUN npm install -g pnpm@8
 
 # Этап установки зависимостей
 FROM base AS deps
 WORKDIR /app
 
-# Копируем конфигурационные файлы
+# Копируем ВСЕ файлы конфигурации
 COPY package.json ./
-COPY apps/frontend/package.json ./apps/frontend/
-COPY packages/*/package.json ./packages/
 COPY pnpm-workspace.yaml ./
 COPY pnpm-lock.yaml ./
+COPY turbo.json ./
 
-# Устанавливаем зависимости
-RUN pnpm install --frozen-lockfile --prod=false
+# Копируем package.json из всех workspace
+COPY apps/frontend/package.json ./apps/frontend/
+COPY apps/backend/package.json ./apps/backend/
+COPY packages/*/package.json ./packages/
+
+# Устанавливаем ВСЕ зависимости
+RUN pnpm install --frozen-lockfile
 
 # Этап сборки
 FROM base AS builder
 WORKDIR /app
+
+# Копируем зависимости из предыдущего этапа
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/pnpm-lock.yaml ./
+
+# Копируем исходный код
 COPY . .
 
-# Собираем приложение
+# Устанавливаем environment variables для билда
 ENV NODE_ENV=production
+
+# Собираем frontend приложение
 RUN pnpm run build:frontend
 
 # Этап запуска
@@ -33,13 +43,13 @@ FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Устанавливаем только production зависимости
+# Копируем только production зависимости
 COPY package.json ./
-COPY apps/frontend/package.json ./apps/frontend/
-COPY packages/*/package.json ./packages/
 COPY pnpm-workspace.yaml ./
 COPY pnpm-lock.yaml ./
+COPY apps/frontend/package.json ./apps/frontend/
 
+# Устанавливаем ТОЛЬКО production зависимости
 RUN pnpm install --frozen-lockfile --prod
 
 # Создаем пользователя
