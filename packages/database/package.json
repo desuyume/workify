@@ -22,8 +22,6 @@
     
     "format": "prisma format",
     "lint": "eslint . --max-warnings 0",
-    "prebuild": "pnpm run db:generate:no-verify",
-    "predev": "pnpm run db:generate:no-verify",
     "studio": "prisma studio"
   },
 	"dependencies": {
