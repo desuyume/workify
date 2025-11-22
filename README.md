@@ -28,11 +28,6 @@ pnpm install
 docker compose -f docker-compose.dev.yml up -d
 ```
 
-* Build libs
-```bash
-pnpm run build:libs
-```
-
 * Start dev mode
 ```bash
 pnpm run dev

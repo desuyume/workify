@@ -7,19 +7,26 @@
 		"dist/**"
 	],
 	"scripts": {
-		"build": "tsup && pnpm run db:migrate && pnpm run db:seed",
-		"db:migrate": "dotenv -e ../../.env prisma migrate deploy",
-		"db:migrate:dev": "dotenv -e ../../.env prisma migrate dev",
-		"db:generate": "prisma generate",
-		"db:push": "dotenv -e ../../.env prisma db push --skip-generate",
-		"db:seed": "tsx src/seed.ts",
-		"dev": "tsup --watch",
-		"format": "prisma format",
-		"lint": "eslint . --max-warnings 0",
-		"prebuild": "pnpm run db:generate",
-		"predev": "pnpm run db:generate",
-		"studio": "prisma studio"
-	},
+    "build": "tsup && pnpm run db:generate",
+    "build:no-db": "tsup && pnpm run db:generate:no-verify",
+    
+    "dev": "tsup --watch",
+    
+    "db:setup": "pnpm run db:migrate && pnpm run db:seed",
+    "db:prepare": "tsup && pnpm run db:setup",
+    "db:migrate": "dotenv -e ../../.env prisma migrate deploy",
+    "db:migrate:dev": "dotenv -e ../../.env prisma migrate dev",
+    "db:generate": "prisma generate",
+    "db:generate:no-verify": "prisma generate --skip-generate",
+    "db:push": "dotenv -e ../../.env prisma db push --skip-generate",
+    "db:seed": "tsx src/seed.ts",
+    
+    "format": "prisma format",
+    "lint": "eslint . --max-warnings 0",
+    "prebuild": "pnpm run db:generate:no-verify",
+    "predev": "pnpm run db:generate:no-verify",
+    "studio": "prisma studio"
+  },
 	"dependencies": {
 		"@prisma/client": "^5.12.1"
 	},

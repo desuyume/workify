@@ -5,19 +5,29 @@
     "schema": "packages/database/prisma/schema.prisma",
     "seed": "tsx packages/database/src/seed.ts"
   },
-  "scripts": {
+    "scripts": {
     "start": "dotenv -- turbo run start",
-    "build": "dotenv -- turbo run build",
-    "build:libs": "dotenv -- pnpm --filter database --filter shared --filter ui run build",
-    "build:frontend": "dotenv -- pnpm --filter frontend run build",
-    "build:backend": "dotenv -- pnpm --filter backend run build",
+    
+    "build": "pnpm run build:ci",
+    "build:ci": "pnpm run build:packages && pnpm run build:apps",
+    "build:local": "pnpm run build:packages && pnpm run db:setup && pnpm run build:apps",
+    "build:packages": "dotenv -- pnpm --filter shared --filter ui --filter database run build:no-db",
+    "build:apps": "dotenv -- pnpm --filter frontend --filter backend run build",
+    "build:full": "pnpm run build:ci && pnpm run db:setup",
+    
     "dev": "dotenv -- turbo run dev & pnpm run prisma:studio",
-    "predev": "dotenv -- pnpm --filter=database run db:migrate",
+    "predev": "pnpm run db:setup",
+    "dev:frontend": "dotenv -- pnpm --filter frontend run dev",
+    "dev:backend": "dotenv -- pnpm --filter backend run dev",
+    
     "db:generate": "dotenv -- pnpm --filter=database run db:generate",
+    "db:setup": "dotenv -- pnpm --filter=database run db:setup",
     "db:migrate": "dotenv -- pnpm --filter=database run db:migrate",
     "db:migrate:dev": "dotenv -- pnpm --filter=database run db:migrate:dev",
     "db:seed": "dotenv -- pnpm --filter=database run db:seed",
+    "db:prepare": "dotenv -- pnpm --filter=database run db:prepare",
     "prisma:studio": "dotenv -- pnpm --filter=database run studio",
+    
     "format": "turbo run format",
     "lint": "turbo run lint",
     "clean": "turbo run clean"

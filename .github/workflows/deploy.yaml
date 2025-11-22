@@ -13,21 +13,6 @@ jobs:
   test-and-build:
     runs-on: ubuntu-latest
     environment: production
-    
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_DB: workify_build
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
 
     steps:
       - name: Checkout code
@@ -59,30 +44,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Wait for PostgreSQL
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client
-          for i in {1..30}; do
-            if pg_isready -h localhost -p 5432; then
-              echo "✅ PostgreSQL is ready!"
-              break
-            fi
-            echo "⏳ Waiting for PostgreSQL... ($i/30)"
-            sleep 2
-          done
-
-      - name: Generate Prisma Client
-        run: pnpm run db:generate
-        working-directory: ./packages/database
-        env:
-          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/workify_build"
-
       - name: Build applications
         run: pnpm run build
-        env:
-          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/workify_build"
-          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
 
   deploy:
     needs: test-and-build
@@ -135,12 +98,14 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build UI and shared packages
-        run: pnpm run build:libs
+      - name: Build packages
+        run: |
+          pnpm run build:packages
+          pnpm run db:setup
 
       - name: Build and push Frontend image
         uses: docker/build-push-action@v5
