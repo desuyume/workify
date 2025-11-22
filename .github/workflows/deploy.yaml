@@ -5,9 +5,13 @@ on:
     branches: [master]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
 env:
-  REGISTRY: docker.io
-  IMAGE_NAME: desuyume/workify
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   test-and-build:
@@ -126,9 +130,9 @@ jobs:
       - name: Log in to Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+           registry: ${{ env.REGISTRY }}
+           username: ${{ github.actor }}
+           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
