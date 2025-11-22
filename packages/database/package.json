@@ -7,12 +7,12 @@
 		"dist/**"
 	],
 	"scripts": {
-    "build": "tsup && pnpm run db:generate",
+    "build": "pnpm run db:generate && tsup",
     
     "dev": "tsup --watch",
     
     "db:setup": "pnpm run db:migrate && pnpm run db:seed",
-    "db:prepare": "tsup && pnpm run db:setup",
+    "db:prepare": "pnpm run db:setup && tsup",
     "db:migrate": "dotenv -e ../../.env prisma migrate deploy",
     "db:migrate:dev": "dotenv -e ../../.env prisma migrate dev",
     "db:generate": "prisma generate",
