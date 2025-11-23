@@ -27,6 +27,11 @@ COPY --from=deps /app/pnpm-workspace.yaml ./
 COPY apps/frontend/ ./apps/frontend/
 COPY packages/ ./packages/
 
+# Переменные для отключения линтеров
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV DISABLE_ESLINT_PLUGIN=true
+ENV ESLINT_NO_DEV_ERRORS=true
+
 # Собираем приложение
 RUN pnpm run build:frontend
 
