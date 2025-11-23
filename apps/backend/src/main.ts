@@ -18,6 +18,6 @@ async function bootstrap() {
   )
   app.useGlobalFilters(new DeleteFileOnErrorFilter())
 
-  await app.listen(process.env.SERVER_PORT || 8000)
+  await app.listen(process.env.BACKEND_PORT || 8000)
 }
 bootstrap()

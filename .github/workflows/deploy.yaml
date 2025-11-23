@@ -105,6 +105,8 @@ jobs:
           # Auto-generated .env file for production
           ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}
           API_URL=${{ secrets.API_URL }}
+          BACKEND_PORT=${{ secrets.BACKEND_PORT }}
+          BACKEND_URL=${{ secrets.BACKEND_URL }}
           CLIENT_URL=${{ secrets.CLIENT_URL }}
           DATABASE_URL=${{ secrets.DATABASE_URL }}
           DOMAIN_NAME=${{ secrets.DOMAIN_NAME }}
@@ -118,7 +120,6 @@ jobs:
           SERVER_HOST=${{ secrets.SERVER_HOST }}
           SERVER_PORT=${{ secrets.SERVER_PORT }}
           SERVER_SSH_KEY=${{ secrets.SERVER_SSH_KEY }}
-          SERVER_URL=${{ secrets.SERVER_URL }}
           SERVER_USER=${{ secrets.SERVER_USER }}
           UPLOAD_LOCATION=${{ secrets.UPLOAD_LOCATION }}
           EOF

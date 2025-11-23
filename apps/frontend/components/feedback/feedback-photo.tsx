@@ -41,7 +41,7 @@ export default function FeedbackPhoto({ photo, setPhoto }: FeedbackPhotoProps) {
             photo
               ? typeof photo === 'object'
                 ? URL.createObjectURL(photo)
-                : `${process.env.SERVER_URL}/${photo}`
+                : `${process.env.BACKEND_URL}/${photo}`
               : '#'
           }
           width={313}

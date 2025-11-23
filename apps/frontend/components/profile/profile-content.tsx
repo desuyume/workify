@@ -20,7 +20,7 @@ export default function ProfileContent({ user }: ProfileContentProps) {
             src={
               !!user.avatar.includes('blob')
                 ? user.avatar
-                : `${process.env.SERVER_URL}/${user.avatar}`
+                : `${process.env.BACKEND_URL}/${user.avatar}`
             }
             width={231}
             height={283}
@@ -44,8 +44,8 @@ export default function ProfileContent({ user }: ProfileContentProps) {
           value={
             user.birthday
               ? `${getAgeByBirthday(new Date(user.birthday))} (${formatDate(
-                  new Date(user.birthday)
-                )})`
+                new Date(user.birthday)
+              )})`
               : null
           }
         />

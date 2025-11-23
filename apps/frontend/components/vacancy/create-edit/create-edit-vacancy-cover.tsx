@@ -42,7 +42,7 @@ export default function CreateEditVacancyCover() {
             vacancy.cover
               ? typeof vacancy.cover === 'object'
                 ? URL.createObjectURL(vacancy.cover)
-                : `${process.env.SERVER_URL}/${vacancy.cover}`
+                : `${process.env.BACKEND_URL}/${vacancy.cover}`
               : '#'
           }
           width={155}

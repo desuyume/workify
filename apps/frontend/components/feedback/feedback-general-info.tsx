@@ -27,7 +27,7 @@ export default function FeedbackGeneralInfo({
         <div className='flex'>
           <Link href={`/profile/${login}`} className='mr-6'>
             <Image
-              src={!!avatar ? `${process.env.SERVER_URL}/${avatar}` : defaultProfileImg}
+              src={!!avatar ? `${process.env.BACKEND_URL}/${avatar}` : defaultProfileImg}
               alt='profile-image'
               width={89}
               height={89}

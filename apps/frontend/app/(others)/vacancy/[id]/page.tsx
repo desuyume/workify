@@ -49,7 +49,7 @@ export default async function Page({
         {vacancy.data.photos.map((vacancy) => (
           <Image
             key={vacancy.id}
-            src={`${process.env.SERVER_URL}/${vacancy.url}`}
+            src={`${process.env.BACKEND_URL}/${vacancy.url}`}
             alt='vacancy-photo'
             width={275}
             height={348}

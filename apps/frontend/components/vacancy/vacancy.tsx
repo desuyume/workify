@@ -24,7 +24,7 @@ export default function Vacancy({ vacancy, inProfile = false }: VacancyProps) {
           <Image
             src={
               !!vacancy.user.avatar
-                ? `${process.env.SERVER_URL}/${vacancy.user.avatar}`
+                ? `${process.env.BACKEND_URL}/${vacancy.user.avatar}`
                 : defaultProfilePic
             }
             alt='profile-img'
@@ -82,7 +82,7 @@ export default function Vacancy({ vacancy, inProfile = false }: VacancyProps) {
           </div>
           {vacancy.cover && (
             <Image
-              src={`${process.env.SERVER_URL}/${vacancy.cover}`}
+              src={`${process.env.BACKEND_URL}/${vacancy.cover}`}
               alt='cover-img'
               width={157}
               height={201}
