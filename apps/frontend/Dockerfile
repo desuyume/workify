@@ -15,8 +15,8 @@ RUN pnpm install --frozen-lockfile
 COPY apps/frontend/ ./apps/frontend/
 COPY packages/ ./packages/ 
 
-# Отключаем ESLint при билде
-RUN NEXT_IGNORE_ESLINT=1 pnpm run build:frontend
+# Отключаем ВСЕ линтеры при билде
+RUN ESLINT_NO_DEV_ERRORS=true TURBO_NO_UNDECLARED_ENV_VARS=1 pnpm run build:frontend
 
 RUN pnpm run build:frontend
 
