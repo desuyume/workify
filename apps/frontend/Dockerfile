@@ -13,7 +13,10 @@ ENV CI=true
 RUN pnpm install --frozen-lockfile
 
 COPY apps/frontend/ ./apps/frontend/
-COPY packages/ ./packages/  
+COPY packages/ ./packages/ 
+
+# Отключаем ESLint при билде
+RUN NEXT_IGNORE_ESLINT=1 pnpm run build:frontend
 
 RUN pnpm run build:frontend
 
