@@ -1,35 +1,48 @@
-FROM node:20-alpine AS builder
+FROM node:20-alpine AS base
 
+# Устанавливаем pnpm
 RUN npm install -g pnpm@10.23.0
 
+FROM base AS deps
 WORKDIR /app
 
+# Копируем файлы для установки зависимостей
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/frontend/package.json ./apps/frontend/
 COPY packages/ ./packages/
 
-ENV CI=true
-
+# Устанавливаем зависимости
 RUN pnpm install --frozen-lockfile
 
-COPY apps/frontend/ ./apps/frontend/
-COPY packages/ ./packages/ 
-
-RUN pnpm run build:frontend
-
-FROM node:20-alpine
-
-RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
-
+FROM base AS builder
 WORKDIR /app
 
-# Копируем только нужные файлы
+# Копируем зависимости
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/package.json ./
+COPY --from=deps /app/pnpm-lock.yaml ./
+COPY --from=deps /app/pnpm-workspace.yaml ./
+
+# Копируем исходный код
+COPY apps/frontend/ ./apps/frontend/
+COPY packages/ ./packages/
+
+# Собираем приложение
+RUN pnpm run build:frontend
+
+FROM base AS runner
+WORKDIR /app
+
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nextjs -u 1001
+
+# Копируем только необходимые файлы
 COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/ ./apps/frontend/.next/
 COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/public/ ./apps/frontend/public/
 COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/package.json ./apps/frontend/
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/ ./node_modules/
 
-COPY --from=builder --chown=nextjs:nodejs /app/packages/ ./packages/
+# Копируем node_modules только для продакшена
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 USER nextjs
 
