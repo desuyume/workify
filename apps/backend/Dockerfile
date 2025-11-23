@@ -23,9 +23,6 @@ COPY packages/ ./packages/
 # Генерируем Prisma
 RUN pnpm run db:generate
 
-# Проверяем Prisma
-RUN ls -la node_modules/.prisma/client/ && echo "✅ Prisma client generated"
-
 # Собираем
 RUN pnpm run build:backend
 
