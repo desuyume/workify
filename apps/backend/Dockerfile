@@ -38,7 +38,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 
 # Копируем собранное приложение
-COPY --from=builder /app/apps/backend/dist ./apps/backend/dist
+COPY --from=builder /app/apps/backend/dist ./
 COPY --from=builder /app/apps/backend/package.json ./apps/backend/
 
 # Копируем shared packages если используются

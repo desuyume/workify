@@ -169,22 +169,26 @@ jobs:
 
       - name: Create deployment package
         run: |
-          mkdir -p deployment
-          cp docker-compose.yml deployment/
-          cp .env deployment/
-          cp nginx.conf deployment/
+          mkdir -p deployment_temp
+          cp docker-compose.yml deployment_temp/
+          cp .env deployment_temp/
+          cp nginx.conf deployment_temp/
           
-          cat > deployment/deploy.sh << 'EOF'
+          # Создаем директорию для nginx
+          mkdir -p deployment_temp/nginx
+          
+          # Создаем .htpasswd с дефолтным паролем (измените вручную на сервере)
+          echo "admin:\$apr1\$rFg5U5bN\$X5zYTpPpW.L3eL2q7J9qQ0" > deployment_temp/nginx/.htpasswd
+          
+          cat > deployment_temp/deploy.sh << 'EOF'
           #!/bin/bash
           set -e
-          
-          DOMAIN_NAME="$1"
-          echo "🚀 Starting deployment with domain: $DOMAIN_NAME"
+          echo "🚀 Starting deployment..."
           
           # Replace domain in nginx.conf
           sed -i "s/\${DOMAIN_NAME}/$DOMAIN_NAME/g" nginx.conf
           
-          # Для публичных образов GHCR логин не требуется
+          # Pull latest images
           echo "📥 Pulling latest images..."
           docker compose pull
           
@@ -200,19 +204,17 @@ jobs:
           echo "⏳ Waiting for services to be healthy..."
           sleep 30
           
-          # Check services status
-          echo "🔍 Checking services status..."
-          docker compose ps
-          
           # Cleanup
           echo "🧹 Cleaning up old images..."
           docker image prune -f
           
           echo "✅ Deployment completed successfully!"
+          echo "🔧 Adminer available at: https://$DOMAIN_NAME/adminer/"
+          echo "🔑 Default credentials: admin / admin (change immediately!)"
           EOF
           
-          chmod +x deployment/deploy.sh
-          tar -czf deployment-package.tar.gz deployment/
+          chmod +x deployment_temp/deploy.sh
+          tar -czf deployment-package.tar.gz deployment_temp/
           echo "✅ Deployment package created"
 
       - name: Copy deployment package to server
