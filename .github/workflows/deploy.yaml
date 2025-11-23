@@ -167,7 +167,6 @@ jobs:
           build-args: |
             NODE_ENV=production
         
-      - name: Cleanup server disk space
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SERVER_HOST }}
