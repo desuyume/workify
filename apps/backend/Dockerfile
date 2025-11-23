@@ -28,6 +28,7 @@ COPY apps/backend/ ./apps/backend/
 COPY packages/ ./packages/
 
 # Собираем приложение
+RUN pnpm run db:generate
 RUN pnpm run build:backend
 
 FROM base AS runner
