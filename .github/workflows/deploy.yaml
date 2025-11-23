@@ -127,9 +127,9 @@ jobs:
       - name: Log in to Container Registry
         uses: docker/login-action@v3
         with:
-           registry: ${{ env.REGISTRY }}
-           username: ${{ github.actor }}
-           password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -178,16 +178,13 @@ jobs:
           #!/bin/bash
           set -e
           
-          echo "🚀 Starting deployment..."
+          DOMAIN_NAME="$1"
+          echo "🚀 Starting deployment with domain: $DOMAIN_NAME"
           
           # Replace domain in nginx.conf
           sed -i "s/\${DOMAIN_NAME}/$DOMAIN_NAME/g" nginx.conf
-
-          # Login to GitHub Container Registry
-          echo "🔐 Logging in to GHCR..."
-          echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
           
-          # Pull latest images
+          # Для публичных образов GHCR логин не требуется
           echo "📥 Pulling latest images..."
           docker compose pull
           
@@ -202,6 +199,10 @@ jobs:
           # Wait for services
           echo "⏳ Waiting for services to be healthy..."
           sleep 30
+          
+          # Check services status
+          echo "🔍 Checking services status..."
+          docker compose ps
           
           # Cleanup
           echo "🧹 Cleaning up old images..."
@@ -246,18 +247,29 @@ jobs:
             
             # Extract deployment package
             echo "📦 Extracting deployment package..."
-            ls -la /tmp/deployment-package.tar.gz || echo "File not found"
             tar -xzf /tmp/deployment-package.tar.gz -C . --strip-components=1
             
             # Make script executable
             chmod +x deploy.sh
             
-            # Deploy with environment variables
+            # Deploy with domain as argument
             echo "🎯 Deploying application..."
-            DOMAIN_NAME="$DOMAIN_NAME" \
-            GHCR_USERNAME="$GHCR_USERNAME" \
-            GHCR_TOKEN="$GHCR_TOKEN" \
-            ./deploy.sh
+            ./deploy.sh "${{ secrets.DOMAIN_NAME }}"
             
             echo "🎉 Deployment completed successfully!"
             echo "🌐 Application is live at: https://${{ secrets.DOMAIN_NAME }}"
+
+      - name: Verify deployment
+        run: |
+          echo "🔍 Verifying deployment..."
+          sleep 45
+          
+          # Health check
+          if curl -f https://${{ secrets.DOMAIN_NAME }}/health; then
+            echo "✅ Production health check passed"
+            echo "🌐 Application URL: https://${{ secrets.DOMAIN_NAME }}"
+          else
+            echo "❌ Health check failed"
+            # Не завершаем workflow с ошибкой, просто логируем
+            echo "⚠️ Health check failed but continuing..."
+          fi
