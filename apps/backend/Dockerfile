@@ -1,29 +1,29 @@
 FROM node:20-alpine
 
-RUN apk add --no-cache python3 make g++ openssl-dev
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    openssl \
+    openssl-dev \
+    openssl-libs-static \
+    libc6-compat
+
+RUN npm install -g pnpm@10.23.0
 
 WORKDIR /app
 
-# Устанавливаем pnpm
-RUN npm install -g pnpm@10.23.0
-
-# Копируем package files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/backend/package.json ./apps/backend/
 COPY packages/ ./packages/
 
-# Устанавливаем зависимости с CI переменной
 ENV CI=true
 RUN pnpm install --frozen-lockfile
 
-# Копируем исходный код
 COPY apps/backend/ ./apps/backend/
 COPY packages/ ./packages/
 
-# Генерируем Prisma
 RUN pnpm run db:generate
-
-# Собираем
 RUN pnpm run build:backend
 
 EXPOSE 8000
