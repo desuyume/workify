@@ -15,14 +15,14 @@ services:
     restart: unless-stopped
 
   frontend:
-    image: docker.io/desuyume/workify-frontend:latest
+    image: ghcr.io/desuyume/workify-frontend:latest
     env_file: ./.env
     networks:
       - workify-network
     restart: unless-stopped
 
   backend:
-    image: docker.io/desuyume/workify-backend:latest
+    image: ghcr.io/desuyume/workify-backend:latest
     env_file: ./.env
     depends_on:
       - postgres
