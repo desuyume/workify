@@ -17,7 +17,7 @@ COPY --from=deps /app/pnpm-workspace.yaml ./
 COPY apps/backend/ ./apps/backend/
 COPY packages/ ./packages/
 
-RUN pnpm run build --filter=backend
+RUN pnpm run build:backend
 
 FROM base AS runner
 WORKDIR /app
