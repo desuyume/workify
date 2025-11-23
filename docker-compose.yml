@@ -1,6 +1,7 @@
 services:
   nginx:
     image: nginx:alpine
+    env_file: ./.env
     ports:
       - "80:80"
       - "443:443"
