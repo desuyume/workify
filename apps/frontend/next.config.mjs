@@ -28,6 +28,7 @@ const nextConfig = {
 		],
 	},
 	output: "standalone",
+	staticPageGenerationTimeout: 180,
 	experimental: {
 		turbo: {
 			turbo: {
