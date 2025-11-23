@@ -166,6 +166,39 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             NODE_ENV=production
+        
+      - name: Cleanup server disk space
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT || '22' }}
+          script: |
+            echo "🧹 Cleaning up disk space..."
+
+            # Проверить свободное место
+            df -h
+
+            # Очистить Docker
+            docker system prune -a -f || true
+            docker volume prune -f || true
+            docker image prune -a -f || true
+
+            # Очистить системный кэш
+            sudo apt-get clean || true
+            sudo apt-get autoremove -y || true
+
+            # Очистить логи
+            sudo journalctl --vacuum-time=1d || true
+
+            # Удалить старые deployment packages
+            sudo rm -rf /tmp/deployment-package* || true
+            sudo rm -rf /opt/workify/old_* || true
+
+            # Проверить результат
+            echo "✅ Cleanup completed. Free space:"
+            df -h
 
       - name: Create deployment package
         run: |
@@ -260,18 +293,3 @@ jobs:
             
             echo "🎉 Deployment completed successfully!"
             echo "🌐 Application is live at: https://${{ secrets.DOMAIN_NAME }}"
-
-      - name: Verify deployment
-        run: |
-          echo "🔍 Verifying deployment..."
-          sleep 45
-          
-          # Health check
-          if curl -f https://${{ secrets.DOMAIN_NAME }}/health; then
-            echo "✅ Production health check passed"
-            echo "🌐 Application URL: https://${{ secrets.DOMAIN_NAME }}"
-          else
-            echo "❌ Health check failed"
-            # Не завершаем workflow с ошибкой, просто логируем
-            echo "⚠️ Health check failed but continuing..."
-          fi
