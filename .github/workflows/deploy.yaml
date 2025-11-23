@@ -178,7 +178,7 @@ jobs:
           mkdir -p deployment_temp/nginx
           
           # Создаем .htpasswd с дефолтным паролем (измените вручную на сервере)
-          echo "admin:\$apr1\$rFg5U5bN\$X5zYTpPpW.L3eL2q7J9qQ0" > deployment_temp/nginx/.htpasswd
+          echo "admin:$apr1$5JtOSK0v$yPZiHgoqp651mafwZpHxt1" > deployment_temp/nginx/.htpasswd
           
           cat > deployment_temp/deploy.sh << 'EOF'
           #!/bin/bash
