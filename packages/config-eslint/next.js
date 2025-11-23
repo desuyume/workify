@@ -1,6 +1,6 @@
-const { resolve } = require("node:path");
+const { resolveTsconfigPath } = require('./helper')
 
-const project = resolve(process.cwd(), "tsconfig.json");
+const project = resolveTsconfigPath();
 
 /*
  * This is a custom ESLint configuration for use with
@@ -22,6 +22,8 @@ module.exports = {
   ].map(require.resolve),
   parserOptions: {
     project,
+		tsconfigRootDir: process.cwd(),
+		sourceType: 'module',
   },
   globals: {
     React: true,
