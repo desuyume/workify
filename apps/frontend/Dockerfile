@@ -4,18 +4,16 @@ RUN npm install -g pnpm@10.23.0
 
 WORKDIR /app
 
-COPY package.json ./
-COPY pnpm-workspace.yaml ./
-COPY pnpm-lock.yaml ./
-
-COPY apps/frontend/package.json ./apps/frontend/
+COPY ../../package.json ./
+COPY ../../pnpm-lock.yaml ./
+COPY ../../apps/frontend/ ./apps/frontend/
+COPY ../../packages/ ./packages/
 
 RUN pnpm install --frozen-lockfile
 
-COPY . .
-
 ENV NODE_ENV=production
-RUN pnpm run build:frontend
+
+RUN cd apps/frontend && pnpm run build
 
 RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 USER nextjs

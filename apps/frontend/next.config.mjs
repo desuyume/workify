@@ -28,20 +28,18 @@ const nextConfig = {
 		],
 	},
 	output: "standalone",
-	staticPageGenerationTimeout: 180,
-	experimental: {
-		turbo: {
-			turbo: {
-      	rules: {
-        	'*.svg': {
-          	loaders: ['@svgr/webpack'],
-          	as: '*.js',
-        	},
-				}
-			},
-		reactCompiler: true
-		}
-	},
+	// Убираем экспериментальные фичи которые могут мешать
+	// experimental: {
+	// 	turbo: {
+	// 		rules: {
+	// 			'*.svg': {
+	// 				loaders: ['@svgr/webpack'],
+	// 				as: '*.js',
+	// 			},
+	// 		}
+	// 	},
+	// 	reactCompiler: true
+	// }
 }
 
 export default nextConfig

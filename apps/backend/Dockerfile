@@ -4,18 +4,16 @@ RUN npm install -g pnpm@10.23.0
 
 WORKDIR /app
 
-COPY package.json ./
-COPY pnpm-workspace.yaml ./
-COPY pnpm-lock.yaml ./
-
-COPY apps/backend/package.json ./apps/backend/
+COPY ../../package.json ./
+COPY ../../pnpm-lock.yaml ./
+COPY ../../apps/backend/ ./apps/backend/
+COPY ../../packages/ ./packages/
 
 RUN pnpm install --frozen-lockfile
 
-COPY . .
-
 ENV NODE_ENV=production
-RUN pnpm run build:backend
+
+RUN pnpm run db:generate && pnpm run build:backend
 
 EXPOSE 8000
 
