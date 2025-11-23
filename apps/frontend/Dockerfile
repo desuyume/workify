@@ -41,13 +41,9 @@ WORKDIR /app
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001
 
-# Копируем только необходимые файлы
-COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/ ./apps/frontend/.next/
-COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/public/ ./apps/frontend/public/
-COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/package.json ./apps/frontend/
-
-# Копируем node_modules только для продакшена
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/standalone/ ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/static ./apps/frontend/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/public ./apps/frontend/public
 
 USER nextjs
 
