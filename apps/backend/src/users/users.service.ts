@@ -6,7 +6,7 @@ import {
   NotFoundException
 } from '@nestjs/common'
 import { CreateUserDto } from './dto/users.dto'
-import { hash } from 'bcrypt'
+import { hash } from 'bcryptjs'
 import { CUSTOM_PRISMA_SERVICE, CUSTOM_PRISMA_TYPE } from 'src/constants/prisma.constants'
 import { removeFile } from '@/utils/removeFIle'
 

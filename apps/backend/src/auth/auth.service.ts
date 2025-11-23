@@ -2,8 +2,8 @@ import { IUserPayload } from '@workify/shared'
 import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { LoginDto } from './dto/auth.dto'
 import { UsersService } from 'src/users/users.service'
-import { compare } from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
+import { compare } from 'bcryptjs'
 
 const EXPIRE_TIME = 20 * 1000
 
