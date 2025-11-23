@@ -11,8 +11,8 @@ export function Glow({
 }) {
   return (
     <div
-      style={{ width, filter: `blur(${blur})` }}
       className={cn('aspect-square bg-primary-light rounded-full', className)}
+      style={{ width, filter: `blur(${blur})` }}
     />
   )
 }

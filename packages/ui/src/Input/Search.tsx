@@ -8,13 +8,13 @@ export function Search({ name, type, placeholder, className, ...props }: SearchP
   return (
     <input
       {...props}
-      type={type ?? 'text'}
-      name={name}
-      placeholder={placeholder}
       className={cn(
         'w-[29.0625rem] h-9 bg-transparent text-primary-light placeholder:text-primary-light placeholder:text-opacity-80 outline-none border border-primary-light rounded-[0.5625rem] pl-[0.9375rem] text-xl',
         className
       )}
+      name={name}
+      placeholder={placeholder}
+      type={type ?? 'text'}
     />
   )
 }

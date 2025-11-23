@@ -23,7 +23,7 @@ export class VacancyService {
     const page = Number(query.page) || 1
     const limit = Number(query.limit) || 7
 
-    let filterOptions: Prisma.VacancyFindManyArgs = {
+    const filterOptions: Prisma.VacancyFindManyArgs = {
       include: {
         photos: true,
         user: true,

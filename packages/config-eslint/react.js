@@ -1,6 +1,6 @@
-const { resolve } = require("node:path");
+const { resolveTsconfigPath } = require('./helper')
 
-const project = resolve(process.cwd(), "tsconfig.json");
+const project = resolveTsconfigPath();
 
 /*
  * This is a custom ESLint configuration for use a library
@@ -19,6 +19,8 @@ module.exports = {
   ].map(require.resolve),
   parserOptions: {
     project,
+		tsconfigRootDir: process.cwd(),
+		sourceType: 'module',
   },
   globals: {
     JSX: true,
@@ -37,6 +39,10 @@ module.exports = {
   // add rules configurations here
   rules: {
     "import/no-default-export": "off",
+    "unicorn/filename-case": "off",
+    "@typescript-eslint/no-empty-interface": "off",
+    "jsx-a11y/click-events-have-key-events": "off",
+    "jsx-a11y/no-static-element-interactions": "warn"
   },
   overrides: [
     {

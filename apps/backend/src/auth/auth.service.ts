@@ -46,7 +46,7 @@ export class AuthService {
     const isPassEqual = await compare(dto.password, user.password)
 
     if (user && isPassEqual) {
-      const { password, ...result } = user
+      const { password: _, ...result } = user
       return result
     }
     throw new UnauthorizedException('Wrong password')

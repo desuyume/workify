@@ -26,11 +26,11 @@ export function Button({
       return (
         <button
           {...props}
-          style={{ width, height, fontSize, fontWeight, borderRadius }}
           className={cn(
             'font-montserrat text-primary-light bg-primary-dark border border-primary-light hover:bg-primary-light hover:text-primary-dark hover:border-primary-dark transition-colors',
             className
           )}
+          style={{ width, height, fontSize, fontWeight, borderRadius }}
         >
           {title}
         </button>
@@ -39,11 +39,11 @@ export function Button({
       return (
         <button
           {...props}
-          style={{ width, height, fontSize, fontWeight, borderRadius }}
           className={cn(
             'font-montserrat text-primary-dark bg-primary-light border border-primary-dark hover:bg-primary-dark hover:text-primary-light hover:border-primary-light transition-colors',
             className
           )}
+          style={{ width, height, fontSize, fontWeight, borderRadius }}
         >
           {title}
         </button>
@@ -52,11 +52,11 @@ export function Button({
       return (
         <button
           {...props}
-          style={{ width, height }}
           className={cn(
             'text-xl font-medium text-primary-dark bg-primary-light border border-primary-light hover:bg-transparent hover:text-primary-light rounded-[0.625rem] transition-colors',
             className
           )}
+          style={{ width, height }}
         >
           {title}
         </button>
@@ -65,11 +65,11 @@ export function Button({
       return (
         <button
           {...props}
-          style={{ width, height }}
           className={cn(
             'text-xl font-medium text-primary-light bg-primary-dark border border-primary-dark hover:bg-transparent hover:border-primary-light rounded-[0.625rem] transition-colors',
             className
           )}
+          style={{ width, height }}
         >
           {title}
         </button>
@@ -78,16 +78,16 @@ export function Button({
       return (
         <button
           {...props}
-          style={{ width, height }}
           className={cn(
             'text-xl font-medium text-primary-light bg-transparent border border-primary-light hover:bg-primary-light hover:text-primary-dark rounded-[0.625rem] transition-colors',
             className
           )}
+          style={{ width, height }}
         >
           {title}
         </button>
       )
     default:
-      return
+      
   }
 }

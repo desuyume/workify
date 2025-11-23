@@ -49,7 +49,7 @@ export class UsersService {
       }
     })
 
-    const { password, ...result } = newUser
+    const { password: _, ...result } = newUser
     return result
   }
 

@@ -21,7 +21,6 @@
     "db:seed": "tsx src/seed.ts",
     
     "format": "prisma format",
-    "lint": "eslint . --max-warnings 0",
     "studio": "prisma studio"
   },
 	"dependencies": {
