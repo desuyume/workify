@@ -4,10 +4,7 @@ RUN npm install -g pnpm@10.23.0
 
 WORKDIR /app
 
-COPY ../../package.json ./
-COPY ../../pnpm-lock.yaml ./
-COPY ../../apps/backend/ ./apps/backend/
-COPY ../../packages/ ./packages/
+COPY ../.. .
 
 RUN pnpm install --frozen-lockfile
 
