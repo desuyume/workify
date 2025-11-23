@@ -1,6 +1,6 @@
 FROM node:20-alpine AS base
 
-RUN npm install -g pnpm@10.14.0
+RUN npm install -g pnpm@10.23.0
 
 WORKDIR /app
 

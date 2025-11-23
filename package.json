@@ -43,7 +43,7 @@
     "tsx": "^4.20.6",
     "turbo": "^1.13.4"
   },
-  "packageManager": "pnpm@10.14.0",
+  "packageManager": "pnpm@10.23.0",
   "dependencies": {
     "dotenv-cli": "^7.4.4",
     "node-jose-tools": "^2.0.4"

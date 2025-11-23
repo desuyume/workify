@@ -31,7 +31,7 @@ jobs:
 
       - name: Install pnpm
         run: |
-          npm install -g pnpm@10.14.0
+          npm install -g pnpm@10.23.0
           echo "PNPM version: $(pnpm --version)"
 
       - name: Verify lockfile exists
@@ -81,7 +81,7 @@ jobs:
           node-version: '18'
 
       - name: Install pnpm
-        run: npm install -g pnpm@10.14.0
+        run: npm install -g pnpm@10.23.0
 
       - name: Install PostgreSQL client
         run: |
@@ -254,7 +254,10 @@ jobs:
             
             # Deploy with environment variables
             echo "🎯 Deploying application..."
-            DOMAIN_NAME="${{ secrets.DOMAIN_NAME }}" ./deploy.sh
+            DOMAIN_NAME="$DOMAIN_NAME" \
+            GHCR_USERNAME="$GHCR_USERNAME" \
+            GHCR_TOKEN="$GHCR_TOKEN" \
+            ./deploy.sh
             
             echo "🎉 Deployment completed successfully!"
             echo "🌐 Application is live at: https://${{ secrets.DOMAIN_NAME }}"
