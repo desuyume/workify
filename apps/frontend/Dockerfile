@@ -1,18 +1,15 @@
-FROM node:20-alpine AS base
-
-# Устанавливаем pnpm
-RUN npm install -g pnpm@10.23.0
+FROM oven/bun:1 AS base
 
 FROM base AS deps
 WORKDIR /app
 
 # Копируем файлы для установки зависимостей
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json bun.lock ./
 COPY apps/frontend/package.json ./apps/frontend/
 COPY packages/ ./packages/
 
 # Устанавливаем зависимости
-RUN pnpm install --frozen-lockfile
+RUN bun install --frozen-lockfile
 
 FROM base AS builder
 WORKDIR /app
@@ -20,8 +17,7 @@ WORKDIR /app
 # Копируем зависимости
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/package.json ./
-COPY --from=deps /app/pnpm-lock.yaml ./
-COPY --from=deps /app/pnpm-workspace.yaml ./
+COPY --from=deps /app/bun.lock ./
 
 # Копируем исходный код
 COPY apps/frontend/ ./apps/frontend/
@@ -33,7 +29,7 @@ ENV DISABLE_ESLINT_PLUGIN=true
 ENV ESLINT_NO_DEV_ERRORS=true
 
 # Собираем приложение
-RUN pnpm run build:frontend
+RUN bun run build:frontend
 
 FROM base AS runner
 WORKDIR /app

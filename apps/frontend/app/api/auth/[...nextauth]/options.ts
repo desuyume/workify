@@ -47,7 +47,6 @@ export const authOptions: NextAuthOptions = {
           })
           return res.data
         } catch (e) {
-          console.error('Wrong credentials')
           return null
         }
       }

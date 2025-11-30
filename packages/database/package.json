@@ -7,17 +7,17 @@
 		"dist/**"
 	],
 	"scripts": {
-    "build": "pnpm run db:generate && tsup",
+    "build": "bun run db:generate && tsup",
     
     "dev": "tsup --watch",
     
-    "db:setup": "pnpm run db:migrate && pnpm run db:seed",
-    "db:prepare": "pnpm run db:setup && tsup",
-    "db:migrate": "dotenv -e ../../.env prisma migrate deploy",
-    "db:migrate:dev": "dotenv -e ../../.env prisma migrate dev",
+    "db:setup": "bun run db:generate && bun run db:migrate && bun run db:seed",
+    "db:prepare": "bun run db:setup && tsup",
+    "db:migrate": "prisma migrate deploy",
+    "db:migrate:dev": "prisma migrate dev",
     "db:generate": "prisma generate",
     "db:generate:no-verify": "prisma generate --skip-generate",
-    "db:push": "dotenv -e ../../.env prisma db push --skip-generate",
+    "db:push": "prisma db push --skip-generate",
     "db:seed": "tsx src/seed.ts",
     
     "format": "prisma format",

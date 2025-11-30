@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM oven/bun:1 AS base
 
 RUN apk add --no-cache \
     python3 \
@@ -9,22 +9,20 @@ RUN apk add --no-cache \
     openssl-libs-static \
     libc6-compat
 
-RUN npm install -g pnpm@10.23.0
-
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json bun.lock ./
 COPY apps/backend/package.json ./apps/backend/
 COPY packages/ ./packages/
 
 ENV CI=true
-RUN pnpm install --frozen-lockfile
+RUN bun install --frozen-lockfile
 
 COPY apps/backend/ ./apps/backend/
 COPY packages/ ./packages/
 
-RUN pnpm run db:generate
-RUN pnpm run build:backend
+RUN bun run db:generate
+RUN bun run build:backend
 
 EXPOSE 8000
 ENV PORT=8000

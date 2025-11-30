@@ -11,8 +11,5 @@ static
 
 tsconfig.tsbuildinfo
 .turbo
-.pnpm-debug.log
 
 .vscode
-
-todo.txt

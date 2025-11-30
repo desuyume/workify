@@ -7,7 +7,7 @@
     "dist/**"
   ],
   "scripts": {
-    "prepare": "pnpm run build",
+    "prepare": "bun run build",
     "dev": "tsup --watch",
     "build": "tsup",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\""

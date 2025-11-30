@@ -7,7 +7,7 @@ Service for search and promotion of self-employed citizens
 ## Requirements
 
 * [Node.js (21.7.3+)](https://nodejs.org/en)
-* [Pnpm (9.1.2+)](https://pnpm.io/)
+* [Bun (1.3.3+)](https://bun.com)
 
 ## Run project
 
@@ -20,7 +20,7 @@ git clone https://github.com/desuyume/workify.git
 
 * Install dependencies
 ```bash
-pnpm install
+bun install
 ```
 
 * Run needed services (Postgres, Adminer)
@@ -30,6 +30,6 @@ docker compose -f docker-compose.dev.yml up -d
 
 * Start dev mode
 ```bash
-pnpm run dev
+bun dev
 ```
 * Visit https://localhost:3000

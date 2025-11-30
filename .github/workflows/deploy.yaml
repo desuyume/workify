@@ -29,27 +29,16 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install pnpm
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         run: |
-          npm install -g pnpm@10.23.0
-          echo "PNPM version: $(pnpm --version)"
-
-      - name: Verify lockfile exists
-        run: |
-          echo "Checking lock files:"
-          ls -la | grep lock
-          if [ -f "pnpm-lock.yaml" ]; then
-            echo "✅ pnpm-lock.yaml found"
-          else
-            echo "❌ pnpm-lock.yaml not found"
-            exit 1
-          fi
+          echo "Bun version: $(bun --version)"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - name: Build applications
-        run: pnpm run build
+        run: bun run build
 
   deploy:
     needs: test-and-build
@@ -80,8 +69,8 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install pnpm
-        run: npm install -g pnpm@10.23.0
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
 
       - name: Install PostgreSQL client
         run: |
@@ -132,12 +121,12 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - name: Build packages
         run: |
-          pnpm run build:packages
-          pnpm run db:setup
+          bun run build:packages
+          bun run db:setup
         env:
           DATABASE_URL: postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}
 
@@ -194,7 +183,7 @@ jobs:
           
           # Run database migrations
           echo "🔄 Running database migrations..."
-          docker compose run --rm backend pnpm run db:migrate || echo "Migrations completed or not needed"
+          docker compose run --rm backend bun run db:migrate || echo "Migrations completed or not needed"
           
           # Start services
           echo "🔧 Starting services..."
