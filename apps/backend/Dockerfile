@@ -16,7 +16,7 @@ COPY apps/backend/package.json ./apps/backend/
 COPY packages/ ./packages/
 
 ENV CI=true
-RUN bun install --frozen-lockfile
+RUN bun install
 
 COPY apps/backend/ ./apps/backend/
 COPY packages/ ./packages/

@@ -9,7 +9,7 @@ COPY apps/frontend/package.json ./apps/frontend/
 COPY packages/ ./packages/
 
 # Устанавливаем зависимости
-RUN bun install --frozen-lockfile
+RUN bun install
 
 FROM base AS builder
 WORKDIR /app
