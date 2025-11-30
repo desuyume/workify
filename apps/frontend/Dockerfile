@@ -2,25 +2,40 @@ FROM oven/bun:1 AS base
 
 FROM base AS deps
 WORKDIR /app
-COPY package.json bun.lock ./
+
+# Сначала копируем только файлы блокировки
+COPY package.json bun.lockb* ./
 COPY apps/frontend/package.json ./apps/frontend/
 COPY packages/ ./packages/
-RUN bun install --frozen-lockfile
+
+RUN bun install
 
 FROM base AS builder
 WORKDIR /app
+
+# Копируем зависимости
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY --from=deps /app/package.json ./
+COPY --from=deps /app/bun.lock* ./
+
+# Копируем исходный код
+COPY apps/frontend/ ./apps/frontend/
+COPY packages/ ./packages/
+
+# Переменные для отключения линтеров
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV DISABLE_ESLINT_PLUGIN=true
 ENV ESLINT_NO_DEV_ERRORS=true
+
+# Собираем приложение
 RUN bun run build:frontend
 
-FROM node:18-alpine AS runner
+FROM base AS runner
 WORKDIR /app
 
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
+# Для Alpine Linux используем другой синтаксис
+RUN addgroup -g 1001 nodejs && \
+    adduser -D -u 1001 -G nodejs nextjs
 
 COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/standalone/ ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/static ./apps/frontend/.next/static
