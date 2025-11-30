@@ -3,21 +3,23 @@ FROM oven/bun:1 AS base
 FROM base AS deps
 WORKDIR /app
 
-# Сначала копируем только файлы блокировки
-COPY package.json bun.lockb* ./
+# Копируем ВСЕ необходимые файлы для workspace разрешения
+COPY package.json bun.lock* turbo.json ./
 COPY apps/frontend/package.json ./apps/frontend/
 COPY packages/ ./packages/
+COPY tsconfig.json ./
 
 # Устанавливаем зависимости
-RUN bun install
+RUN bun install --frozen-lockfile
 
 FROM base AS builder
 WORKDIR /app
 
-# Копируем зависимости
+# Копируем зависимости и конфигурационные файлы
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/package.json ./
 COPY --from=deps /app/bun.lock* ./
+COPY --from=deps /app/turbo.json ./
 
 # Копируем исходный код
 COPY apps/frontend/ ./apps/frontend/
