@@ -7,7 +7,6 @@ WORKDIR /app
 COPY package.json bun.lock* turbo.json ./
 COPY apps/frontend/package.json ./apps/frontend/
 COPY packages/ ./packages/
-COPY tsconfig.json ./
 
 # Устанавливаем зависимости
 RUN bun install --frozen-lockfile
