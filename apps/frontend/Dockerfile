@@ -34,8 +34,8 @@ RUN bun run build:frontend
 FROM base AS runner
 WORKDIR /app
 
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
+RUN addgroup -g 1001 nodejs
+RUN adduser -D -u 1001 -G nodejs nextjs
 
 COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/standalone/ ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/static ./apps/frontend/.next/static
