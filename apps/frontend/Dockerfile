@@ -8,6 +8,7 @@ COPY package.json bun.lockb* ./
 COPY apps/frontend/package.json ./apps/frontend/
 COPY packages/ ./packages/
 
+# Устанавливаем зависимости
 RUN bun install
 
 FROM base AS builder
@@ -33,15 +34,10 @@ RUN bun run build:frontend
 FROM base AS runner
 WORKDIR /app
 
-# Для Alpine Linux используем другой синтаксис
-RUN addgroup -g 1001 nodejs && \
-    adduser -D -u 1001 -G nodejs nextjs
-
-COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/standalone/ ./
-COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/static ./apps/frontend/.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/public ./apps/frontend/public
-
-USER nextjs
+# Копируем собранное приложение
+COPY --from=builder /app/apps/frontend/.next/standalone/ ./
+COPY --from=builder /app/apps/frontend/.next/static ./apps/frontend/.next/static
+COPY --from=builder /app/apps/frontend/public ./apps/frontend/public
 
 EXPOSE 3000
 ENV PORT=3000
