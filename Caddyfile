@@ -48,9 +48,17 @@ admin.{$DOMAIN_NAME} {
 monitor.{$DOMAIN_NAME} {
     encode gzip
     
-    basicauth {
-        {$GRAFANA_AUTH}
+    handle /prometheus/* {
+        basicauth {
+            {$MONITOR_AUTH}
+        }
+        reverse_proxy prometheus:9090
     }
     
-    reverse_proxy grafana:3001
+    handle {
+        basicauth {
+            {$MONITOR_AUTH}
+        }
+        reverse_proxy grafana:3001
+    }
 }
