@@ -1,15 +1,14 @@
 services:
   nginx:
     image: nginx:alpine
-    env_file: ./.env
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/nginx/ssl:ro
-      - ./data/nginx/logs:/var/log/nginx
-      - ./data/certbot/www:/var/www/certbot
+      - ./certbot/www:/var/www/certbot
+      - ./nginx/.htpasswd:/etc/nginx/.htpasswd:ro
     depends_on:
       - frontend
       - backend
@@ -17,8 +16,7 @@ services:
     networks:
       - workify-network
     restart: unless-stopped
-    labels:
-      - "traefik.enable=false"
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
 
   frontend:
     image: ghcr.io/desuyume/workify-frontend:latest
@@ -64,10 +62,34 @@ services:
     restart: unless-stopped
     volumes:
       - ./ssl:/etc/letsencrypt
-      - ./data/certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+      - ./certbot/www:/var/www/certbot
+    entrypoint: >
+      /bin/sh -c '
+      # Ждем пока nginx запустится
+      sleep 10;
+      
+      if [ ! -f /etc/letsencrypt/live/workify-dev.ru/fullchain.pem ]; then
+        echo "🔐 Получение SSL сертификатов...";
+        certbot certonly \
+          --webroot \
+          -w /var/www/certbot \
+          --email 77desss@gmail.com \
+          --agree-tos \
+          --no-eff-email \
+          -d workify-dev.ru \
+          -d www.workify-dev.ru \
+          -d api.workify-dev.ru \
+          -d admin.workify-dev.ru \
+          --non-interactive;
+      fi;
+      
+      # Автоматическое обновление каждые 12 часов
+      trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;
+      '
     networks:
       - workify-network
+    depends_on:
+      - nginx
 
 networks:
   workify-network:
@@ -75,4 +97,3 @@ networks:
 
 volumes:
   postgres-data:
-  nginx_logs:
