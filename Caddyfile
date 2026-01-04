@@ -1,0 +1,46 @@
+{
+    email 77desss@gmail.com
+}
+
+www.{$DOMAIN_NAME} {
+    redir https://{$DOMAIN_NAME}{uri}
+}
+
+{$DOMAIN_NAME} {
+    encode gzip
+    reverse_proxy frontend:${FRONTEND_PORT:-3000}
+}
+
+api.{$DOMAIN_NAME} {
+    encode gzip
+    
+    header {
+        Access-Control-Allow-Origin "https://{$DOMAIN_NAME}"
+        Access-Control-Allow-Methods "GET,POST,PUT,DELETE,OPTIONS"
+        Access-Control-Allow-Credentials "true"
+        Access-Control-Allow-Headers "*"
+    }
+    
+    @preflight method OPTIONS
+    handle @preflight {
+        header Access-Control-Allow-Origin "https://{$DOMAIN_NAME}"
+        header Access-Control-Allow-Methods "GET,POST,PUT,DELETE,OPTIONS"
+        header Access-Control-Allow-Credentials "true"
+        header Access-Control-Allow-Headers "*"
+        respond 204
+    }
+    
+    handle {
+        reverse_proxy backend:${BACKEND_PORT:-8000}
+    }
+}
+
+admin.{$DOMAIN_NAME} {
+    encode gzip
+    
+    basicauth {
+        {$ADMIN_AUTH}
+    }
+    
+    reverse_proxy adminer:8080
+}

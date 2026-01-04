@@ -1,17 +1,17 @@
 version: '3.8'
 
 services:
-  traefik:
-    image: traefik:v3.0
-    container_name: traefik
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "./traefik.yml:/etc/traefik/traefik.yml:ro"
-      - "./letsencrypt:/letsencrypt"
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./caddy_data:/data
+      - ./caddy_config:/config
     networks:
       - workify-network
 
@@ -19,12 +19,6 @@ services:
     image: ghcr.io/desuyume/workify-frontend:latest
     env_file: ./.env
     restart: unless-stopped
-    labels:
-      traefik.enable: true
-      traefik.http.routers.frontend.entrypoints: websecure
-      traefik.http.routers.frontend.tls.certresolver: myresolver
-      traefik.http.routers.frontend.rule: Host(`${DOMAIN_NAME}`) || Host(`www.${DOMAIN_NAME}`)
-      traefik.http.services.frontend.loadbalancer.server.port: ${FRONTEND_PORT:-3000}
     networks:
       - workify-network
 
@@ -32,16 +26,6 @@ services:
     image: ghcr.io/desuyume/workify-backend:latest
     env_file: ./.env
     restart: unless-stopped
-    labels:
-      traefik.enable: true
-      traefik.http.routers.backend.entrypoints: websecure
-      traefik.http.routers.backend.tls.certresolver: myresolver
-      traefik.http.routers.backend.rule: Host(`api.${DOMAIN_NAME}`)
-      traefik.http.services.backend.loadbalancer.server.port: ${BACKEND_PORT:-8000}
-      traefik.http.middlewares.cors.headers.accesscontrolallowmethods: GET,POST,PUT,DELETE,OPTIONS
-      traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist: https://${DOMAIN_NAME}
-      traefik.http.middlewares.cors.headers.accesscontrolallowcredentials: true
-      traefik.http.routers.backend.middlewares: cors
     networks:
       - workify-network
     depends_on:
@@ -63,13 +47,6 @@ services:
     restart: unless-stopped
     environment:
       - ADMINER_DEFAULT_SERVER=postgres
-    labels:
-      traefik.enable: true
-      traefik.http.routers.adminer.entrypoints: websecure
-      traefik.http.routers.adminer.tls.certresolver: myresolver
-      traefik.http.routers.adminer.rule: Host(`admin.${DOMAIN_NAME}`)
-      traefik.http.services.adminer.loadbalancer.server.port: 8080
-      traefik.http.middlewares.admin-auth.basicauth.users: ${ADMIN_AUTH}
     networks:
       - workify-network
     depends_on:
@@ -81,3 +58,5 @@ networks:
 
 volumes:
   postgres-data:
+  caddy_data:
+  caddy_config:
