@@ -176,6 +176,8 @@ jobs:
           cp docker-compose.yml deployment_temp/
           cp .env deployment_temp/
           cp Caddyfile deployment_temp/
+          mkdir -p prometheus
+          cp prometheus.yml deployment_temp/prometheus/
           
           cat > deployment_temp/deploy.sh << 'EOF'
           #!/bin/bash
