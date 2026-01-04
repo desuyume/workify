@@ -2,8 +2,9 @@ version: '3.8'
 
 services:
   caddy:
-    image: caddy:2-alpine
-    container_name: caddy
+    image: caddy:2.7.4
+    container_name: workify-caddy
+    env_file: ./.env
     restart: unless-stopped
     ports:
       - "80:80"
@@ -17,6 +18,7 @@ services:
 
   frontend:
     image: ghcr.io/desuyume/workify-frontend:latest
+    container_name: workify-frontend
     env_file: ./.env
     restart: unless-stopped
     networks:
@@ -24,6 +26,7 @@ services:
 
   backend:
     image: ghcr.io/desuyume/workify-backend:latest
+    container_name: workify-backend
     env_file: ./.env
     restart: unless-stopped
     networks:
@@ -33,6 +36,7 @@ services:
 
   postgres:
     image: postgres:15-alpine
+    container_name: workify-postgres
     env_file: ./.env
     restart: unless-stopped
     volumes:
@@ -42,6 +46,7 @@ services:
 
   adminer:
     image: adminer:4.8.1
+    container_name: workify-adminer
     ports:
       - "8080:8080"
     restart: unless-stopped
@@ -52,6 +57,41 @@ services:
     depends_on:
       - postgres
 
+    prometheus:
+    image: prom/prometheus
+    container_name: workify-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    networks:
+      - workify-network
+
+  grafana:
+    image: grafana/grafana
+    container_name: workify-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
+      - GF_SERVER_HTTP_PORT=3001
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    ports:
+      - "3001:3001"
+    networks:
+      - workify-network
+
 networks:
   workify-network:
     driver: bridge
@@ -60,3 +100,5 @@ volumes:
   postgres-data:
   caddy_data:
   caddy_config:
+  prometheus_data:
+  grafana_data:
