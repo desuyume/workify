@@ -8,7 +8,7 @@ www.{$DOMAIN_NAME} {
 
 {$DOMAIN_NAME} {
     encode gzip
-    reverse_proxy frontend:${FRONTEND_PORT:-3000}
+    reverse_proxy frontend:${FRONTEND_PORT}
 }
 
 api.{$DOMAIN_NAME} {
@@ -31,7 +31,7 @@ api.{$DOMAIN_NAME} {
     }
     
     handle {
-        reverse_proxy backend:${BACKEND_PORT:-8000}
+        reverse_proxy backend:${BACKEND_PORT}
     }
 }
 
