@@ -12,6 +12,7 @@ services:
       - ./caddy_config:/config
     networks:
       - workify-network
+    env_file: ./.env
 
   frontend:
     image: ghcr.io/desuyume/workify-frontend:latest
