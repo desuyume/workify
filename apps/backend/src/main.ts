@@ -6,10 +6,10 @@ import { DeleteFileOnErrorFilter } from './delete-file-on-error.filter'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { abortOnError: false })
 
-  app.enableCors({
-    origin: process.env.CLIENT_URL,
-    credentials: true
-  })
+  // app.enableCors({
+  //   origin: process.env.CLIENT_URL,
+  //   credentials: true
+  // })
   app.setGlobalPrefix('api')
   app.useGlobalPipes(
     new ValidationPipe({
