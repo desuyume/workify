@@ -7,13 +7,14 @@
     "dist/**"
   ],
   "scripts": {
-    "prepare": "pnpm run build",
-    "dev": "tsup --watch",
-    "build": "tsup",
+    "dev": "rimraf dist && tsup --watch",
+    "build": "rimraf dist && tsup",
+    "clean": "rimraf dist",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\""
   },
   "devDependencies": {
     "@workify/typescript-config": "workspace:*",
+    "rimraf": "^6.1.2",
     "tsup": "^8.0.2",
     "typescript": "^5.2.2",
     "vite": "^5.2.0"
