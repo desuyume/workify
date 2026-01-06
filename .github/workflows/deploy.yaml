@@ -136,6 +136,18 @@ jobs:
           
           echo "🚀 Starting deployment..."
           
+          # Загружаем переменные из .env файла
+          echo "📖 Loading environment variables..."
+          if [ -f .env ]; then
+              set -a
+              source .env
+              set +a
+              echo "✅ Environment variables loaded"
+          else
+              echo "❌ .env file not found!"
+              exit 1
+          fi
+          
           # Создаем необходимые директории
           mkdir -p /opt/workify/{postgres-data,uploads}
           chmod 755 /opt/workify /opt/workify/*
@@ -149,83 +161,79 @@ jobs:
           docker compose up -d postgres
           
           # Ждем готовности PostgreSQL
-          echo "⏳ Waiting for PostgreSQL..."
+          echo "⏳ Waiting for PostgreSQL to be healthy..."
           for i in {1..30}; do
-            if docker compose exec postgres pg_isready -U ${POSTGRES_USER:-postgres} >/dev/null 2>&1; then
-              echo "✅ PostgreSQL is ready!"
-              break
-            fi
-            echo "⏳ Waiting... ($i/30)"
-            sleep 2
+              if docker compose ps postgres | grep -q "(healthy)"; then
+                  echo "✅ PostgreSQL is ready and healthy!"
+                  break
+              fi
+              echo "⏳ Waiting... ($i/30)"
+              sleep 2
           done
           
-          # Проверяем и создаем пользователя БД если нужно
-          echo "👤 Checking database user..."
-          docker compose exec postgres psql -U postgres -c "
-          DO \$\$
-          BEGIN
-            IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '${POSTGRES_USER}') THEN
-              CREATE USER ${POSTGRES_USER} WITH PASSWORD '${POSTGRES_PASSWORD}';
-              RAISE NOTICE 'User ${POSTGRES_USER} created';
-            END IF;
-
-            IF NOT EXISTS (SELECT FROM pg_database WHERE datname = '${POSTGRES_DB}') THEN
-              CREATE DATABASE ${POSTGRES_DB} OWNER ${POSTGRES_USER};
-              RAISE NOTICE 'Database ${POSTGRES_DB} created';
-            END IF;
-
-            -- Даем все права пользователю на свою базу
-            GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DB} TO ${POSTGRES_USER};
-            ALTER DATABASE ${POSTGRES_DB} OWNER TO ${POSTGRES_USER};
-          END
-          \$\$;" 2>/dev/null || echo "User/database check completed"
+          # Проверяем подключение от имени пользователя приложения
+          echo "🔍 Testing database connection with app user..."
+          if docker compose exec -T postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT 1;" > /dev/null 2>&1; then
+              echo "✅ Database user can connect successfully"
+          else
+              echo "⚠️  User cannot connect, attempting to fix permissions..."
+              
+              # Используем superuser для настройки прав
+              docker compose exec -T postgres psql -U postgres <<EOF
+              DO \$\$
+              BEGIN
+                  -- Создаем пользователя если не существует
+                  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '$POSTGRES_USER') THEN
+                      CREATE USER "$POSTGRES_USER" WITH PASSWORD '$POSTGRES_PASSWORD';
+                      RAISE NOTICE 'User $POSTGRES_USER created';
+                  ELSE
+                      -- Обновляем пароль если пользователь существует
+                      ALTER USER "$POSTGRES_USER" WITH PASSWORD '$POSTGRES_PASSWORD';
+                  END IF;
+                  
+                  -- Создаем базу данных если не существует
+                  IF NOT EXISTS (SELECT FROM pg_database WHERE datname = '$POSTGRES_DB') THEN
+                      CREATE DATABASE "$POSTGRES_DB" OWNER "$POSTGRES_USER";
+                      RAISE NOTICE 'Database $POSTGRES_DB created';
+                  END IF;
+                  
+                  -- Даем все права на базу данных
+                  GRANT ALL PRIVILEGES ON DATABASE "$POSTGRES_DB" TO "$POSTGRES_USER";
+                  
+                  -- Подключаемся к базе и даем права на схему public
+                  \c "$POSTGRES_DB";
+                  GRANT ALL ON SCHEMA public TO "$POSTGRES_USER";
+                  GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "$POSTGRES_USER";
+                  GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO "$POSTGRES_USER";
+                  ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO "$POSTGRES_USER";
+                  ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO "$POSTGRES_USER";
+              END
+              \$\$;
+          EOF
+              echo "✅ Database permissions fixed"
+          fi
           
           # Выполняем миграции и сиды
           echo "🔄 Running database setup..."
           
-          # Отладочная информация
-          echo "=== DEBUG INFO ==="
-          echo "POSTGRES_USER: $POSTGRES_USER"
-          echo "POSTGRES_DB: $POSTGRES_DB"
-          echo "DATABASE_URL from env: $DATABASE_URL"
-          echo "=================="
+          echo "🚀 Starting backend for migrations..."
+          docker compose up -d backend
+          sleep 10  # Ждем запуска backend
           
-          # Создаем временный файл с переменными
-          cat > /tmp/db_vars.env << EOF
-          POSTGRES_USER=$POSTGRES_USER
-          POSTGRES_PASSWORD=$POSTGRES_PASSWORD
-          POSTGRES_DB=$POSTGRES_DB
-          DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB?schema=public
-          EOF
-          
-          echo "Testing connection to PostgreSQL..."
-          docker compose exec postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT 1;" 2>/dev/null && echo "✅ Connection successful" || echo "❌ Connection failed"
-          
-          # Выполняем миграции с явной передачей переменных
-          echo "Running migrations..."
-          docker compose run --rm \
-            -e "POSTGRES_USER=$POSTGRES_USER" \
-            -e "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" \
-            -e "POSTGRES_DB=$POSTGRES_DB" \
-            -e "DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB?schema=public" \
-            backend \
-            sh -c "
-              echo '=== Inside container ==='
-              echo 'POSTGRES_USER: '\$POSTGRES_USER
-              echo 'POSTGRES_DB: '\$POSTGRES_DB
-              echo 'DATABASE_URL: '\$DATABASE_URL | sed 's/:[^:@]*@/:****@/'
-              echo '======================='
+          echo "📦 Running Prisma migrations..."
+          docker compose exec backend sh -c "
+              echo 'Current directory: \$(pwd)'
+              echo 'DATABASE_URL environment variable:'
+              echo \$DATABASE_URL | sed 's/:[^:@]*@/:****@/'
               
-              echo 'Setting up database...'
+              echo 'Changing to database package...'
               cd /app/packages/database
               
-              # Проверяем prisma схему
-              echo 'Checking Prisma schema...'
-              cat prisma/schema.prisma | grep -A5 'datasource db'
-              
-              echo 'Running Prisma migrations and seeds...'
+              echo 'Running migrations and seeds...'
               pnpm run db:setup
-            "
+              
+              echo '✅ Database setup completed inside container'
+          "
           
           # Запускаем все сервисы
           echo "🔧 Starting all services..."

@@ -1,10 +1,7 @@
-version: '3.8'
-
 services:
   caddy:
     image: caddy:2.8.4
     container_name: workify-caddy
-    env_file: ./.env
     restart: unless-stopped
     ports:
       - "80:80"
@@ -15,34 +12,50 @@ services:
       - ./caddy_config:/config
     networks:
       - workify-network
+    env_file: ./.env
 
   frontend:
     image: ghcr.io/desuyume/workify-frontend:latest
     container_name: workify-frontend
-    env_file: ./.env
     restart: unless-stopped
     networks:
       - workify-network
+    env_file: ./.env
 
   backend:
     image: ghcr.io/desuyume/workify-backend:latest
     container_name: workify-backend
-    env_file: ./.env
     restart: unless-stopped
     networks:
       - workify-network
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    env_file: ./.env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - NODE_ENV=production
 
   postgres:
     image: postgres:15-alpine
     container_name: workify-postgres
-    env_file: ./.env
     restart: unless-stopped
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
     networks:
       - workify-network
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   adminer:
     image: adminer:5.4.1
@@ -99,6 +112,11 @@ networks:
 
 volumes:
   postgres-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/workify/postgres-data
   caddy_data:
   caddy_config:
   prometheus_data:
