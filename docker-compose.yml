@@ -12,7 +12,6 @@ services:
       - ./caddy_config:/config
     networks:
       - workify-network
-    env_file: ./.env
 
   frontend:
     image: ghcr.io/desuyume/workify-frontend:latest
@@ -29,8 +28,7 @@ services:
     networks:
       - workify-network
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     env_file: ./.env
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
@@ -47,6 +45,7 @@ services:
       - postgres-data:/var/lib/postgresql/data
     networks:
       - workify-network
+    env_file: ./.env
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -60,8 +59,6 @@ services:
   adminer:
     image: adminer:5.4.1
     container_name: workify-adminer
-    ports:
-      - "8080:8080"
     restart: unless-stopped
     environment:
       - ADMINER_DEFAULT_SERVER=postgres
@@ -84,8 +81,6 @@ services:
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--storage.tsdb.retention.time=200h'
       - '--web.enable-lifecycle'
-    ports:
-      - "9090:9090"
     networks:
       - workify-network
 
@@ -101,8 +96,6 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
-    ports:
-      - "3001:3001"
     networks:
       - workify-network
 
