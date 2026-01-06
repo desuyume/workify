@@ -197,6 +197,21 @@ jobs:
           # Pull latest images
           echo "📥 Pulling latest images..."
           docker compose pull
+
+          # Запускаем PostgreSQL отдельно
+          echo "🐘 Starting PostgreSQL..."
+          docker compose up -d postgres
+          
+          # Ждем готовности PostgreSQL
+          echo "⏳ Waiting for PostgreSQL..."
+          for i in {1..30}; do
+            if docker compose exec postgres pg_isready -U ${POSTGRES_USER:-postgres} >/dev/null 2>&1; then
+              echo "✅ PostgreSQL is ready!"
+              break
+            fi
+            echo "⏳ Waiting... ($i/30)"
+            sleep 2
+          done
           
           # Run database migrations
           echo "🔄 Running database migrations..."
