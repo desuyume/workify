@@ -168,22 +168,31 @@ jobs:
               CREATE USER ${POSTGRES_USER} WITH PASSWORD '${POSTGRES_PASSWORD}';
               RAISE NOTICE 'User ${POSTGRES_USER} created';
             END IF;
-            
+
             IF NOT EXISTS (SELECT FROM pg_database WHERE datname = '${POSTGRES_DB}') THEN
               CREATE DATABASE ${POSTGRES_DB} OWNER ${POSTGRES_USER};
               RAISE NOTICE 'Database ${POSTGRES_DB} created';
             END IF;
+
+            -- Даем все права пользователю на свою базу
+            GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DB} TO ${POSTGRES_USER};
+            ALTER DATABASE ${POSTGRES_DB} OWNER TO ${POSTGRES_USER};
           END
           \$\$;" 2>/dev/null || echo "User/database check completed"
           
           # Выполняем миграции и сиды
           echo "🔄 Running database setup..."
           docker compose run --rm \
-            -e DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public" \
+            -e POSTGRES_USER="$POSTGRES_USER" \
+            -e POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+            -e POSTGRES_DB="$POSTGRES_DB" \
             backend \
             sh -c "
               echo 'Setting up database...'
               cd /app/packages/database
+              
+              # Устанавливаем DATABASE_URL на основе переданных переменных
+              export DATABASE_URL=\"postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB?schema=public\"
               
               echo 'Running Prisma migrations and seeds...'
               pnpm run db:setup
