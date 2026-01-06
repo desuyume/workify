@@ -38,11 +38,12 @@ api.{$DOMAIN_NAME} {
 admin.{$DOMAIN_NAME} {
     encode gzip
     
-    basicauth {
-        {$ADMIN_USER} {$ADMIN_PASSWORD}
+    handle {
+        basicauth {
+            {$ADMIN_USER} {$ADMIN_PASSWORD}
+        }
+        reverse_proxy adminer:8080
     }
-    
-    reverse_proxy adminer:8080
 }
 
 monitor.{$DOMAIN_NAME} {
