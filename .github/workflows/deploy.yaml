@@ -101,28 +101,27 @@ jobs:
 
       - name: Generate production .env file
         run: |
-          cat > .env << EOF
+          cat > .env << 'EOF'
           # Auto-generated .env file for production
-          ADMIN_USER=${{ secrets.ADMIN_USER }}
-          ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
-          ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}
-          API_URL=${{ secrets.API_URL }}
-          BACKEND_PORT=${{ secrets.BACKEND_PORT }}
-          BACKEND_URL=${{ secrets.BACKEND_URL }}
-          CLIENT_URL=${{ secrets.CLIENT_URL }}
-          DATABASE_URL=${{ secrets.DATABASE_URL }}
-          DOMAIN_NAME=${{ secrets.DOMAIN_NAME }}
-          FRONTEND_PORT=${{ secrets.FRONTEND_PORT }}
-          MONITOR_USER=${{ secrets.MONITOR_USER }}
-          MONITOR_PASSWORD=${{ secrets.MONITOR_PASSWORD }}
-          LETSENCRYPT_EMAIL=${{ secrets.LETSENCRYPT_EMAIL }}
-          NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
-          NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}
-          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
-          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
-          REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }}
-          UPLOAD_LOCATION=${{ secrets.UPLOAD_LOCATION }}
+          ACCESS_TOKEN_SECRET='${{ secrets.ACCESS_TOKEN_SECRET }}'
+          ADMIN_PASSWORD='${{ secrets.ADMIN_PASSWORD }}'
+          ADMIN_USER='${{ secrets.ADMIN_USER }}'
+          API_URL='${{ secrets.API_URL }}'
+          BACKEND_PORT='${{ secrets.BACKEND_PORT }}'
+          BACKEND_URL='${{ secrets.BACKEND_URL }}'
+          CLIENT_URL='${{ secrets.CLIENT_URL }}'
+          DATABASE_URL='${{ secrets.DATABASE_URL }}'
+          DOMAIN_NAME='${{ secrets.DOMAIN_NAME }}'
+          FRONTEND_PORT='${{ secrets.FRONTEND_PORT }}'
+          MONITOR_PASSWORD='${{ secrets.MONITOR_PASSWORD }}'
+          MONITOR_USER='${{ secrets.MONITOR_USER }}'
+          NEXTAUTH_SECRET='${{ secrets.NEXTAUTH_SECRET }}'
+          NEXTAUTH_URL='${{ secrets.NEXTAUTH_URL }}'
+          POSTGRES_DB='${{ secrets.POSTGRES_DB }}'
+          POSTGRES_PASSWORD='${{ secrets.POSTGRES_PASSWORD }}'
+          POSTGRES_USER='${{ secrets.POSTGRES_USER }}'
+          REFRESH_TOKEN_SECRET='${{ secrets.REFRESH_TOKEN_SECRET }}'
+          UPLOAD_LOCATION='${{ secrets.UPLOAD_LOCATION }}'
           EOF
           echo "✅ Generated .env file"
 
