@@ -41,7 +41,7 @@ export const authOptions: NextAuthOptions = {
         const { email, password } = credentials
 
         try {
-          const res = await axios.post(`${process.env.API_URL}/auth/login`, {
+          const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
             email,
             password
           })

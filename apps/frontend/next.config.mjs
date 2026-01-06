@@ -9,8 +9,8 @@ const nextConfig = {
 	reactStrictMode: true,
 	transpilePackages: ['@workify/ui'],
 	env: {
-		API_URL: process.env.API_URL,
-		BACKEND_URL: process.env.BACKEND_URL,
+		NEXT_PUBLIC_API_URL: process.env.API_URL,
+		NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL,
 		NEXTAUTH_URL: process.env.NEXTAUTH_URL,
 		NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
 	},

@@ -20,7 +20,7 @@ export default function ProfileContent({ user }: ProfileContentProps) {
             src={
               !!user.avatar.includes('blob')
                 ? user.avatar
-                : `${process.env.BACKEND_URL}/${user.avatar}`
+                : `${process.env.NEXT_PUBLIC_BACKEND_URL}/${user.avatar}`
             }
             width={231}
             height={283}

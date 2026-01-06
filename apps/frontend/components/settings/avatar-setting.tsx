@@ -71,7 +71,7 @@ export default function AvatarSetting({ className }: AvatarSettingProps) {
           src={
             !!profile.user.avatar.includes('blob')
               ? profile.user.avatar
-              : `${process.env.BACKEND_URL}/${profile.user.avatar}`
+              : `${process.env.NEXT_PUBLIC_BACKEND_URL}/${profile.user.avatar}`
           }
           width={231}
           height={283}

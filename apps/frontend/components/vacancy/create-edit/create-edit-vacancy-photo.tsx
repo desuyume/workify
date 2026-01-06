@@ -49,7 +49,7 @@ export default function CreateEditVacancyPhoto({ index }: CreateEditVacancyPhoto
             vacancy.photos[index]
               ? typeof vacancy.photos[index].url === 'object'
                 ? URL.createObjectURL(vacancy.photos[index].url as File)
-                : `${process.env.BACKEND_URL}/${vacancy.photos[index].url}`
+                : `${process.env.NEXT_PUBLIC_BACKEND_URL}/${vacancy.photos[index].url}`
               : '#'
           }
           className='w-[275px] h-[348px] object-cover rounded-[0.3125rem]'

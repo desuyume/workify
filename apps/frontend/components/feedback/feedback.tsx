@@ -16,7 +16,7 @@ export default function Feedback({ feedback }: FeedbackProps) {
           <Image
             src={
               !!feedback.customer.avatar
-                ? `${process.env.BACKEND_URL}/${feedback.customer.avatar}`
+                ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/${feedback.customer.avatar}`
                 : defaultProfileImg
             }
             alt='profile-image'
@@ -51,7 +51,7 @@ export default function Feedback({ feedback }: FeedbackProps) {
       </Link>
       {feedback.photo && (
         <Image
-          src={`${process.env.BACKEND_URL}/${feedback.photo}`}
+          src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${feedback.photo}`}
           alt='feedback-image'
           width={313}
           height={193}

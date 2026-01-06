@@ -66,7 +66,7 @@ export default async function Page({
       <div className='mb-[2.8125rem] flex justify-center'>
         {feedback.photo && (
           <Image
-            src={`${process.env.BACKEND_URL}/${feedback.photo}`}
+            src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${feedback.photo}`}
             alt='feedback-image'
             width={313}
             height={193}

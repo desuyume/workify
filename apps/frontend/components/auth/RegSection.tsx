@@ -28,7 +28,7 @@ export function RegSection({ setActiveSection }: RegSectionProps) {
     if (!isValid) return
 
     try {
-      await axios.post(`${process.env.API_URL}/auth/register`, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
         login: fields.login,
         email: fields.email,
         password: fields.password,

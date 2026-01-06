@@ -4,11 +4,11 @@ import { getServerSession } from 'next-auth'
 import { getSession } from 'next-auth/react'
 
 export const apiInstance = axios.create({
-  baseURL: process.env.API_URL
+  baseURL: process.env.NEXT_PUBLIC_API_URL
 })
 
 export const authApiInstance = axios.create({
-  baseURL: process.env.API_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true
 })
 
