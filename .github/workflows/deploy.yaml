@@ -14,62 +14,9 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  test-and-build:
+  build:
     runs-on: ubuntu-latest
     environment: production
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Install pnpm
-        run: |
-          npm install -g pnpm@10.23.0
-          echo "PNPM version: $(pnpm --version)"
-
-      - name: Verify lockfile exists
-        run: |
-          echo "Checking lock files:"
-          ls -la | grep lock
-          if [ -f "pnpm-lock.yaml" ]; then
-            echo "✅ pnpm-lock.yaml found"
-          else
-            echo "❌ pnpm-lock.yaml not found"
-            exit 1
-          fi
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build applications
-        run: pnpm run build
-
-  deploy:
-    needs: test-and-build
-    runs-on: ubuntu-latest
-    environment: production
-
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
 
     steps:
       - name: Checkout code
@@ -83,47 +30,11 @@ jobs:
       - name: Install pnpm
         run: npm install -g pnpm@10.23.0
 
-      - name: Install PostgreSQL client
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Wait for PostgreSQL
-        run: |
-          for i in {1..30}; do
-            if pg_isready -h localhost -p 5432; then
-              echo "✅ PostgreSQL is ready!"
-              break
-            fi
-            echo "⏳ Waiting for PostgreSQL... ($i/30)"
-            sleep 2
-          done
-
-      - name: Generate production .env file
-        run: |
-          cat > .env << 'EOF'
-          # Auto-generated .env file for production
-          ACCESS_TOKEN_SECRET='${{ secrets.ACCESS_TOKEN_SECRET }}'
-          ADMIN_PASSWORD='${{ secrets.ADMIN_PASSWORD }}'
-          ADMIN_USER='${{ secrets.ADMIN_USER }}'
-          NEXT_PUBLIC_API_URL='${{ secrets.API_URL }}'
-          BACKEND_PORT='${{ secrets.BACKEND_PORT }}'
-          NEXT_PUBLIC_BACKEND_URL='${{ secrets.BACKEND_URL }}'
-          CLIENT_URL='${{ secrets.CLIENT_URL }}'
-          DATABASE_URL='${{ secrets.DATABASE_URL }}'
-          DOMAIN_NAME='${{ secrets.DOMAIN_NAME }}'
-          FRONTEND_PORT='${{ secrets.FRONTEND_PORT }}'
-          MONITOR_PASSWORD='${{ secrets.MONITOR_PASSWORD }}'
-          MONITOR_USER='${{ secrets.MONITOR_USER }}'
-          NEXTAUTH_SECRET='${{ secrets.NEXTAUTH_SECRET }}'
-          NEXTAUTH_URL='${{ secrets.NEXTAUTH_URL }}'
-          POSTGRES_DB='${{ secrets.POSTGRES_DB }}'
-          POSTGRES_PASSWORD='${{ secrets.POSTGRES_PASSWORD }}'
-          POSTGRES_USER='${{ secrets.POSTGRES_USER }}'
-          REFRESH_TOKEN_SECRET='${{ secrets.REFRESH_TOKEN_SECRET }}'
-          UPLOAD_LOCATION='${{ secrets.UPLOAD_LOCATION }}'
-          EOF
-          echo "✅ Generated .env file"
+      - name: Build packages
+        run: pnpm run build:packages
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -135,16 +46,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build packages
-        run: |
-          pnpm run build:packages
-          pnpm run db:setup
-        env:
-          DATABASE_URL: postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}
-
       - name: Build and push Frontend image
         uses: docker/build-push-action@v5
         with:
@@ -153,6 +54,7 @@ jobs:
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
@@ -169,36 +71,80 @@ jobs:
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
             NODE_ENV=production
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Create deployment package
         run: |
           mkdir -p deployment_temp
+          
+          # Копируем необходимые файлы
           cp docker-compose.yml deployment_temp/
-          cp .env deployment_temp/
           cp Caddyfile deployment_temp/
           cp prometheus.yml deployment_temp/
           
+          # Создаем .env файл для продакшена
+          cat > deployment_temp/.env << 'EOF'
+          # Database
+          POSTGRES_USER='${{ secrets.POSTGRES_USER }}'
+          POSTGRES_PASSWORD='${{ secrets.POSTGRES_PASSWORD }}'
+          POSTGRES_DB='${{ secrets.POSTGRES_DB }}'
+          DATABASE_URL='postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@postgres:5432/${{ secrets.POSTGRES_DB }}?schema=public'
+          
+          # Backend
+          ACCESS_TOKEN_SECRET='${{ secrets.ACCESS_TOKEN_SECRET }}'
+          REFRESH_TOKEN_SECRET='${{ secrets.REFRESH_TOKEN_SECRET }}'
+          CLIENT_URL='${{ secrets.CLIENT_URL }}'
+          UPLOAD_LOCATION='${{ secrets.UPLOAD_LOCATION }}'
+          
+          # Frontend
+          NEXT_PUBLIC_API_URL='${{ secrets.API_URL }}'
+          NEXT_PUBLIC_BACKEND_URL='${{ secrets.BACKEND_URL }}'
+          NEXTAUTH_URL='${{ secrets.NEXTAUTH_URL }}'
+          NEXTAUTH_SECRET='${{ secrets.NEXTAUTH_SECRET }}'
+          
+          # Docker
+          DOMAIN_NAME='${{ secrets.DOMAIN_NAME }}'
+          BACKEND_PORT='${{ secrets.BACKEND_PORT }}'
+          FRONTEND_PORT='${{ secrets.FRONTEND_PORT }}'
+          
+          # Monitoring
+          ADMIN_USER='${{ secrets.ADMIN_USER }}'
+          ADMIN_PASSWORD='${{ secrets.ADMIN_PASSWORD }}'
+          MONITOR_USER='${{ secrets.MONITOR_USER }}'
+          MONITOR_PASSWORD='${{ secrets.MONITOR_PASSWORD }}'
+          GF_USER='${{ secrets.GF_USER }}'
+          GF_PASSWORD='${{ secrets.GF_PASSWORD }}'
+          EOF
+          
+          # Создаем скрипт деплоя
           cat > deployment_temp/deploy.sh << 'EOF'
           #!/bin/bash
           set -e
-
-          DOMAIN_NAME="$1"
-          EMAIL="$2"
-
+          
           echo "🚀 Starting deployment..."
           
-          # Создаем папку
-          mkdir -p /opt/workify/{letsencrypt,postgres-data}
+          # Создаем необходимые директории
+          mkdir -p /opt/workify/{postgres-data,uploads}
+          chmod 755 /opt/workify /opt/workify/*
           
           # Pull latest images
           echo "📥 Pulling latest images..."
           docker compose pull
-
-          # Запускаем PostgreSQL отдельно
+          
+          # Запускаем PostgreSQL
           echo "🐘 Starting PostgreSQL..."
           docker compose up -d postgres
           
@@ -213,28 +159,61 @@ jobs:
             sleep 2
           done
           
-          # Run database migrations
-          echo "🔄 Running database migrations..."
-          docker compose run --rm backend pnpm run db:migrate || echo "Migrations completed or not needed"
+          # Проверяем и создаем пользователя БД если нужно
+          echo "👤 Checking database user..."
+          docker compose exec postgres psql -U postgres -c "
+          DO \$\$
+          BEGIN
+            IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '${POSTGRES_USER}') THEN
+              CREATE USER ${POSTGRES_USER} WITH PASSWORD '${POSTGRES_PASSWORD}';
+              RAISE NOTICE 'User ${POSTGRES_USER} created';
+            END IF;
+            
+            IF NOT EXISTS (SELECT FROM pg_database WHERE datname = '${POSTGRES_DB}') THEN
+              CREATE DATABASE ${POSTGRES_DB} OWNER ${POSTGRES_USER};
+              RAISE NOTICE 'Database ${POSTGRES_DB} created';
+            END IF;
+          END
+          \$\$;" 2>/dev/null || echo "User/database check completed"
           
-          # Start services
-          echo "🔧 Starting services..."
+          # Выполняем миграции и сиды
+          echo "🔄 Running database setup..."
+          docker compose run --rm \
+            -e DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public" \
+            backend \
+            sh -c "
+              echo 'Setting up database...'
+              cd /app/packages/database
+              
+              echo 'Running Prisma migrations and seeds...'
+              pnpm run db:setup
+              
+              echo '✅ Database setup completed'
+            "
+          
+          # Запускаем все сервисы
+          echo "🔧 Starting all services..."
           docker compose up -d --remove-orphans
           
-          # Wait for services
-          echo "⏳ Waiting for services to be healthy..."
-          sleep 30
+          # Ждем и проверяем
+          echo "⏳ Waiting for services to start..."
+          sleep 20
           
-          # Cleanup
+          # Проверяем здоровье сервисов
+          echo "🏥 Checking services health..."
+          docker compose ps
+          
+          # Очистка
           echo "🧹 Cleaning up old images..."
           docker image prune -f
           
-          echo "✅ Done!"
-          echo "🌐 https://$DOMAIN_NAME"
-          echo "🔧 https://api.$DOMAIN_NAME"
-          echo "🛠️ https://admin.$DOMAIN_NAME"
+          echo "✅ Deployment completed successfully!"
+          echo ""
+          echo "🌐 Frontend: https://${DOMAIN_NAME}"
+          echo "🔧 API: https://api.${DOMAIN_NAME}"
+          echo "🛠️ Adminer: https://admin.${DOMAIN_NAME}"
           EOF
-
+          
           chmod +x deployment_temp/deploy.sh
           tar -czf deployment-package.tar.gz -C deployment_temp .
 
@@ -257,26 +236,27 @@ jobs:
           port: ${{ secrets.SERVER_PORT || '22' }}
           script: |
             set -e
-            echo "🚀 Starting automated deployment..."
+            echo "🚀 Starting deployment on server..."
             
-            # Ensure app directory exists
+            # Переходим в директорию приложения
             sudo mkdir -p /opt/workify
             sudo chown ${{ secrets.SERVER_USER }}:${{ secrets.SERVER_USER }} /opt/workify
             cd /opt/workify
             
-            # Stop existing services if any
+            # Останавливаем существующие сервисы
             echo "🛑 Stopping existing services..."
-            docker compose down --remove-orphans || true
+            docker compose down --remove-orphans 2>/dev/null || true
             
-            # Extract deployment package
+            # Извлекаем пакет деплоя
             echo "📦 Extracting deployment package..."
             tar -xzf /tmp/deployment-package.tar.gz -C . --strip-components=1
             
-            # Make script executable
-            chmod +x deploy.sh
+            # Запускаем деплой
+            echo "🎯 Running deployment script..."
+            ./deploy.sh
             
-            # Deploy with domain as argument
-            echo "🎯 Deploying application..."
-            ./deploy.sh "${{ secrets.DOMAIN_NAME }}"
+            # Проверяем результат
+            echo "🔍 Verifying deployment..."
+            sleep 10
             
             echo "🎉 Deployment completed successfully!"
