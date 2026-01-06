@@ -161,11 +161,9 @@ jobs:
           echo "📥 Pulling latest images..."
           docker compose pull
           
-          # Запускаем PostgreSQL
           echo "🐘 Starting PostgreSQL..."
           docker compose up -d postgres
           
-          # Ждем готовности PostgreSQL
           echo "⏳ Waiting for PostgreSQL..."
           for i in {1..30}; do
             if docker compose exec postgres pg_isready -U "$POSTGRES_USER" >/dev/null 2>&1; then
@@ -176,7 +174,6 @@ jobs:
             sleep 2
           done
           
-          # Проверяем и создаем пользователя БД если нужно
           echo "👤 Checking database user..."
           docker compose exec postgres psql -U postgres -c "
           DO \$\$
@@ -196,7 +193,6 @@ jobs:
           END
           \$\$;" 2>/dev/null || echo "User/database check completed"
           
-          # Выполняем миграции и сиды (САМЫЙ ВАЖНЫЙ ШАГ)
           echo "🔄 Running database setup..."
           
           echo "🚀 Starting backend container..."
@@ -205,20 +201,8 @@ jobs:
           
           echo "📦 Running Prisma migrations..."
           docker compose exec backend sh -c "
-            echo '=== Inside backend container ==='
-            echo 'Current directory: \$(pwd)'
-            echo 'Available environment variables:'
-            env | grep -E '(POSTGRES|DATABASE|DB|NODE)' || echo 'No env vars found'
-            echo 'DATABASE_URL:'
-            echo \$DATABASE_URL | sed 's/:[^:@]*@/:****@/'
-            echo '==============================='
-            
-            echo 'Navigating to database package...'
             cd /app/packages/database
-            
-            echo 'Running migrations and seeds...'
             pnpm run db:setup
-            
             echo '✅ Database setup completed!'
           "
           
@@ -242,12 +226,6 @@ jobs:
           echo "🧹 Cleaning up old images..."
           docker image prune -f
           
-          echo "✅ Deployment completed successfully!"
-          echo ""
-          echo "🌐 Frontend: https://$DOMAIN_NAME"
-          echo "🔧 API: https://api.$DOMAIN_NAME"
-          echo "🛠️ Adminer: https://admin.$DOMAIN_NAME"
-          echo "📊 Grafana: https://grafana.$DOMAIN_NAME"
           EOF
           
           chmod +x deployment_temp/deploy.sh
@@ -291,12 +269,5 @@ jobs:
             # Проверяем результат
             echo "🔍 Verifying deployment..."
             sleep 15
-            
-            # Проверяем подключение к БД
-            echo "🔌 Testing database connection..."
-            docker compose exec backend sh -c "
-              cd /app/packages/database
-              npx prisma db execute --stdin --url \"\$DATABASE_URL\" <<< 'SELECT version();' 2>/dev/null || echo 'Database connection failed'
-            " || true
             
             echo "🎉 Deployment completed successfully!"
