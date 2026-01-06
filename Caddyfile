@@ -38,36 +38,26 @@ api.{$DOMAIN_NAME} {
 admin.{$DOMAIN_NAME} {
     encode gzip
     
-    route {
-        authenticate with admin_auth
-        reverse_proxy adminer:8080
+    basicauth {
+        {$ADMIN_USER} {$ADMIN_PASSWORD}
     }
+    reverse_proxy adminer:8080
 }
 
 monitor.{$DOMAIN_NAME} {
     encode gzip
     
-    route /prometheus/* {
-        authenticate with monitor_auth
+    handle /prometheus/* {
+        basicauth {
+            {$MONITOR_USER} {$MONITOR_PASSWORD}
+        }
         reverse_proxy prometheus:9090
     }
     
-    route {
-        authenticate with monitor_auth
+    handle {
+        basicauth {
+            {$MONITOR_USER} {$MONITOR_PASSWORD}
+        }
         reverse_proxy grafana:3001
-    }
-}
-
-(admin_auth) {
-    basic_auth {
-        realm "Admin Area"
-        {$ADMIN_USER} {$ADMIN_PASSWORD}
-    }
-}
-
-(monitor_auth) {
-    basic_auth {
-        realm "Monitoring"
-        {$MONITOR_USER} {$MONITOR_PASSWORD}
     }
 }

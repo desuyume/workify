@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   caddy:
-    image: caddy:2.7.4
+    image: caddy:2.8.4
     container_name: workify-caddy
     env_file: ./.env
     restart: unless-stopped
