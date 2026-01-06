@@ -8,8 +8,10 @@
     "scripts": {
     "start": "dotenv -- turbo run start",
     
-    "build": "pnpm run build:packages && pnpm run build:apps",
-    "build:packages": "dotenv -- pnpm --filter shared --filter ui --filter database run build && pnpm run db:setup",
+    "build": "pnpm run build:ci",
+    "build:ci": "pnpm run build:packages && pnpm run build:apps",
+    "build:local": "pnpm run build:packages && pnpm run db:setup && pnpm run build:apps",
+    "build:packages": "dotenv -- pnpm --filter shared --filter ui --filter database run build",
     "build:apps": "dotenv -- pnpm --filter frontend --filter backend run build",
     "build:frontend": "dotenv -- pnpm --filter frontend run build",
     "build:backend": "dotenv -- pnpm --filter backend run build",

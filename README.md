@@ -38,3 +38,8 @@ pnpm run build:packages
 pnpm run dev
 ```
 * Visit https://localhost:3000
+
+* Run build on local
+```bash
+pnpm run build:local
+```
