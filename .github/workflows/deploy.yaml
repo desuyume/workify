@@ -128,8 +128,6 @@ jobs:
           GF_USER=${{ secrets.GF_USER }}
           GF_PASSWORD=${{ secrets.GF_PASSWORD }}
           
-          # Docker Compose
-          COMPOSE_PROJECT_NAME=workify
           EOF
           
           # Создаем скрипт деплоя
@@ -201,7 +199,6 @@ jobs:
           # Выполняем миграции и сиды (САМЫЙ ВАЖНЫЙ ШАГ)
           echo "🔄 Running database setup..."
           
-          # Метод 1: Запускаем backend и выполняем команды внутри него
           echo "🚀 Starting backend container..."
           docker compose up -d backend
           sleep 10  # Ждем полного запуска backend
@@ -219,21 +216,8 @@ jobs:
             echo 'Navigating to database package...'
             cd /app/packages/database
             
-            echo 'Checking Prisma schema...'
-            if [ -f prisma/schema.prisma ]; then
-              echo '✅ Prisma schema found'
-              cat prisma/schema.prisma | grep -A3 'datasource db'
-            else
-              echo '❌ Prisma schema not found!'
-              ls -la /app/packages/database/
-              exit 1
-            fi
-            
-            echo 'Running Prisma migrations...'
-            npx prisma migrate deploy
-            
-            echo 'Running database seeds...'
-            npx prisma db seed
+            echo 'Running migrations and seeds...'
+            pnpm run db:setup
             
             echo '✅ Database setup completed!'
           "
@@ -299,12 +283,6 @@ jobs:
             echo "📦 Extracting deployment package..."
             tar -xzf /tmp/deployment-package.tar.gz -C . --overwrite
             
-            # Делаем backup старого .env если существует
-            if [ -f .env ]; then
-              echo "💾 Backing up old .env file..."
-              cp .env .env.backup.$(date +%Y%m%d_%H%M%S)
-            fi
-            
             # Запускаем деплой
             echo "🎯 Running deployment script..."
             chmod +x deploy.sh
@@ -313,14 +291,6 @@ jobs:
             # Проверяем результат
             echo "🔍 Verifying deployment..."
             sleep 15
-            
-            # Проверяем контейнеры
-            echo "📋 Checking running containers:"
-            docker compose ps
-            
-            # Проверяем логи backend
-            echo "📝 Backend logs (last 20 lines):"
-            docker compose logs --tail=20 backend || true
             
             # Проверяем подключение к БД
             echo "🔌 Testing database connection..."
