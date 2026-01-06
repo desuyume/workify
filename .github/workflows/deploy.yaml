@@ -182,22 +182,49 @@ jobs:
           
           # Выполняем миграции и сиды
           echo "🔄 Running database setup..."
+          
+          # Отладочная информация
+          echo "=== DEBUG INFO ==="
+          echo "POSTGRES_USER: $POSTGRES_USER"
+          echo "POSTGRES_DB: $POSTGRES_DB"
+          echo "DATABASE_URL from env: $DATABASE_URL"
+          echo "=================="
+          
+          # Создаем временный файл с переменными
+          cat > /tmp/db_vars.env << EOF
+          POSTGRES_USER=$POSTGRES_USER
+          POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+          POSTGRES_DB=$POSTGRES_DB
+          DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB?schema=public
+          EOF
+          
+          echo "Testing connection to PostgreSQL..."
+          docker compose exec postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT 1;" 2>/dev/null && echo "✅ Connection successful" || echo "❌ Connection failed"
+          
+          # Выполняем миграции с явной передачей переменных
+          echo "Running migrations..."
           docker compose run --rm \
-            -e POSTGRES_USER="$POSTGRES_USER" \
-            -e POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
-            -e POSTGRES_DB="$POSTGRES_DB" \
+            -e "POSTGRES_USER=$POSTGRES_USER" \
+            -e "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" \
+            -e "POSTGRES_DB=$POSTGRES_DB" \
+            -e "DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB?schema=public" \
             backend \
             sh -c "
+              echo '=== Inside container ==='
+              echo 'POSTGRES_USER: '\$POSTGRES_USER
+              echo 'POSTGRES_DB: '\$POSTGRES_DB
+              echo 'DATABASE_URL: '\$DATABASE_URL | sed 's/:[^:@]*@/:****@/'
+              echo '======================='
+              
               echo 'Setting up database...'
               cd /app/packages/database
               
-              # Устанавливаем DATABASE_URL на основе переданных переменных
-              export DATABASE_URL=\"postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB?schema=public\"
+              # Проверяем prisma схему
+              echo 'Checking Prisma schema...'
+              cat prisma/schema.prisma | grep -A5 'datasource db'
               
               echo 'Running Prisma migrations and seeds...'
               pnpm run db:setup
-              
-              echo '✅ Database setup completed'
             "
           
           # Запускаем все сервисы
