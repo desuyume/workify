@@ -9,15 +9,18 @@ import { CUSTOM_PRISMA_SERVICE, CUSTOM_PRISMA_TYPE } from '@/constants/prisma.co
 import { FeedbackSortBy } from '@workify/shared'
 import { Prisma } from '@workify/database'
 import { CreateFeedbackDto } from './dto/feedback.dto'
-import { removeFile } from '@/utils/removeFIle'
 import { VacancyService } from '@/vacancy/vacancy.service'
+import { StorageService } from '@/storage/storage.service'
+import { StorageFileResponse } from '@/types/storage'
+import { getFileName, getFileUrl } from '@/utils/storage'
 
 @Injectable()
 export class FeedbackService {
   constructor(
     @Inject(CUSTOM_PRISMA_SERVICE)
     private prisma: CUSTOM_PRISMA_TYPE,
-    private vacancyService: VacancyService
+    private vacancyService: VacancyService,
+    private storageService: StorageService
   ) {}
 
   async create(
@@ -50,12 +53,16 @@ export class FeedbackService {
       throw new BadRequestException('Вы уже оставляли отзыв на эту вакансию')
     }
 
+    let uploadedPhoto: StorageFileResponse | null = null
+    if (photo) {
+      uploadedPhoto = await this.storageService.upload(photo)
+    }
     const feedback = await this.prisma.client.feedback.create({
       data: {
         comment: dto.comment,
         customerId: userId,
         rating: dto.rating ?? 0,
-        photo: photo?.filename ?? null
+        photo: uploadedPhoto ? getFileUrl(uploadedPhoto.fileName) : null
       }
     })
 
@@ -66,7 +73,6 @@ export class FeedbackService {
       }
     })
 
-    // update average executor rating
     await this.vacancyService.updateRating(vacancy.id)
 
     return feedback
@@ -97,10 +103,14 @@ export class FeedbackService {
       throw new BadRequestException('Вы не оставляли отзыв на эту вакансию')
     }
 
-    if (!!feedback.photo) {
-      await removeFile(feedback.photo)
+    if (feedback.photo) {
+      await this.storageService.delete(getFileName(feedback.photo))
     }
 
+    let uploadedPhoto: StorageFileResponse | null = null
+    if (photo) {
+      uploadedPhoto = await this.storageService.upload(photo)
+    }
     const updatedFeedback = await this.prisma.client.feedback.update({
       where: {
         id: feedbackId
@@ -108,11 +118,10 @@ export class FeedbackService {
       data: {
         comment: dto.comment,
         rating: dto.rating ?? 0,
-        photo: photo?.filename ?? null
+        photo: uploadedPhoto ? getFileUrl(uploadedPhoto.fileName) : null
       }
     })
 
-    // update average executor rating
     await this.vacancyService.updateRating(vacancy.id)
 
     return updatedFeedback
@@ -164,11 +173,10 @@ export class FeedbackService {
     })
     await this.prisma.client.feedback.delete({ where: { id: feedbackId } })
 
-    if (!!feedback.photo) {
-      removeFile(feedback.photo)
+    if (feedback.photo) {
+      await this.storageService.delete(getFileName(feedback.photo))
     }
 
-    // update average executor rating
     await this.vacancyService.updateRating(feedback.FeedbackOnVacancy[0].vacancy.id)
 
     return {
@@ -190,7 +198,7 @@ export class FeedbackService {
     })
 
     if (!vacancy) {
-      throw new NotFoundException('Вакансия не найдена')
+      throw new NotFoundException('Вакансия не найдена')
     }
 
     let filterOptions: Prisma.FeedbackFindManyArgs = {

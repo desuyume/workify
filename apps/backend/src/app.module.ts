@@ -14,6 +14,7 @@ import * as path from 'path'
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { FeedbackModule } from './feedback/feedback.module'
 import { StatisticModule } from './statistic/statistic.module'
+import { StorageModule } from './storage/storage.module'
 
 @Module({
   imports: [
@@ -34,13 +35,14 @@ import { StatisticModule } from './statistic/statistic.module'
       client: new PrismaClient(),
       isGlobal: true
     }),
-    MulterModule.register({ dest: process.env.UPLOAD_LOCATION }),
+    MulterModule.register(),
     UsersModule,
     AuthModule,
     VacancyModule,
     CitiesModule,
     FeedbackModule,
-    StatisticModule
+    StatisticModule,
+    StorageModule
   ],
   controllers: [AppController],
   providers: [AppService]

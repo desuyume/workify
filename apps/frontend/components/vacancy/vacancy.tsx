@@ -22,11 +22,7 @@ export default function Vacancy({ vacancy, inProfile = false }: VacancyProps) {
       {!inProfile && (
         <Link className='mr-[1.875rem]' href={`/profile/${vacancy.user.login}`}>
           <Image
-            src={
-              !!vacancy.user.avatar
-                ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/${vacancy.user.avatar}`
-                : defaultProfilePic
-            }
+            src={!!vacancy.user.avatar ? vacancy.user.avatar : defaultProfilePic}
             alt='profile-img'
             width={201}
             height={244}
@@ -82,7 +78,7 @@ export default function Vacancy({ vacancy, inProfile = false }: VacancyProps) {
           </div>
           {vacancy.cover && (
             <Image
-              src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${vacancy.cover}`}
+              src={`${vacancy.cover}`}
               alt='cover-img'
               width={157}
               height={201}

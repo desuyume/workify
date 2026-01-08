@@ -14,11 +14,7 @@ export default function Feedback({ feedback }: FeedbackProps) {
       <div className='flex mb-[1.4375rem]'>
         <Link className='mr-6' href={`/profile/${feedback.customer.login}`}>
           <Image
-            src={
-              !!feedback.customer.avatar
-                ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/${feedback.customer.avatar}`
-                : defaultProfileImg
-            }
+            src={!!feedback.customer.avatar ? feedback.customer.avatar : defaultProfileImg}
             alt='profile-image'
             width={89}
             height={89}
@@ -51,7 +47,7 @@ export default function Feedback({ feedback }: FeedbackProps) {
       </Link>
       {feedback.photo && (
         <Image
-          src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${feedback.photo}`}
+          src={`${feedback.photo}`}
           alt='feedback-image'
           width={313}
           height={193}

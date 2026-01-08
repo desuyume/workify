@@ -65,14 +65,10 @@ export default function AvatarSetting({ className }: AvatarSettingProps) {
         className
       )}
     >
-      {profile.user?.avatar ? (
+      {profile.user.avatar ? (
         <Image
           alt='profile-img'
-          src={
-            !!profile.user.avatar.includes('blob')
-              ? profile.user.avatar
-              : `${process.env.NEXT_PUBLIC_BACKEND_URL}/${profile.user.avatar}`
-          }
+          src={profile.user.avatar}
           width={231}
           height={283}
           className='w-[231px] h-[283px] object-cover rounded-[10.71875rem]'

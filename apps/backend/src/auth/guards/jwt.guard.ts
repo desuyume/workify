@@ -18,8 +18,6 @@ export class JwtGuard implements CanActivate {
       })
       request['user'] = payload
     } catch (e) {
-      console.log(e)
-
       throw new UnauthorizedException()
     }
 

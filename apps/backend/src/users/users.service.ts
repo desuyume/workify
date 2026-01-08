@@ -3,18 +3,21 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  InternalServerErrorException,
   NotFoundException
 } from '@nestjs/common'
 import { CreateUserDto } from './dto/users.dto'
 import { hash } from 'bcryptjs'
 import { CUSTOM_PRISMA_SERVICE, CUSTOM_PRISMA_TYPE } from 'src/constants/prisma.constants'
-import { removeFile } from '@/utils/removeFIle'
+import { StorageService } from '@/storage/storage.service'
+import { getFileName, getFileUrl } from '@/utils/storage'
 
 @Injectable()
 export class UsersService {
   constructor(
     @Inject(CUSTOM_PRISMA_SERVICE)
-    private prisma: CUSTOM_PRISMA_TYPE
+    private prisma: CUSTOM_PRISMA_TYPE,
+    private storageService: StorageService
   ) {}
 
   async create(dto: CreateUserDto) {
@@ -112,13 +115,18 @@ export class UsersService {
   async updateAvatar(id: number, avatar: Express.Multer.File) {
     const user = await this.findById(id)
     if (user.avatar) {
-      removeFile(user.avatar)
+      await this.storageService.delete(getFileName(user.avatar))
+    }
+
+    const storageResponse = await this.storageService.upload(avatar)
+    if (storageResponse.$metadata.httpStatusCode !== 200) {
+      throw new InternalServerErrorException('Failed to uploading file to S3')
     }
 
     return await this.prisma.client.user.update({
       where: { id },
       data: {
-        avatar: avatar.filename
+        avatar: getFileUrl(storageResponse.fileName)
       }
     })
   }
@@ -126,7 +134,7 @@ export class UsersService {
   async deleteAvatar(id: number) {
     const user = await this.findById(id)
     if (user.avatar) {
-      removeFile(user.avatar)
+      await this.storageService.delete(getFileName(user.avatar))
     }
     return await this.prisma.client.user.update({
       where: { id },

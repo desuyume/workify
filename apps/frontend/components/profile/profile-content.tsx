@@ -14,14 +14,10 @@ export default function ProfileContent({ user }: ProfileContentProps) {
   return (
     <div className='w-full flex flex-col items-center'>
       <div className='w-full foreground pt-8 pb-10 rounded-t-[0.625rem] border-t-primary-light border-t relative'>
-        {user?.avatar ? (
+        {user.avatar ? (
           <Image
             alt='profile-img'
-            src={
-              !!user.avatar.includes('blob')
-                ? user.avatar
-                : `${process.env.NEXT_PUBLIC_BACKEND_URL}/${user.avatar}`
-            }
+            src={user.avatar}
             width={231}
             height={283}
             className='w-[231px] h-[283px] object-cover rounded-[10.71875rem] mx-auto'
@@ -44,8 +40,8 @@ export default function ProfileContent({ user }: ProfileContentProps) {
           value={
             user.birthday
               ? `${getAgeByBirthday(new Date(user.birthday))} (${formatDate(
-                new Date(user.birthday)
-              )})`
+                  new Date(user.birthday)
+                )})`
               : null
           }
         />

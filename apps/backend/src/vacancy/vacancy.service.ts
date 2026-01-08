@@ -10,13 +10,16 @@ import { IVacancyQuery, isNumber } from '@workify/shared'
 import { CreateVacancyDto } from './dto/vacancy.dto'
 import { Prisma, VacancyCategory } from '@workify/database'
 import { stringToBoolean } from '@workify/shared'
-import { removeFile } from '@/utils/removeFIle'
+import { StorageService } from '@/storage/storage.service'
+import { StorageFileResponse } from '@/types/storage'
+import { getFileName, getFileUrl } from '@/utils/storage'
 
 @Injectable()
 export class VacancyService {
   constructor(
     @Inject(CUSTOM_PRISMA_SERVICE)
-    private prisma: CUSTOM_PRISMA_TYPE
+    private prisma: CUSTOM_PRISMA_TYPE,
+    private storageService: StorageService
   ) {}
 
   async getAll(query: IVacancyQuery) {
@@ -195,13 +198,17 @@ export class VacancyService {
     }
 
     let vacancyCategory: VacancyCategory | null = null
-
     if (dto.categoryId) {
       vacancyCategory = await this.prisma.client.vacancyCategory.findUnique({
         where: {
           id: +dto.categoryId
         }
       })
+    }
+
+    let uploadedCover: StorageFileResponse | null = null
+    if (cover) {
+      uploadedCover = await this.storageService.upload(cover)
     }
 
     const vacancy = await this.prisma.client.vacancy.create({
@@ -214,14 +221,15 @@ export class VacancyService {
         isLocationHidden: stringToBoolean(dto.isLocationHidden) ?? false,
         isVacancyHidden: stringToBoolean(dto.isVacancyHidden) ?? false,
         userId: user.id,
-        cover: cover?.filename ?? null
+        cover: uploadedCover ? getFileUrl(uploadedCover.fileName) : null
       }
     })
 
     for (const photo of photos) {
+      const uploadedPhoto = await this.storageService.upload(photo)
       await this.prisma.client.vacancyPhoto.create({
         data: {
-          url: photo.filename,
+          url: getFileUrl(uploadedPhoto.fileName),
           vacancyId: vacancy.id
         }
       })
@@ -268,16 +276,21 @@ export class VacancyService {
       })
     }
 
-    if (!!vacancy.cover) {
-      removeFile(vacancy.cover)
+    if (vacancy.cover) {
+      await this.storageService.delete(getFileName(vacancy.cover))
     }
     for (const photo of vacancy.photos) {
-      removeFile(photo.url)
+      await this.storageService.delete(getFileName(photo.url))
       await this.prisma.client.vacancyPhoto.delete({
         where: {
           id: photo.id
         }
       })
+    }
+
+    let uploadedCover: StorageFileResponse | null = null
+    if (cover) {
+      uploadedCover = await this.storageService.upload(cover)
     }
 
     const updatedVacancy = await this.prisma.client.vacancy.update({
@@ -292,14 +305,15 @@ export class VacancyService {
         cityName: dto.city ?? null,
         isLocationHidden: stringToBoolean(dto.isLocationHidden) ?? false,
         isVacancyHidden: stringToBoolean(dto.isVacancyHidden) ?? false,
-        cover: cover?.filename ?? null
+        cover: uploadedCover ? getFileUrl(uploadedCover.fileName) : null
       }
     })
 
     for (const photo of photos) {
+      const uploadedPhoto = await this.storageService.upload(photo)
       await this.prisma.client.vacancyPhoto.create({
         data: {
-          url: photo.filename,
+          url: getFileUrl(uploadedPhoto.fileName),
           vacancyId: vacancy.id
         }
       })
@@ -326,11 +340,11 @@ export class VacancyService {
       throw new ForbiddenException('You are not allowed to delete this vacancy')
     }
 
-    if (!!vacancy.cover) {
-      removeFile(vacancy.cover)
+    if (vacancy.cover) {
+      await this.storageService.delete(getFileName(vacancy.cover))
     }
     for (const photo of vacancy.photos) {
-      removeFile(photo.url)
+      await this.storageService.delete(getFileName(photo.url))
       await this.prisma.client.vacancyPhoto.delete({
         where: {
           id: photo.id

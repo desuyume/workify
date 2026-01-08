@@ -37,13 +37,7 @@ export default function FeedbackPhoto({ photo, setPhoto }: FeedbackPhotoProps) {
       >
         <img
           ref={imgRef}
-          src={
-            photo
-              ? typeof photo === 'object'
-                ? URL.createObjectURL(photo)
-                : `${process.env.NEXT_PUBLIC_BACKEND_URL}/${photo}`
-              : '#'
-          }
+          src={photo ? (typeof photo === 'object' ? URL.createObjectURL(photo) : photo) : '#'}
           width={313}
           height={193}
           className='w-[313px] h-[193px] object-cover rounded-[0.3125rem]'

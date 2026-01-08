@@ -89,37 +89,46 @@ jobs:
       - name: Create deployment package
         run: |
           mkdir -p deployment_temp
-          
+
           # Копируем docker-compose.yml (уже обновленный с environment блоками)
           cp docker-compose.yml deployment_temp/
           cp Caddyfile deployment_temp/
           cp prometheus.yml deployment_temp/
-          
+
           # Создаем .env файл для продакшена
           cat > deployment_temp/.env << 'EOF'
+          NODE_ENV=production
+
           # Database
           POSTGRES_USER=${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB=${{ secrets.POSTGRES_DB }}
           DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@postgres:5432/${{ secrets.POSTGRES_DB }}?schema=public
-          
+
           # Backend
           ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}
           REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }}
           CLIENT_URL=${{ secrets.CLIENT_URL }}
-          UPLOAD_LOCATION=${{ secrets.UPLOAD_LOCATION }}
-          
+
           # Frontend
           NEXT_PUBLIC_API_URL=${{ secrets.API_URL }}
           NEXT_PUBLIC_BACKEND_URL=${{ secrets.BACKEND_URL }}
           NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}
           NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
-          
+
+          # S3
+          S3_ENDPOINT=${{ secrets.S3_ENDPOINT }}
+          S3_ACCESS_KEY_ID=${{ secrets.S3_ACCESS_KEY_ID }}
+          S3_SECRET_ACCESS_KEY=${{ secrets.S3_SECRET_ACCESS_KEY }}
+          S3_REGION=${{ secrets.S3_REGION }}
+          S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}
+          S3_SUBDOMAIN=${{ secrets.S3_SUBDOMAIN }}
+
           # Docker
           DOMAIN_NAME=${{ secrets.DOMAIN_NAME }}
           BACKEND_PORT=${{ secrets.BACKEND_PORT }}
           FRONTEND_PORT=${{ secrets.FRONTEND_PORT }}
-          
+
           # Monitoring
           ADMIN_USER=${{ secrets.ADMIN_USER }}
           ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
@@ -127,16 +136,16 @@ jobs:
           MONITOR_PASSWORD=${{ secrets.MONITOR_PASSWORD }}
           GF_USER=${{ secrets.GF_USER }}
           GF_PASSWORD=${{ secrets.GF_PASSWORD }}
-          
+
           EOF
-          
+
           # Создаем скрипт деплоя
           cat > deployment_temp/deploy.sh << 'EOF'
           #!/bin/bash
           set -e
-          
+
           echo "🚀 Starting deployment..."
-          
+
           # Загружаем переменные окружения
           if [ -f .env ]; then
             set -a
@@ -147,23 +156,23 @@ jobs:
             echo "❌ .env file not found!"
             exit 1
           fi
-          
+
           # Создаем необходимые директории
-          sudo mkdir -p /opt/workify/{postgres-data,uploads}
+          sudo mkdir -p /opt/workify/{postgres-data}
           sudo chown $USER:$USER /opt/workify /opt/workify/*
           chmod 755 /opt/workify /opt/workify/*
-          
+
           # Останавливаем существующие сервисы
           echo "🛑 Stopping existing services..."
           docker compose down --remove-orphans 2>/dev/null || true
-          
+
           # Pull latest images
           echo "📥 Pulling latest images..."
           docker compose pull
-          
+
           echo "🐘 Starting PostgreSQL..."
           docker compose up -d postgres
-          
+
           echo "⏳ Waiting for PostgreSQL..."
           for i in {1..30}; do
             if docker compose exec postgres pg_isready -U "$POSTGRES_USER" >/dev/null 2>&1; then
@@ -173,7 +182,7 @@ jobs:
             echo "⏳ Waiting... ($i/30)"
             sleep 2
           done
-          
+
           echo "👤 Checking database user..."
           docker compose exec postgres psql -U postgres -c "
           DO \$\$
@@ -182,54 +191,54 @@ jobs:
               CREATE USER \"$POSTGRES_USER\" WITH PASSWORD '$POSTGRES_PASSWORD';
               RAISE NOTICE 'User $POSTGRES_USER created';
             END IF;
-            
+
             IF NOT EXISTS (SELECT FROM pg_database WHERE datname = '$POSTGRES_DB') THEN
               CREATE DATABASE \"$POSTGRES_DB\" OWNER \"$POSTGRES_USER\";
               RAISE NOTICE 'Database $POSTGRES_DB created';
             END IF;
-            
+
             -- Даем все права
             GRANT ALL PRIVILEGES ON DATABASE \"$POSTGRES_DB\" TO \"$POSTGRES_USER\";
           END
           \$\$;" 2>/dev/null || echo "User/database check completed"
-          
+
           echo "🔄 Running database setup..."
-          
+
           echo "🚀 Starting backend container..."
           docker compose up -d backend
           sleep 10  # Ждем полного запуска backend
-          
+
           echo "📦 Running Prisma migrations..."
           docker compose exec backend sh -c "
             cd /app/packages/database
             pnpm run db:setup
             echo '✅ Database setup completed!'
           "
-          
+
           # Перезапускаем backend чтобы применить все изменения
           echo "🔄 Restarting backend..."
           docker compose restart backend
-          
+
           # Запускаем все остальные сервисы
           echo "🔧 Starting all services..."
           docker compose up -d --remove-orphans
-          
+
           # Ждем и проверяем
           echo "⏳ Waiting for services to start..."
           sleep 20
-          
+
           # Проверяем здоровье сервисов
           echo "🏥 Checking services health..."
           docker compose ps
-          
+
           # Очистка
           echo "🧹 Cleaning up old images..."
           docker image prune -f
-          
+
           EOF
-          
+
           chmod +x deployment_temp/deploy.sh
-          
+
           # Создаем архив
           tar -czf deployment-package.tar.gz -C deployment_temp .
 
@@ -240,8 +249,8 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT || '22' }}
-          source: "deployment-package.tar.gz"
-          target: "/tmp/"
+          source: 'deployment-package.tar.gz'
+          target: '/tmp/'
 
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.0.0
@@ -253,21 +262,21 @@ jobs:
           script: |
             set -e
             echo "🚀 Starting deployment on server..."
-            
+
             # Переходим в директорию приложения
             cd /opt/workify
-            
+
             # Извлекаем пакет деплоя
             echo "📦 Extracting deployment package..."
             tar -xzf /tmp/deployment-package.tar.gz -C . --overwrite
-            
+
             # Запускаем деплой
             echo "🎯 Running deployment script..."
             chmod +x deploy.sh
             ./deploy.sh
-            
+
             # Проверяем результат
             echo "🔍 Verifying deployment..."
             sleep 15
-            
+
             echo "🎉 Deployment completed successfully!"

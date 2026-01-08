@@ -40,9 +40,6 @@ export const ProfileProvider: React.FC<ProfileProviderProps> = ({ children }) =>
   )
 
   useEffect(() => {
-    console.log(process.env.NEXT_PUBLIC_API_URL)
-    console.log(process.env.NEXT_PUBLIC_BACKEND_URL)
-    console.log(process.env.NODE_ENV)
     getUserProfile({
       params: {}
     })
