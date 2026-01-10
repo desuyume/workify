@@ -13,6 +13,7 @@ import { stringToBoolean } from '@workify/shared'
 import { StorageService } from '@/storage/storage.service'
 import { StorageFileResponse } from '@/types/storage'
 import { getFileName, getFileUrl } from '@/utils/storage'
+import { calculateAvgRating } from '@/utils/rating'
 
 @Injectable()
 export class VacancyService {
@@ -20,7 +21,7 @@ export class VacancyService {
     @Inject(CUSTOM_PRISMA_SERVICE)
     private prisma: CUSTOM_PRISMA_TYPE,
     private storageService: StorageService
-  ) {}
+  ) { }
 
   async getAll(query: IVacancyQuery) {
     const page = Number(query.page) || 1
@@ -394,9 +395,7 @@ export class VacancyService {
         rating: true
       }
     })
-    const avgCurrentVacancyRating =
-      currentVacancyFeedbacks.reduce((sum, feedback) => sum + feedback.rating, 0) /
-      currentVacancyFeedbacks.length
+    const avgCurrentVacancyRating = calculateAvgRating(currentVacancyFeedbacks)
     await this.prisma.client.vacancy.update({
       where: {
         id: vacancy.id
@@ -420,10 +419,7 @@ export class VacancyService {
         rating: true
       }
     })
-    const avgAllExecutorsVacancyRating =
-      allExecutorsFeedbacks.reduce((sum, feedback) => sum + feedback.rating, 0) /
-      allExecutorsFeedbacks.length
-
+    const avgAllExecutorsVacancyRating = calculateAvgRating(allExecutorsFeedbacks)
     await this.prisma.client.user.update({
       where: {
         id: vacancy.userId

@@ -159,6 +159,7 @@ export class FeedbackService {
         }
       }
     })
+    const vacancy = feedback.FeedbackOnVacancy[0].vacancy
 
     if (!feedback) {
       throw new NotFoundException('Отзыв не найден')
@@ -177,12 +178,12 @@ export class FeedbackService {
       await this.storageService.delete(getFileName(feedback.photo))
     }
 
-    await this.vacancyService.updateRating(feedback.FeedbackOnVacancy[0].vacancy.id)
+    await this.vacancyService.updateRating(vacancy.id)
 
     return {
       ...feedback,
-      executor: feedback.FeedbackOnVacancy[0].vacancy.user,
-      vacancy: feedback.FeedbackOnVacancy[0].vacancy
+      executor: vacancy.user,
+      vacancy
     }
   }
 

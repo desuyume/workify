@@ -67,8 +67,6 @@ export default function CreateEditVacancy({
         data.append('photos', photo.url)
       }
       if (typeof photo.url === 'string') {
-        console.log('123')
-
         data.append('photos', await imgSrcToFile(photo.url, 'photo.jpg'))
       }
     }
