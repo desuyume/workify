@@ -39,7 +39,7 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 's3.workify-dev.ru',
+        hostname: 'cdn.workify-dev.ru',
         port: '',
         pathname: '/**'
       }
