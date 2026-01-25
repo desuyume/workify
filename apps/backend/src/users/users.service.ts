@@ -106,8 +106,14 @@ export class UsersService {
       await this.storageService.delete(getFileName(user.avatar))
     }
 
-    const [deletedUser] = await this.db.delete(users).where(eq(users.id, id)).returning()
-    return deletedUser
+    const [updatedUser] = await this.db
+      .update(users)
+      .set({
+        avatar: null
+      })
+      .where(eq(users.id, id))
+      .returning()
+    return updatedUser
   }
 
   async updateName(id: number, name: string) {
