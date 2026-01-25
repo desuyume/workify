@@ -1,5 +1,12 @@
 {
-	"extends": "@workify/typescript-config/base.json",
-	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "tsup.config.ts"],
-	"exclude": ["node_modules"]
+  "extends": "@workify/typescript-config/node-library.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "lib": ["ES2022", "DOM"],
+    "incremental": false,
+    "composite": false
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
 }

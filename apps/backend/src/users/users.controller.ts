@@ -5,7 +5,6 @@ import {
   Get,
   Param,
   Patch,
-  Req,
   UploadedFile,
   UseGuards,
   UseInterceptors
@@ -14,7 +13,8 @@ import { UsersService } from './users.service'
 import { JwtGuard } from 'src/auth/guards/jwt.guard'
 import { IUserPayload } from '@workify/shared'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { multerOptions } from '@/config/multer.config'
+import { multerOptions } from '@/common/config/multer.config'
+import { CurrentUser } from '@/common/decorators/user.decorator'
 
 @Controller('users')
 export class UsersController {
@@ -22,9 +22,8 @@ export class UsersController {
 
   @UseGuards(JwtGuard)
   @Get('profile')
-  async getProfile(@Req() req) {
-    const { id } = req.user as IUserPayload
-    return await this.usersService.findById(id)
+  async getProfile(@CurrentUser() user: IUserPayload) {
+    return await this.usersService.findById(user.id)
   }
 
   @Get('profile/:login')
@@ -35,78 +34,79 @@ export class UsersController {
   @UseGuards(JwtGuard)
   @Patch('avatar')
   @UseInterceptors(FileInterceptor('avatar', multerOptions))
-  async updateAvatar(@Req() req, @UploadedFile() avatar: Express.Multer.File) {
-    const { id } = req.user as IUserPayload
-    return await this.usersService.updateAvatar(id, avatar)
+  async updateAvatar(
+    @CurrentUser() user: IUserPayload,
+    @UploadedFile() avatar: Express.Multer.File
+  ) {
+    return await this.usersService.updateAvatar(user.id, avatar)
   }
 
   @UseGuards(JwtGuard)
   @Delete('avatar')
-  async deleteAvatar(@Req() req) {
-    const { id } = req.user as IUserPayload
-    return await this.usersService.deleteAvatar(id)
+  async deleteAvatar(@CurrentUser() user: IUserPayload) {
+    return await this.usersService.deleteAvatar(user.id)
   }
 
   @UseGuards(JwtGuard)
   @Patch('name')
-  async updateName(@Req() req, @Body() dto: { name: string }) {
-    const { id } = req.user as IUserPayload
-    return await this.usersService.updateName(id, dto.name)
+  async updateName(@CurrentUser() user: IUserPayload, @Body() dto: { name: string }) {
+    return await this.usersService.updateName(user.id, dto.name)
   }
 
   @UseGuards(JwtGuard)
   @Patch('birthday')
-  async updateBirthday(@Req() req, @Body() dto: { birthday: Date | null }) {
-    const { id } = req.user as IUserPayload
-    return await this.usersService.updateBirthday(id, dto.birthday)
+  async updateBirthday(@CurrentUser() user: IUserPayload, @Body() dto: { birthday: Date | null }) {
+    return await this.usersService.updateBirthday(user.id, dto.birthday)
   }
 
   @UseGuards(JwtGuard)
   @Patch('specialisation')
-  async updateSpecialisation(@Req() req, @Body() dto: { specialisation: string }) {
-    const { id } = req.user as IUserPayload
-    return await this.usersService.updateSpecialisation(id, dto.specialisation)
+  async updateSpecialisation(
+    @CurrentUser() user: IUserPayload,
+    @Body() dto: { specialisation: string }
+  ) {
+    return await this.usersService.updateSpecialisation(user.id, dto.specialisation)
   }
 
   @UseGuards(JwtGuard)
   @Patch('email')
-  async updateEmail(@Req() req, @Body() dto: { email: string }) {
-    const { id } = req.user as IUserPayload
-    return await this.usersService.updateEmail(id, dto.email)
+  async updateEmail(@CurrentUser() user: IUserPayload, @Body() dto: { email: string }) {
+    return await this.usersService.updateEmail(user.id, dto.email)
   }
 
   @UseGuards(JwtGuard)
   @Patch('phone')
-  async updatePhone(@Req() req, @Body() dto: { phone: string }) {
-    const { id } = req.user as IUserPayload
-    return await this.usersService.updatePhone(id, dto.phone)
+  async updatePhone(@CurrentUser() user: IUserPayload, @Body() dto: { phone: string }) {
+    return await this.usersService.updatePhone(user.id, dto.phone)
   }
 
   @UseGuards(JwtGuard)
   @Patch('description')
-  async updateDescription(@Req() req, @Body() dto: { description: string }) {
-    const { id } = req.user as IUserPayload
-    return await this.usersService.updateDescription(id, dto.description)
+  async updateDescription(@CurrentUser() user: IUserPayload, @Body() dto: { description: string }) {
+    return await this.usersService.updateDescription(user.id, dto.description)
   }
 
   @UseGuards(JwtGuard)
   @Patch('password')
-  async updatePassword(@Req() req, @Body() dto: { password: string }) {
-    const { id } = req.user as IUserPayload
-    return await this.usersService.updatePassword(id, dto.password)
+  async updatePassword(@CurrentUser() user: IUserPayload, @Body() dto: { password: string }) {
+    return await this.usersService.updatePassword(user.id, dto.password)
   }
 
   @UseGuards(JwtGuard)
   @Patch('communication/email')
-  async updateEmailCommunication(@Req() req, @Body() dto: { isVisible: boolean }) {
-    const { id } = req.user as IUserPayload
-    return await this.usersService.updateEmailCommunication(id, dto.isVisible)
+  async updateEmailCommunication(
+    @CurrentUser() user: IUserPayload,
+    @Body() dto: { isVisible: boolean }
+  ) {
+    return await this.usersService.updateEmailCommunication(user.id, dto.isVisible)
   }
 
   @UseGuards(JwtGuard)
   @Patch('communication/phone')
-  async updatePhoneCommunication(@Req() req, @Body() dto: { isVisible: boolean }) {
-    const { id } = req.user as IUserPayload
-    return await this.usersService.updatePhoneCommunication(id, dto.isVisible)
+  async updatePhoneCommunication(
+    @CurrentUser() user: IUserPayload,
+    @Body() dto: { isVisible: boolean }
+  ) {
+    return await this.usersService.updatePhoneCommunication(user.id, dto.isVisible)
   }
 }

@@ -1,3 +1,5 @@
+'use client'
+
 import { useCreateEditVacancy } from '@/contexts/create-edit-vacancy'
 import { getAllVacancyCategories } from '@/lib/api'
 import { IVacancyCategory, cn } from '@workify/shared'

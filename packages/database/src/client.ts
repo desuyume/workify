@@ -1,14 +1,27 @@
-import { PrismaClient } from '@prisma/client'
-export * from '@prisma/client'
+import { drizzle } from 'drizzle-orm/postgres-js'
+import postgres from 'postgres'
+import * as schema from './schema'
 
-const prismaClientSingleton = () => {
-	return new PrismaClient()
+let db: ReturnType<typeof drizzle<typeof schema>> | null = null
+
+export function getDbClient(connectionString?: string) {
+  if (!db) {
+    const dbUrl = connectionString || process.env.DB_URL
+
+    if (!dbUrl) {
+      throw new Error('DB_URL is not defined')
+    }
+
+    const client = postgres(dbUrl, {
+      max: 10,
+      idle_timeout: 20,
+      connect_timeout: 10
+    })
+
+    db = drizzle(client, { schema })
+  }
+
+  return db
 }
 
-declare global {
-	var prisma: undefined | ReturnType<typeof prismaClientSingleton>
-}
-
-export const prisma = globalThis.prisma ?? prismaClientSingleton()
-
-if (process.env.NODE_ENV !== 'production') globalThis.prisma = prisma
+export type DatabaseClient = ReturnType<typeof getDbClient>

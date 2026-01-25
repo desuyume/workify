@@ -7,7 +7,6 @@ import {
   Patch,
   Post,
   Query,
-  Req,
   UploadedFiles,
   UseGuards,
   UseInterceptors
@@ -17,7 +16,8 @@ import { IUserPayload, IVacancyQuery } from '@workify/shared'
 import { CreateVacancyDto } from './dto/vacancy.dto'
 import { FileFieldsInterceptor } from '@nestjs/platform-express'
 import { JwtGuard } from '@/auth/guards/jwt.guard'
-import { multerOptions } from '@/config/multer.config'
+import { multerOptions } from '@/common/config/multer.config'
+import { CurrentUser } from '@/common/decorators/user.decorator'
 
 @Controller('vacancy')
 export class VacancyController {
@@ -45,15 +45,14 @@ export class VacancyController {
     )
   )
   async create(
-    @Req() req,
+    @CurrentUser() user: IUserPayload,
     @Body() dto: CreateVacancyDto,
     @UploadedFiles()
     files: { cover: Express.Multer.File[]; photos: Express.Multer.File[] }
   ) {
-    const { id } = req.user as IUserPayload
     const cover = files?.cover?.[0] || null
     const photos = files?.photos || []
-    return await this.vacancyService.create(id, dto, cover, photos)
+    return await this.vacancyService.create(user.id, dto, cover, photos)
   }
 
   @UseGuards(JwtGuard)
@@ -68,23 +67,21 @@ export class VacancyController {
     )
   )
   async update(
-    @Req() req,
+    @CurrentUser() user: IUserPayload,
     @Param('id') vacancyId: number,
     @Body() dto: CreateVacancyDto,
     @UploadedFiles()
     files: { cover: Express.Multer.File[]; photos: Express.Multer.File[] }
   ) {
-    const { id } = req.user as IUserPayload
     const cover = files?.cover?.[0] || null
     const photos = files?.photos || []
-    return await this.vacancyService.update(id, vacancyId, dto, cover, photos)
+    return await this.vacancyService.update(user.id, vacancyId, dto, cover, photos)
   }
 
   @UseGuards(JwtGuard)
   @Delete(':id')
-  async delete(@Req() req, @Param('id') vacancyId: number) {
-    const { id: userId } = req.user as IUserPayload
-    return await this.vacancyService.delete(userId, vacancyId)
+  async delete(@CurrentUser() user: IUserPayload, @Param('id') vacancyId: number) {
+    return await this.vacancyService.delete(user.id, vacancyId)
   }
 
   @Get('categories')

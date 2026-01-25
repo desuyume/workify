@@ -1,40 +1,52 @@
 {
-	"name": "@workify/database",
-	"main": "./dist/index.js",
-	"module": "./dist/index.mjs",
-	"types": "./dist/index.d.ts",
-	"files": [
-		"dist/**"
-	],
-	"scripts": {
-    "build": "pnpm run db:generate && tsup",
-    
-    "dev": "tsup --watch",
-    
-    "db:setup": "pnpm run db:migrate && pnpm run db:seed",
-    "db:prepare": "pnpm run db:setup && tsup",
-    "db:migrate": "prisma migrate deploy",
-    "db:migrate:dev": "prisma migrate dev",
-    "db:generate": "prisma generate",
-    "db:push": "prisma db push --skip-generate",
-    "db:seed": "tsx src/seed.ts",
-    
-    "format": "prisma format",
-    "studio": "prisma studio"
+  "name": "@workify/database",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "default": "./dist/client.js"
+    },
+    "./schema": {
+      "types": "./dist/schema.d.ts",
+      "default": "./dist/schema.js"
+    }
   },
-	"dependencies": {
-		"@prisma/client": "^5.12.1"
-	},
-	"devDependencies": {
-		"@types/node": "^20.3.1",
-		"@workify/eslint-config": "workspace:*",
-		"@workify/typescript-config": "workspace:*",
-		"prisma": "^5.12.1",
-		"tsup": "^8.0.2",
-		"tsx": "^4.7.2",
-		"typescript": "^5.4.5"
-	},
-	"prisma": {
-    "schema": "./prisma/schema.prisma"
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rimraf dist",
+    "db:setup": "pnpm run db:generate && pnpm run db:migrate && pnpm run db:seed",
+    "db:generate": "pnpm drizzle-kit generate",
+    "db:migrate": "pnpm drizzle-kit migrate",
+    "db:push": "pnpm drizzle-kit push",
+    "db:pull": "pnpm drizzle-kit pull",
+    "db:seed": "tsx src/seeds/index.ts",
+    "db:check": "pnpm drizzle-kit check",
+    "db:up": "pnpm drizzle-kit up",
+    "db:studio": "pnpm drizzle-kit studio"
+  },
+  "dependencies": {
+    "@workify/shared": "workspace:*",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.45.1",
+    "postgres": "^3.4.8"
+  },
+  "devDependencies": {
+    "@workify/eslint-config": "workspace:*",
+    "@workify/typescript-config": "workspace:*",
+    "@types/node": "^20.19.25",
+    "drizzle-kit": "^0.31.8",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
   }
 }

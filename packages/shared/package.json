@@ -1,14 +1,23 @@
 {
   "name": "@workify/shared",
+  "version": "0.0.0",
+  "private": true,
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
   "files": [
-    "dist/**"
+    "dist"
   ],
   "scripts": {
-    "dev": "rimraf dist && tsup --watch",
-    "build": "rimraf dist && tsup",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "clean": "rimraf dist",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\""
   },
@@ -21,6 +30,7 @@
   },
   "dependencies": {
     "clsx": "^2.1.1",
-    "tailwind-merge": "^2.3.0"
+    "tailwind-merge": "^2.3.0",
+    "transliteration": "^2.6.0"
   }
 }

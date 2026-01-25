@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useState } from 'react'
 import SortIcon from './icons/SortIcon'
 import { SortBy, cn } from '@workify/shared'

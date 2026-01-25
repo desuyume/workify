@@ -1,4 +1,4 @@
-import { StorageFileResponse } from '@/types/storage'
+import { StorageFileResponse } from '@/common/types/storage'
 import {
   DeleteObjectCommand,
   ListObjectsV2Command,

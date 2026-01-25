@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { IntroduceSection } from './IntroduceSection'
 import { LoginSection } from './LoginSection'
 import { RegSection } from './RegSection'
-import { BackButton, CloseButton, Glow } from '@workify/ui'
+import { BackButton, CloseButton } from '@workify/ui'
 import { cn } from '@workify/shared'
 import AuthModalBackgroundContent from './AuthModalBackgroundContent'
 

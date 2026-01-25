@@ -1,11 +1,7 @@
 {
   "name": "workify",
   "private": true,
-  "prisma": {
-    "schema": "packages/database/prisma/schema.prisma",
-    "seed": "tsx packages/database/src/seed.ts"
-  },
-    "scripts": {
+  "scripts": {
     "start": "dotenv -- turbo run start",
     
     "build": "pnpm run build:ci",
@@ -21,13 +17,15 @@
     "dev:frontend": "dotenv -- pnpm --filter frontend run dev",
     "dev:backend": "dotenv -- pnpm --filter backend run dev",
     
-    "db:generate": "dotenv -- pnpm --filter=database run db:generate",
     "db:setup": "dotenv -- pnpm --filter=database run db:setup",
+    "db:generate": "dotenv -- pnpm --filter=database run db:generate",
     "db:migrate": "dotenv -- pnpm --filter=database run db:migrate",
-    "db:migrate:dev": "dotenv -- pnpm --filter=database run db:migrate:dev",
+    "db:push": "dotenv -- pnpm --filter=database run db:push",
+    "db:pull": "dotenv -- pnpm --filter=database run db:pull",
     "db:seed": "dotenv -- pnpm --filter=database run db:seed",
-    "db:prepare": "dotenv -- pnpm --filter=database run db:prepare",
-    "prisma:studio": "dotenv -- pnpm --filter=database run studio",
+    "db:check": "dotenv -- pnpm --filter=database run db:check",
+    "db:up": "dotenv -- pnpm --filter=database run db:up",
+    "db:studio": "dotenv -- pnpm --filter=database run db:studio",
     
     "format": "turbo run format",
     "lint": "turbo run lint",

@@ -24,10 +24,8 @@ export const ProfileProvider: React.FC<ProfileProviderProps> = ({ children }) =>
       password: null,
       rating: 0,
       vacancies: [],
-      communication: {
-        isEmailVisible: true,
-        isPhoneVisible: true
-      }
+      isEmailVisible: true,
+      isPhoneVisible: true
     }
   })
 
@@ -48,8 +46,8 @@ export const ProfileProvider: React.FC<ProfileProviderProps> = ({ children }) =>
           user: {
             ...res.data,
             password: null,
-            birthday: !!res.data.birthday
-              ? new Date(res.data.birthday).toISOString().split('T')[0]
+            birthday: res.data.birthday
+              ? (new Date(res.data.birthday).toISOString().split('T')[0] ?? null)
               : null
           }
         })

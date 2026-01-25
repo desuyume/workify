@@ -1,5 +1,12 @@
 {
-	"extends": "@workify/typescript-config/react-library.json",
-	"include": ["."],
-	"exclude": ["dist", "build", "node_modules"]
+  "extends": "@workify/typescript-config/react-library.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "noEmit": true,
+    "incremental": false,
+    "composite": false
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.stories.tsx", "**/*.test.tsx"]
 }

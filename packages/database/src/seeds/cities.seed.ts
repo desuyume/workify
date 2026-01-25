@@ -1,26 +1,16 @@
-import { prisma } from '..'
+import { DatabaseClient } from '../client'
 import { RUSSIAN_CITIES } from '../constants/russian-cities'
+import { cities } from '../schema'
 
-export const citySeed = async () => {
-	await Promise.all(
-		RUSSIAN_CITIES.map(city =>
-			prisma.city.upsert({
-				where: {
-					name: city.name,
-				},
-				update: {
-					name: city.name,
-					subject: city.subject,
-					population: city.population,
-				},
-				create: {
-					name: city.name,
-					subject: city.subject,
-					population: city.population,
-				},
-			})
-		)
-	)
+export const seedCities = async (db: DatabaseClient) => {
+  console.log('🌆 Seeding cities...')
 
-	console.log('cities seed done')
+  const existing = await db.select().from(cities).limit(1);
+  
+  if (existing.length === 0) {
+    await db.insert(cities).values(RUSSIAN_CITIES);
+    console.log(`✅ Added ${RUSSIAN_CITIES.length} cities`);
+  } else {
+    console.log('⏭️ Cities already exist, skipping...');
+  }
 }

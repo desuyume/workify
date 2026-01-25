@@ -23,7 +23,7 @@ git clone https://github.com/desuyume/workify.git
 pnpm install
 ```
 
-* Run needed services (Postgres, Adminer)
+* Run needed services (Postgres)
 ```bash
 docker compose -f docker-compose.dev.yml up -d
 ```

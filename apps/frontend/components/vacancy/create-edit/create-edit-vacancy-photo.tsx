@@ -1,3 +1,5 @@
+'use client'
+
 import AddIcon from '@/app/ui/icons/AddIcon'
 import ChangeIcon from '@/app/ui/icons/ChangeIcon'
 import GarbageIcon from '@/app/ui/icons/GarbageIcon'

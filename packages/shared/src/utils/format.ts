@@ -1,5 +1,8 @@
 export const formatMoney = (money: string | number, separator: string = ' '): string => {
   const parts = money.toString().split('.')
+  if (parts.length === 0 || !parts[0]) {
+    return ''
+  }
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, separator)
   return parts.join(',')
 }

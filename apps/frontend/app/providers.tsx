@@ -1,3 +1,5 @@
+'use client'
+
 import { AuthProvider } from '@/contexts/auth'
 import { ProfileProvider } from '@/contexts/profile'
 

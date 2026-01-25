@@ -100,10 +100,10 @@ jobs:
           NODE_ENV=production
 
           # Database
-          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
-          DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@postgres:5432/${{ secrets.POSTGRES_DB }}?schema=public
+          DB_USER=${{ secrets.DB_USER }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_NAME=${{ secrets.DB_NAME }}
+          DB_URL=postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@postgres:5432/${{ secrets.DB_NAME }}
 
           # Backend
           ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}
@@ -175,7 +175,7 @@ jobs:
 
           echo "⏳ Waiting for PostgreSQL..."
           for i in {1..30}; do
-            if docker compose exec postgres pg_isready -U "$POSTGRES_USER" >/dev/null 2>&1; then
+            if docker compose exec postgres pg_isready -U "$DB_USER" >/dev/null 2>&1; then
               echo "✅ PostgreSQL is ready!"
               break
             fi
@@ -187,18 +187,18 @@ jobs:
           docker compose exec postgres psql -U postgres -c "
           DO \$\$
           BEGIN
-            IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '$POSTGRES_USER') THEN
-              CREATE USER \"$POSTGRES_USER\" WITH PASSWORD '$POSTGRES_PASSWORD';
-              RAISE NOTICE 'User $POSTGRES_USER created';
+            IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '$DB_USER') THEN
+              CREATE USER \"$DB_USER\" WITH PASSWORD '$DB_PASSWORD';
+              RAISE NOTICE 'User $DB_USER created';
             END IF;
 
-            IF NOT EXISTS (SELECT FROM pg_database WHERE datname = '$POSTGRES_DB') THEN
-              CREATE DATABASE \"$POSTGRES_DB\" OWNER \"$POSTGRES_USER\";
-              RAISE NOTICE 'Database $POSTGRES_DB created';
+            IF NOT EXISTS (SELECT FROM pg_database WHERE datname = '$DB_NAME') THEN
+              CREATE DATABASE \"$DB_NAME\" OWNER \"$DB_USER\";
+              RAISE NOTICE 'Database $DB_NAME created';
             END IF;
 
             -- Даем все права
-            GRANT ALL PRIVILEGES ON DATABASE \"$POSTGRES_DB\" TO \"$POSTGRES_USER\";
+            GRANT ALL PRIVILEGES ON DATABASE \"$DB_NAME\" TO \"$DB_USER\";
           END
           \$\$;" 2>/dev/null || echo "User/database check completed"
 
@@ -208,7 +208,7 @@ jobs:
           docker compose up -d backend
           sleep 10  # Ждем полного запуска backend
 
-          echo "📦 Running Prisma migrations..."
+          echo "📦 Running migrations..."
           docker compose exec backend sh -c "
             cd /app/packages/database
             pnpm run db:setup

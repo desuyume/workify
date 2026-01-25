@@ -26,7 +26,7 @@ COPY packages/ ./packages/
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 
-RUN pnpm run db:generate
+# RUN pnpm run db:generate
 RUN pnpm run build:backend
 
 EXPOSE 8000

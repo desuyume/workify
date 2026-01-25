@@ -3,7 +3,6 @@
 import EmailIcon from '@/app/ui/icons/EmailIcon'
 import PhoneIcon from '@/app/ui/icons/PhoneIcon'
 import Modal from '@/app/ui/modal'
-import { IUserCommunication } from '@workify/shared'
 import { Button } from '@workify/ui'
 import { useState } from 'react'
 
@@ -13,7 +12,7 @@ export default function CommunicationButton({
   email,
   phone
 }: {
-  communication: IUserCommunication
+  communication: { isEmailVisible: boolean; isPhoneVisible: boolean }
   username: string
   email: string
   phone: string

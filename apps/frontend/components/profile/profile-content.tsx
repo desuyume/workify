@@ -63,7 +63,10 @@ export default function ProfileContent({ user }: ProfileContentProps) {
         )}
 
         <CommunicationButton
-          communication={user.communication}
+          communication={{
+            isEmailVisible: user.isEmailVisible,
+            isPhoneVisible: user.isPhoneVisible
+          }}
           username={user.name ?? user.login}
           email={user.email}
           phone={user.phone ?? ''}

@@ -4,112 +4,79 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
-  NotFoundException
+  UnauthorizedException
 } from '@nestjs/common'
 import { CreateUserDto } from './dto/users.dto'
 import { hash } from 'bcryptjs'
-import { CUSTOM_PRISMA_SERVICE, CUSTOM_PRISMA_TYPE } from 'src/constants/prisma.constants'
 import { StorageService } from '@/storage/storage.service'
-import { getFileName, getFileUrl } from '@/utils/storage'
+import { getFileName, getFileUrl } from '@/common/utils/storage'
+import { DatabaseClient, eq, users } from '@workify/database'
+import { DB_CLIENT } from '@/database/database.module'
 
 @Injectable()
 export class UsersService {
   constructor(
-    @Inject(CUSTOM_PRISMA_SERVICE)
-    private prisma: CUSTOM_PRISMA_TYPE,
+    @Inject(DB_CLIENT) private db: DatabaseClient,
     private storageService: StorageService
   ) {}
 
+  async findById(id: number) {
+    const user = await this.db.query.users.findFirst({
+      where: eq(users.id, id),
+      with: {
+        vacancies: true
+      }
+    })
+    if (!user) throw new UnauthorizedException('Пользователь не найден')
+    return user
+  }
+
+  async findByEmail(email: string) {
+    const user = await this.db.query.users.findFirst({
+      where: eq(users.email, email),
+      with: {
+        vacancies: true
+      }
+    })
+    return user
+  }
+
+  async findByLogin(login: string) {
+    const user = await this.db.query.users.findFirst({
+      where: eq(users.login, login),
+      with: {
+        vacancies: true
+      }
+    })
+    return user
+  }
+
   async create(dto: CreateUserDto) {
-    const userByEmail = await this.prisma.client.user.findUnique({
-      where: {
-        email: dto.email
-      }
-    })
+    const userByEmail = await this.findByEmail(dto.email)
+    if (userByEmail) throw new ConflictException('Пользователь с такой почтой уже существует')
 
-    if (userByEmail) throw new ConflictException('Пользователь с такой эл.почтой уже существует')
-
-    const userByLogin = await this.prisma.client.user.findUnique({
-      where: {
-        login: dto.login
-      }
-    })
-
+    const userByLogin = await this.findByLogin(dto.login)
     if (userByLogin) throw new ConflictException('Пользователь с таким логином уже существует')
 
     if (dto.password !== dto.rePassword) {
       throw new BadRequestException('Пароли не совпадают')
     }
 
-    const communication = await this.prisma.client.communication.create({})
-
-    const newUser = await this.prisma.client.user.create({
-      data: {
+    const [newUser] = await this.db
+      .insert(users)
+      .values({
         login: dto.login,
         email: dto.email,
-        password: await hash(dto.password, 10),
-        communicationId: communication.id
-      }
-    })
+        password: await hash(dto.password, 10)
+      })
+      .returning()
+
+    if (!newUser) {
+      throw new BadRequestException('Не удалость создать пользователя')
+    }
 
     const { password: _, ...result } = newUser
     return result
-  }
-
-  async findByEmail(email: string) {
-    return await this.prisma.client.user.findUnique({ where: { email } })
-  }
-
-  async findById(id: number) {
-    const user = await this.prisma.client.user.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        login: true,
-        email: true,
-        name: true,
-        avatar: true,
-        birthday: true,
-        description: true,
-        phone: true,
-        specialisation: true,
-        vacancies: {
-          include: {
-            user: true,
-            category: true
-          }
-        },
-        communication: true
-      }
-    })
-    if (!user) throw new NotFoundException('User not found')
-    return user
-  }
-
-  async findByLogin(login: string) {
-    const user = await this.prisma.client.user.findUnique({
-      where: { login },
-      select: {
-        id: true,
-        login: true,
-        email: true,
-        name: true,
-        avatar: true,
-        birthday: true,
-        description: true,
-        phone: true,
-        specialisation: true,
-        vacancies: {
-          include: {
-            user: true,
-            category: true
-          }
-        },
-        communication: true
-      }
-    })
-    if (!user) throw new NotFoundException('User not found')
-    return user
   }
 
   async updateAvatar(id: number, avatar: Express.Multer.File) {
@@ -123,12 +90,14 @@ export class UsersService {
       throw new InternalServerErrorException('Failed to uploading file to S3')
     }
 
-    return await this.prisma.client.user.update({
-      where: { id },
-      data: {
+    const [updatedUser] = await this.db
+      .update(users)
+      .set({
         avatar: getFileUrl(storageResponse.fileName)
-      }
-    })
+      })
+      .where(eq(users.id, id))
+      .returning()
+    return updatedUser
   }
 
   async deleteAvatar(id: number) {
@@ -136,104 +105,110 @@ export class UsersService {
     if (user.avatar) {
       await this.storageService.delete(getFileName(user.avatar))
     }
-    return await this.prisma.client.user.update({
-      where: { id },
-      data: {
-        avatar: null
-      }
-    })
+
+    const [deletedUser] = await this.db.delete(users).where(eq(users.id, id)).returning()
+    return deletedUser
   }
 
   async updateName(id: number, name: string) {
-    return await this.prisma.client.user.update({
-      where: { id },
-      data: {
+    const [updatedUser] = await this.db
+      .update(users)
+      .set({
         name
-      }
-    })
+      })
+      .where(eq(users.id, id))
+      .returning()
+    return updatedUser
   }
 
   async updateBirthday(id: number, birthday: Date | null) {
-    return await this.prisma.client.user.update({
-      where: { id },
-      data: {
-        birthday
-      }
-    })
+    const [updatedUser] = await this.db
+      .update(users)
+      .set({
+        birthday: String(birthday)
+      })
+      .where(eq(users.id, id))
+      .returning()
+    return updatedUser
   }
 
   async updateSpecialisation(id: number, specialisation: string) {
-    return await this.prisma.client.user.update({
-      where: { id },
-      data: {
+    const [updatedUser] = await this.db
+      .update(users)
+      .set({
         specialisation
-      }
-    })
+      })
+      .where(eq(users.id, id))
+      .returning()
+    return updatedUser
   }
 
   async updateEmail(id: number, email: string) {
     const user = await this.findByEmail(email)
-
     if (user) throw new ConflictException('Пользователь с таким email уже существует')
 
-    return await this.prisma.client.user.update({
-      where: { id },
-      data: {
+    const [updatedUser] = await this.db
+      .update(users)
+      .set({
         email
-      }
-    })
+      })
+      .where(eq(users.id, id))
+      .returning()
+    return updatedUser
   }
 
   async updatePhone(id: number, phone: string) {
-    return await this.prisma.client.user.update({
-      where: { id },
-      data: {
+    const [updatedUser] = await this.db
+      .update(users)
+      .set({
         phone
-      }
-    })
+      })
+      .where(eq(users.id, id))
+      .returning()
+    return updatedUser
   }
 
   async updateDescription(id: number, description: string) {
-    return await this.prisma.client.user.update({
-      where: { id },
-      data: {
+    const [updatedUser] = await this.db
+      .update(users)
+      .set({
         description
-      }
-    })
+      })
+      .where(eq(users.id, id))
+      .returning()
+    return updatedUser
   }
 
   async updatePassword(id: number, password: string) {
-    return await this.prisma.client.user.update({
-      where: { id },
-      data: {
+    const [updatedUser] = await this.db
+      .update(users)
+      .set({
         password: await hash(password, 10)
-      }
-    })
+      })
+      .where(eq(users.id, id))
+      .returning()
+    return updatedUser
   }
 
   async updateEmailCommunication(id: number, isVisible: boolean) {
-    const user = await this.findById(id)
-    return await this.prisma.client.communication.upsert({
-      where: { id: user.communication.id },
-      create: {
+    const [updatedUser] = await this.db
+      .update(users)
+      .set({
         isEmailVisible: isVisible
-      },
-      update: {
-        isEmailVisible: isVisible
-      }
-    })
+      })
+      .where(eq(users.id, id))
+      .returning()
+    return updatedUser
   }
 
   async updatePhoneCommunication(id: number, isVisible: boolean) {
-    const user = await this.findById(id)
-    return await this.prisma.client.communication.upsert({
-      where: { id: user.communication.id },
-      create: {
+    const [updatedUser] = await this.db
+      .update(users)
+      .set({
         isPhoneVisible: isVisible
-      },
-      update: {
-        isPhoneVisible: isVisible
-      }
-    })
+      })
+      .where(eq(users.id, id))
+      .returning()
+    return updatedUser
   }
 }

@@ -7,7 +7,6 @@ import {
   Patch,
   Post,
   Query,
-  Req,
   UploadedFile,
   UseGuards,
   UseInterceptors
@@ -16,8 +15,9 @@ import { FeedbackService } from './feedback.service'
 import { CreateFeedbackDto } from './dto/feedback.dto'
 import { FeedbackSortBy, IUserPayload } from '@workify/shared'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { multerOptions } from '@/config/multer.config'
+import { multerOptions } from '@/common/config/multer.config'
 import { JwtGuard } from '@/auth/guards/jwt.guard'
+import { CurrentUser } from '@/common/decorators/user.decorator'
 
 @Controller('feedback')
 export class FeedbackController {
@@ -27,13 +27,12 @@ export class FeedbackController {
   @Post(':vacancyId')
   @UseInterceptors(FileInterceptor('photo', multerOptions))
   async create(
-    @Req() req,
+    @CurrentUser() user: IUserPayload,
     @Param('vacancyId') vacancyId: number,
     @Body() dto: CreateFeedbackDto,
     @UploadedFile() photo: Express.Multer.File
   ) {
-    const { id: userId } = req.user as IUserPayload
-    return await this.feedbackService.create(userId, vacancyId, dto, photo)
+    return await this.feedbackService.create(user.id, vacancyId, dto, photo)
   }
 
   @UseGuards(JwtGuard)
@@ -50,9 +49,8 @@ export class FeedbackController {
 
   @UseGuards(JwtGuard)
   @Delete(':id')
-  async deleteFeedback(@Req() req, @Param('id') feedbackId: number) {
-    const { id: userId } = req.user as IUserPayload
-    return await this.feedbackService.deleteFeedback(userId, feedbackId)
+  async deleteFeedback(@CurrentUser() user: IUserPayload, @Param('id') feedbackId: number) {
+    return await this.feedbackService.deleteFeedback(user.id, feedbackId)
   }
 
   @Get('vacancy/:vacancyId')
@@ -77,8 +75,10 @@ export class FeedbackController {
 
   @UseGuards(JwtGuard)
   @Get('created/:vacancyId')
-  async getCreatedFeedback(@Req() req, @Param('vacancyId') vacancyId: number) {
-    const { id: userId } = req.user as IUserPayload
-    return await this.feedbackService.getCreatedFeedback(userId, vacancyId)
+  async getCreatedFeedback(
+    @CurrentUser() user: IUserPayload,
+    @Param('vacancyId') vacancyId: number
+  ) {
+    return await this.feedbackService.getCreatedFeedback(user.id, vacancyId)
   }
 }

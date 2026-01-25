@@ -4,9 +4,11 @@ import { FeedbackController } from './feedback.controller'
 import { JwtService } from '@nestjs/jwt'
 import { VacancyService } from '@/vacancy/vacancy.service'
 import { StorageService } from '@/storage/storage.service'
+import { DatabaseModule } from '@/database/database.module'
 
 @Module({
   controllers: [FeedbackController],
-  providers: [FeedbackService, JwtService, VacancyService, StorageService]
+  providers: [FeedbackService, JwtService, VacancyService, StorageService],
+  imports: [DatabaseModule]
 })
 export class FeedbackModule {}

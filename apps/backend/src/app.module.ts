@@ -1,11 +1,6 @@
 import { Module } from '@nestjs/common'
-import { AppController } from './app.controller'
-import { AppService } from './app.service'
 import { UsersModule } from './users/users.module'
 import { AuthModule } from './auth/auth.module'
-import { CustomPrismaModule } from 'nestjs-prisma'
-import { PrismaClient } from '@workify/database'
-import { CUSTOM_PRISMA_SERVICE } from './constants/prisma.constants'
 import { ConfigModule } from '@nestjs/config'
 import { VacancyModule } from './vacancy/vacancy.module'
 import { MulterModule } from '@nestjs/platform-express'
@@ -25,15 +20,11 @@ import { StorageModule } from './storage/storage.module'
     //   },
     // ]),
     ConfigModule.forRoot({
-      isGlobal: true
+      isGlobal: true,
+      envFilePath: ['../../.env', '.env']
     }),
     ServeStaticModule.forRoot({
       rootPath: path.join(__dirname, '..', 'static')
-    }),
-    CustomPrismaModule.forRoot({
-      name: CUSTOM_PRISMA_SERVICE,
-      client: new PrismaClient(),
-      isGlobal: true
     }),
     MulterModule.register(),
     UsersModule,
@@ -43,8 +34,6 @@ import { StorageModule } from './storage/storage.module'
     FeedbackModule,
     StatisticModule,
     StorageModule
-  ],
-  controllers: [AppController],
-  providers: [AppService]
+  ]
 })
 export class AppModule {}

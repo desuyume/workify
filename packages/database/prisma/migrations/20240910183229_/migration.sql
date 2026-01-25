@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "vacancies" ADD COLUMN     "rating" DOUBLE PRECISION NOT NULL DEFAULT 0;

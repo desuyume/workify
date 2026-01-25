@@ -17,11 +17,7 @@ export interface IUser {
   phone: string | null
   specialisation: string | null
   rating: number
-  vacancies: IUserVacancy[]
-  communication: IUserCommunication
-}
-
-export interface IUserCommunication {
   isEmailVisible: boolean
   isPhoneVisible: boolean
+  vacancies: IUserVacancy[]
 }
